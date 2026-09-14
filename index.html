@@ -121,6 +121,61 @@ textarea{min-height:90px;resize:vertical}
 .selectedAirport{margin-top:8px;background:#ecfdf3;color:#027a48;border-radius:10px;padding:9px;font-size:12px;font-weight:800}
 .yearMonth{cursor:pointer;transition:.15s}.yearMonth:hover{border-color:#c5cad3}.yearMonth.open{grid-column:1/-1}.yearLayer{margin-top:9px;border-top:1px solid #eef0f3;padding-top:8px}.yearDay{border:1px solid #eef0f3;border-radius:10px;margin:6px 0;overflow:hidden}.yearDayHead{padding:9px 10px;background:#fafbfc;font-size:12px;font-weight:800;display:flex;justify-content:space-between;cursor:pointer}.yearItems{padding:7px}.countBadge{font-size:10px;background:#eef2f7;border-radius:999px;padding:4px 7px;color:#475467}
 @media(max-width:900px){.app.plannerHidden{grid-template-columns:1fr}}
+
+/* V8 polish */
+:root{
+  --flight:#e8f1ff;--flightInk:#2458a6;
+  --hotel:#ecfdf3;--hotelInk:#087a55;
+  --activity:#fff6df;--activityInk:#9a6300;
+  --restaurant:#fff0f0;--restaurantInk:#a53a3a;
+  --transport:#f0edff;--transportInk:#6549b8;
+  --other:#f2f4f7;--otherInk:#475467;
+}
+.main{padding:20px}
+.topbar{align-items:center;margin-bottom:12px}
+.controls{align-items:center}
+.roundControl{width:38px;height:38px;padding:0!important;display:grid;place-items:center;font-size:20px;line-height:1}
+.dateContext{height:38px;min-width:92px;padding:0 13px;border:1px solid var(--line);background:#f8fafc;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:850;color:#344054;white-space:nowrap}
+.filterBar{display:flex;gap:7px;align-items:center;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
+.filterBar::-webkit-scrollbar{display:none}
+.filterChip{border:1px solid var(--line);background:#fff;color:#667085;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:800;white-space:nowrap;display:inline-flex;gap:6px;align-items:center;transition:.15s}
+.filterChip.active{background:#111827;color:#fff;border-color:#111827}
+.filterChip.off{opacity:.45;background:#f8fafc}
+.filterDivider{height:24px;width:1px;background:var(--line);flex:0 0 auto}
+.dayCell{position:relative;overflow:hidden}
+.dayCell.selected{box-shadow:inset 0 0 0 2px #111827}
+.dayHeader{cursor:pointer}
+.event{transition:transform .12s ease,border-color .12s ease,box-shadow .12s ease}
+.event:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(16,24,40,.06)}
+.event.type-flight{background:var(--flight);border-color:#d7e6ff}
+.event.type-hotel{background:var(--hotel);border-color:#d5f5e5}
+.event.type-activity{background:var(--activity);border-color:#fae8b0}
+.event.type-restaurant{background:var(--restaurant);border-color:#f6d6d6}
+.event.type-transport{background:var(--transport);border-color:#e1dcfb}
+.event.type-other{background:var(--other)}
+.spanEvent{padding:6px 8px;min-height:34px}
+.spanEvent .eventTime{display:flex;justify-content:space-between;gap:5px}
+.spanEvent .eventTitle{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.spanEvent .eventMeta{display:none}
+.stage{font-size:9px;border-radius:999px;padding:2px 5px;background:rgba(255,255,255,.75);white-space:nowrap}
+.attachmentBox{margin-top:12px;border:1px dashed #cfd4dc;background:#fafbfc;border-radius:14px;padding:12px}
+.attachmentBox input[type=file]{padding:8px;background:#fff}
+.attachmentPreview{margin-top:10px;display:flex;gap:10px;align-items:center}
+.attachmentPreview img{width:66px;height:66px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.attachmentPreview .fileInfo{font-size:11px;color:var(--muted);min-width:0}
+.attachmentPreview .fileInfo b{display:block;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.detailAttachment{margin-top:12px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#f8fafc}
+.detailAttachment img{display:block;width:100%;max-height:340px;object-fit:contain;background:#fff;cursor:zoom-in}
+.modalCard.imageViewer{width:min(860px,100%);background:#0b0f16}
+.modalCard.imageViewer img{display:block;max-width:100%;max-height:76vh;margin:auto;object-fit:contain}
+.imageViewer .modalClose{position:sticky;top:0;float:right;z-index:2}
+@media(max-width:900px){
+  .main{padding:14px}
+  .topbar{align-items:flex-start}
+  .controls{width:100%}
+  .dateContext{min-width:82px}
+}
+
 </style>
 </head>
 <body>
@@ -128,7 +183,7 @@ textarea{min-height:90px;resize:vertical}
   <aside class="sidebar" id="sidebar">
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v7</div>
+      <div class="version hideWhenCollapsed">v8</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -151,14 +206,17 @@ textarea{min-height:90px;resize:vertical}
           <button id="v-month" onclick="setView('month')">📅 Month</button>
           <button id="v-year" onclick="setView('year')">🧭 Year</button>
         </div>
-        <div class="navrow"><button onclick="openSettings()" title="Settings">⚙️</button>
-          <button onclick="movePeriod(-1)">◀</button>
-          <button onclick="goToday()">Today</button>
-          <button onclick="movePeriod(1)">▶</button>
+        <div class="navrow">
+          <button class="roundControl" onclick="openSettings()" title="Settings">⚙️</button>
+          <button class="roundControl" onclick="movePeriod(-1)" title="Previous">‹</button>
+          <div class="dateContext" id="dateContext">Today</div>
+          <button class="roundControl" onclick="movePeriod(1)" title="Next">›</button>
+          <button class="roundControl" onclick="goToday()" title="Go to today">◎</button>
         </div>
       </div>
     </div>
 
+    <div class="filterBar" id="filterBar"></div>
     <div class="calendarScroller">
       <div id="calendar"></div>
     </div>
@@ -202,6 +260,7 @@ let focusDate=state.items.length?new Date(state.items[0].date+"T12:00:00"):new D
 let expandedMonthDate=null;
 let expandedYearMonth=null;
 let expandedYearDay=null;
+let typeFilters={flight:true,hotel:true,activity:true,restaurant:true,transport:true,other:true};
 
 function loadState(){
   try{
@@ -274,7 +333,8 @@ function renderFlight(){
   return `<div class="kicker">Flight · 4 of 4</div><h1>Flight details</h1>
     <div class="row"><div><label>Airline</label><input data-field="airline" value="${esc(d.airline)}" placeholder="Qantas"></div><div><label>Flight number</label><input data-field="flightNo" value="${esc(d.flightNo)}" placeholder="QF61"></div></div>
     <label>Booking reference</label><input data-field="bookingRef" value="${esc(d.bookingRef)}" placeholder="Optional">
-    <label>Notes</label><textarea data-field="notes" placeholder="Terminal, seat, baggage…">${esc(d.notes)}</textarea>${controls(true)}`;
+    <label>Notes</label><textarea data-field="notes" placeholder="Terminal, seat, baggage…">${esc(d.notes)}</textarea>
+    ${attachmentField()}${controls(true)}`;
 }
 function liveAirportSearch(field,q){
   flow.draft[field==="departAirport"?"departSearch":"arriveSearch"]=q;
@@ -289,17 +349,50 @@ function setArrivalOffset(n){
 function genericTitle(type){
   return {hotel:"Where are you staying?",activity:"What are you doing?",restaurant:"Where are you eating?",transport:"What transport are you taking?",other:"What are you adding?"}[type];
 }
+function attachmentField(){
+  const a=flow.draft.attachment;
+  return `<div class="attachmentBox">
+    <label style="margin-top:0">Booking image / QR / screenshot</label>
+    <input type="file" accept="image/*" onchange="handleAttachment(this)">
+    <div class="sub" style="font-size:11px;margin:7px 0 0">Optional. Stored only with this local itinerary.</div>
+    ${a?`<div class="attachmentPreview"><img src="${a.data}" alt="Attachment"><div class="fileInfo"><b>${esc(a.name||"Attached image")}</b>Tap the plan later to view it.</div><button class="chip" onclick="removeAttachment()">Remove</button></div>`:""}
+  </div>`;
+}
 function renderGeneric(){
   const t=flow.mode,d=flow.draft;
   if(flow.step===0)return `<div class="kicker">${TYPES[t].label} · 1 of 3</div><h1>${genericTitle(t)}</h1>
     <label>${TYPES[t].label}</label><input data-field="title" value="${esc(d.title)}" placeholder="${t==="hotel"?"e.g. Hotel Gracery Shinjuku":t==="restaurant"?"e.g. Sushi dinner":t==="activity"?"e.g. TeamLab Borderless":t==="transport"?"e.g. Shinkansen to Kyoto":"e.g. Pick up SIM card"}">${controls()}`;
   if(flow.step===1)return `<div class="kicker">${TYPES[t].label} · 2 of 3</div><h1>When is it?</h1>
-    <div class="row"><div><label>Date</label><input type="date" data-field="date" value="${esc(d.date)}"></div><div><label>Time</label><input type="time" data-field="time" value="${esc(d.time)}"></div></div>
+    <div class="row"><div><label>${t==="hotel"?"Check-in date":"Date"}</label><input type="date" data-field="date" value="${esc(d.date)}"></div><div><label>${t==="hotel"?"Check-in time":"Time"}</label><input type="time" data-field="time" value="${esc(d.time)}"></div></div>
     ${t==="hotel"?`<label>Check-out date</label><input type="date" data-field="endDate" value="${esc(d.endDate)}">`:""}${controls()}`;
   return `<div class="kicker">${TYPES[t].label} · 3 of 3</div><h1>Details</h1>
     <label>Location / address</label><input data-field="location" value="${esc(d.location)}" placeholder="Optional">
-    <label>Notes</label><textarea data-field="notes" placeholder="Booking reference, ideas, details…">${esc(d.notes)}</textarea>${controls(true)}`;
+    <label>Booking reference</label><input data-field="bookingRef" value="${esc(d.bookingRef||"")}" placeholder="Optional">
+    <label>Notes</label><textarea data-field="notes" placeholder="Ideas, details, instructions…">${esc(d.notes)}</textarea>
+    ${attachmentField()}${controls(true)}`;
 }
+function handleAttachment(input){
+  const file=input.files?.[0]; if(!file)return;
+  if(!file.type.startsWith("image/")){alert("Please choose an image or screenshot.");return}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width,h=img.height,max=1500;
+      if(Math.max(w,h)>max){const s=max/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
+      const c=document.createElement("canvas");c.width=w;c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      let data;
+      try{data=c.toDataURL("image/jpeg",0.86)}catch(e){data=reader.result}
+      if(data.length>1900000){alert("That image is too large to store locally. Try a cropped screenshot.");return}
+      flow.draft.attachment={name:file.name,type:"image/jpeg",data};
+      renderPlanner();
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeAttachment(){flow.draft.attachment=null;renderPlanner()}
 function renderPlanner(){
   document.getElementById("planner").innerHTML=flow.mode==="home"?renderHome():flow.mode==="flight"?renderFlight():renderGeneric();
 }
@@ -313,7 +406,7 @@ function finishItem(){
     item.location=`${d.departAirport||d.departCity||""} → ${d.arriveAirport||d.arriveCity||""}`;
     item.meta=[d.airline,d.flightNo,d.arrivalDate?`Arrive ${d.arrivalDate} ${d.arrivalTime||""}`:"",d.bookingRef?`Ref ${d.bookingRef}`:""].filter(Boolean).join(" · ");
   }else{
-    item.meta=d.notes||"";
+    item.meta=[d.bookingRef?`Ref ${d.bookingRef}`:"",d.notes||""].filter(Boolean).join(" · ");
   }
   if(flow.editingId){
     const idx=state.items.findIndex(x=>x.id===flow.editingId);
@@ -334,18 +427,26 @@ function editItem(id){
 }
 function openItem(id){
   const i=state.items.find(x=>x.id===id);if(!i)return;
+  const endLabel=i.type==="hotel"&&i.endDate?`<div class="detail"><small>Check-out</small><b>${esc(i.endDate)}</b></div>`:
+    i.type==="flight"&&i.arrivalDate?`<div class="detail"><small>Arrival</small><b>${esc(i.arrivalDate)} ${esc(i.arrivalTime||"")}</b></div>`:"";
+  document.getElementById("modalCard").className="modalCard";
   document.getElementById("modalCard").innerHTML=`
     <div class="modalTop"><div><div class="kicker">${TYPES[i.type]?.label||"Plan"}</div><h3>${esc(i.title)}</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
     <div class="detailGrid">
-      <div class="detail"><small>Date</small><b>${esc(i.date||"—")}</b></div>
-      <div class="detail"><small>Time</small><b>${esc(i.time||"—")}</b></div>
+      <div class="detail"><small>${i.type==="hotel"?"Check-in":"Start"}</small><b>${esc(i.date||"—")} ${esc(i.time||"")}</b></div>
+      ${endLabel||`<div class="detail"><small>Type</small><b>${esc(TYPES[i.type]?.label||i.type)}</b></div>`}
       <div class="detail"><small>Location</small><b>${esc(i.location||"—")}</b></div>
       <div class="detail"><small>Type</small><b>${esc(TYPES[i.type]?.label||i.type)}</b></div>
     </div>
     ${i.meta?`<div class="detail"><small>Details</small>${esc(i.meta)}</div>`:""}
-    ${i.notes?`<div class="detail" style="margin-top:10px"><small>Notes</small>${esc(i.notes)}</div>`:""}
+    ${i.attachment?`<div class="detailAttachment"><img src="${i.attachment.data}" alt="Booking attachment" onclick="viewAttachment('${i.id}')"></div>`:""}
     <div class="actions"><button class="btn secondary" onclick="editItem('${i.id}')">✏️ Edit</button><button class="btn danger" onclick="removeItem('${i.id}')">🗑 Delete</button></div>`;
   document.getElementById("modal").classList.add("open");
+}
+function viewAttachment(id){
+  const i=state.items.find(x=>x.id===id);if(!i?.attachment)return;
+  document.getElementById("modalCard").className="modalCard imageViewer";
+  document.getElementById("modalCard").innerHTML=`<button class="modalClose" onclick="openItem('${i.id}')">✕</button><img src="${i.attachment.data}" alt="Booking attachment">`;
 }
 function closeModal(){document.getElementById("modal").classList.remove("open")}
 
@@ -358,29 +459,76 @@ function movePeriod(dir){
   if(view==="year")focusDate=new Date(focusDate.getFullYear()+dir,focusDate.getMonth(),1,12);
   renderCalendar();
 }
-function eventHTML(i,compact=false){
-  return `<div class="event ${compact?"compact":""}" onclick="event.stopPropagation();openItem('${i.id}')">
-    <div class="eventTime">${TYPES[i.type]?.icon||"•"} ${esc(i.time||TYPES[i.type]?.label||"Plan")}</div>
+function dateContextLabel(d){
+  const today=new Date();today.setHours(12,0,0,0);
+  const x=new Date(d);x.setHours(12,0,0,0);
+  const diff=Math.round((x-today)/86400000);
+  if(diff===0)return "Today";
+  if(diff===1)return "Tomorrow";
+  if(diff===-1)return "Yesterday";
+  return x.toLocaleDateString(undefined,{day:"numeric",month:"short"});
+}
+function setFocusDate(ds,rerender=true){focusDate=new Date(ds+"T12:00:00");if(rerender)renderCalendar()}
+function itemEndDate(i){
+  if(i.type==="hotel"&&i.endDate)return i.endDate;
+  if(i.type==="flight"&&i.arrivalDate)return i.arrivalDate;
+  return i.date;
+}
+function isItemOnDate(i,ds){
+  if(!typeFilters[i.type])return false;
+  if(i.type==="hotel"&&i.endDate)return ds>=i.date&&ds<=i.endDate;
+  if(i.type==="flight"&&i.arrivalDate&&i.arrivalDate!==i.date)return ds===i.date||ds===i.arrivalDate;
+  return ds===i.date;
+}
+function itemsForDate(ds){return state.items.filter(i=>isItemOnDate(i,ds)).sort(sortItems)}
+function occurrenceStage(i,ds){
+  if(i.type==="hotel"&&i.endDate&&i.endDate!==i.date){
+    if(ds===i.date)return "Check-in";
+    if(ds===i.endDate)return "Check-out";
+    return "Stay";
+  }
+  if(i.type==="flight"&&i.arrivalDate&&i.arrivalDate!==i.date){
+    return ds===i.date?"Departs":"Arrives";
+  }
+  return "";
+}
+function eventHTML(i,compact=false,ds=i.date){
+  const stage=occurrenceStage(i,ds);
+  const spanning=!!stage;
+  let when=i.time||TYPES[i.type]?.label||"Plan";
+  if(i.type==="flight"&&stage==="Arrives")when=i.arrivalTime||"Arrival";
+  return `<div class="event type-${i.type} ${compact?"compact":""} ${spanning?"spanEvent":""}" onclick="event.stopPropagation();openItem('${i.id}')">
+    <div class="eventTime"><span>${TYPES[i.type]?.icon||"•"} ${esc(when)}</span>${stage?`<span class="stage">${stage}</span>`:""}</div>
     <div class="eventTitle">${esc(i.title)}</div>
-    ${i.location?`<div class="eventMeta">${esc(i.location)}</div>`:""}
-    ${i.meta?`<div class="eventMeta">${esc(i.meta)}</div>`:""}
+    ${!spanning&&i.location?`<div class="eventMeta">${esc(i.location)}</div>`:""}
+    ${!spanning&&i.meta?`<div class="eventMeta">${esc(i.meta)}</div>`:""}
   </div>`;
 }
+function renderFilters(){
+  const bar=document.getElementById("filterBar");if(!bar)return;
+  const active=Object.values(typeFilters).filter(Boolean).length;
+  bar.innerHTML=`<button class="filterChip ${active===6?"active":""}" onclick="showAllTypes()">✦ All</button><span class="filterDivider"></span>`+
+    Object.entries(TYPES).map(([k,v])=>`<button class="filterChip ${typeFilters[k]?"active":"off"}" onclick="toggleType('${k}')">${v.icon} ${v.label}</button>`).join("");
+}
+function toggleType(t){typeFilters[t]=!typeFilters[t];renderCalendar()}
+function showAllTypes(){const allOn=Object.values(typeFilters).every(Boolean);Object.keys(typeFilters).forEach(k=>typeFilters[k]=!allOn);renderCalendar()}
 function renderCalendar(){
+  renderFilters();
+  document.getElementById("dateContext").textContent=dateContextLabel(focusDate);
   ["day","week","month","year"].forEach(v=>document.getElementById("v-"+v).classList.toggle("active",v===view));
-  const cal=document.getElementById("calendar");
+  const cal=document.getElementById("calendar"),focusIso=iso(focusDate);
   if(view==="day"){
     cal.className="calendar";cal.style.gridTemplateColumns="1fr";
-    const ds=iso(focusDate),items=state.items.filter(i=>i.date===ds).sort(sortItems);
+    const ds=focusIso,items=itemsForDate(ds);
     document.getElementById("calendarTitle").textContent=focusDate.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
     cal.innerHTML=dayCellHTML(focusDate,items,false);
     return;
   }
   if(view==="week"){
     const start=startOfWeek(focusDate);
-    cal.className="calendar";cal.style.gridTemplateColumns="repeat(7,minmax(130px,1fr))";
+    cal.className="calendar";cal.style.gridTemplateColumns="repeat(7,minmax(135px,1fr))";
     document.getElementById("calendarTitle").textContent=`Week of ${start.toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"})}`;
-    let h="";for(let n=0;n<7;n++){const d=addDays(start,n),ds=iso(d),items=state.items.filter(i=>i.date===ds).sort(sortItems);h+=dayCellHTML(d,items,false)}
+    let h="";for(let n=0;n<7;n++){const d=addDays(start,n),ds=iso(d),items=itemsForDate(ds);h+=dayCellHTML(d,items,false)}
     cal.innerHTML=h;return;
   }
   if(view==="month"){
@@ -389,11 +537,11 @@ function renderCalendar(){
     document.getElementById("calendarTitle").textContent=first.toLocaleDateString(undefined,{month:"long",year:"numeric"});
     let h="";
     for(let n=0;n<42;n++){
-      const d=addDays(start,n),ds=iso(d),items=state.items.filter(i=>i.date===ds).sort(sortItems),expanded=expandedMonthDate===ds;
-      h+=`<div class="dayCell ${d.getMonth()!==m?"faded":""} ${expanded?"expanded":""}" onclick="toggleMonthDay('${ds}')">
+      const d=addDays(start,n),ds=iso(d),items=itemsForDate(ds),expanded=expandedMonthDate===ds;
+      h+=`<div class="dayCell ${d.getMonth()!==m?"faded":""} ${expanded?"expanded":""} ${ds===focusIso?"selected":""}" onclick="toggleMonthDay('${ds}')">
         <div class="dayHeader"><div class="dayName">${d.toLocaleDateString(undefined,{weekday:"short"})}</div><div class="dayNum">${d.getDate()}</div></div>
-        ${items.length?(expanded?items.map(i=>eventHTML(i,false)).join(""):items.slice(0,3).map(i=>eventHTML(i,true)).join("")):`<div class="empty">Open</div>`}
-        ${!expanded&&items.length>3?`<div class="eventMeta">+${items.length-3} more</div>`:""}
+        ${items.length?(expanded?items.map(i=>eventHTML(i,false,ds)).join(""):items.slice(0,4).map(i=>eventHTML(i,true,ds)).join("")):`<div class="empty">Open</div>`}
+        ${!expanded&&items.length>4?`<div class="eventMeta">+${items.length-4} more</div>`:""}
       </div>`;
     }
     cal.innerHTML=h;return;
@@ -402,27 +550,41 @@ function renderCalendar(){
   cal.className="yearGrid";cal.style.gridTemplateColumns="";
   let h="";
   for(let m=0;m<12;m++){
-    const monthItems=state.items.filter(i=>{const d=new Date(i.date+"T12:00:00");return d.getFullYear()===focusDate.getFullYear()&&d.getMonth()===m}).sort(sortItems);
-    const open=expandedYearMonth===m, groups={}; monthItems.forEach(i=>(groups[i.date]??=[]).push(i));
+    const monthItems=state.items.filter(i=>{
+      if(!typeFilters[i.type])return false;
+      const start=new Date(i.date+"T12:00:00"),end=new Date(itemEndDate(i)+"T12:00:00");
+      const monthStart=new Date(focusDate.getFullYear(),m,1,12),monthEnd=new Date(focusDate.getFullYear(),m+1,0,12);
+      return start<=monthEnd&&end>=monthStart;
+    }).sort(sortItems);
+    const open=expandedYearMonth===m, groups={};
+    if(open){
+      const days=new Date(focusDate.getFullYear(),m+1,0).getDate();
+      for(let day=1;day<=days;day++){
+        const ds=iso(new Date(focusDate.getFullYear(),m,day,12)),its=itemsForDate(ds);
+        if(its.length)groups[ds]=its;
+      }
+    }
     h+=`<div class="yearMonth ${open?"open":""}" onclick="toggleYearMonth(event,${m})">
       <h3>${open?"▾":"▸"} ${new Date(focusDate.getFullYear(),m,1).toLocaleDateString(undefined,{month:"long"})} <span class="countBadge">${monthItems.length}</span></h3>
-      ${!open?(monthItems.length?monthItems.slice(0,3).map(i=>eventHTML(i,true)).join(""):`<div class="empty">No plans</div>`):`
+      ${!open?(monthItems.length?monthItems.slice(0,3).map(i=>eventHTML(i,true,i.date)).join(""):`<div class="empty">No plans</div>`):`
       <div class="yearLayer">${Object.entries(groups).map(([date,items])=>`<div class="yearDay">
         <div class="yearDayHead" onclick="event.stopPropagation();toggleYearDay('${date}')"><span>${expandedYearDay===date?"▾":"▸"} ${new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})}</span><span>${items.length} item${items.length===1?"":"s"}</span></div>
-        ${expandedYearDay===date?`<div class="yearItems">${items.map(i=>eventHTML(i,false)).join("")}</div>`:""}
+        ${expandedYearDay===date?`<div class="yearItems">${items.map(i=>eventHTML(i,false,date)).join("")}</div>`:""}
       </div>`).join("")||`<div class="empty">No plans</div>`}</div>`}
     </div>`;
   }
   cal.innerHTML=h;
 }
 function sortItems(a,b){return (a.date+(a.time||"99:99")).localeCompare(b.date+(b.time||"99:99"))}
-function dayCellHTML(d,items){return `<div class="dayCell expanded"><div class="dayHeader"><div class="dayName">${d.toLocaleDateString(undefined,{weekday:"long"})}</div><div class="dayNum">${d.getDate()}</div></div>${items.length?items.map(i=>eventHTML(i,false)).join(""):`<div class="empty">No plans yet</div>`}</div>`}
-function toggleMonthDay(ds){expandedMonthDate=expandedMonthDate===ds?null:ds;renderCalendar()}
-
-
+function dayCellHTML(d,items){
+  const ds=iso(d),selected=ds===iso(focusDate);
+  return `<div class="dayCell expanded ${selected?"selected":""}" onclick="setFocusDate('${ds}')"><div class="dayHeader"><div class="dayName">${d.toLocaleDateString(undefined,{weekday:"long"})}</div><div class="dayNum">${d.getDate()}</div></div>${items.length?items.map(i=>eventHTML(i,false,ds)).join(""):`<div class="empty">No plans yet</div>`}</div>`
+}
+function toggleMonthDay(ds){focusDate=new Date(ds+"T12:00:00");expandedMonthDate=expandedMonthDate===ds?null:ds;renderCalendar()}
 function toggleYearMonth(e,m){if(e.target.closest(".event"))return;expandedYearMonth=expandedYearMonth===m?null:m;expandedYearDay=null;renderCalendar()}
-function toggleYearDay(date){expandedYearDay=expandedYearDay===date?null:date;renderCalendar()}
+function toggleYearDay(date){focusDate=new Date(date+"T12:00:00");expandedYearDay=expandedYearDay===date?null:date;renderCalendar()}
 function openSettings(){
+  document.getElementById("modalCard").className="modalCard";
   document.getElementById("modalCard").innerHTML=`
     <div class="modalTop"><div><div class="kicker">Wonder Plan</div><h3>Settings</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
     <div class="settingsList" style="margin-top:16px">
@@ -432,12 +594,13 @@ function openSettings(){
         <input id="settingsFile" type="file" accept=".json,application/json" style="display:none" onchange="importTrip(event)">
       </div>
       <div class="settingsCard"><h4>Connected bookings</h4><p>Planned: connect your inbox and live travel data to import flight and hotel confirmations automatically.</p></div>
+      <div class="settingsCard"><h4>Calendar layers</h4><p>Use the category switches above the calendar to show or hide flights, stays, activities, meals and transport without deleting anything.</p></div>
     </div>`;
   document.getElementById("modal").classList.add("open");
 }
 
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:6,savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:8,savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
