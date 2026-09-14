@@ -31,10 +31,10 @@
 html,body{margin:0;min-height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
-.app{min-height:100vh;display:grid;grid-template-columns:360px 1fr;gap:14px;padding:14px}
+.app{min-height:100vh;display:grid;grid-template-columns:360px minmax(0,1fr);gap:14px;padding:14px;transition:grid-template-columns .2s ease}.app.plannerHidden{grid-template-columns:72px minmax(0,1fr)}
 .sidebar,.main{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
 .sidebar{padding:18px;display:flex;flex-direction:column;min-height:calc(100vh - 28px)}
-.sidebar.collapsed{width:72px;padding:12px;overflow:hidden}
+.sidebar.collapsed{padding:12px;overflow:hidden}
 .sidebar.collapsed .hideWhenCollapsed{display:none}
 .sidebar.collapsed .collapseText{display:none}
 .brandrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
@@ -115,6 +115,12 @@ textarea{min-height:90px;resize:vertical}
   .sidebar.collapsed{width:auto}
   .main{min-height:70vh}
 }
+
+.settingsList{display:grid;gap:10px}.settingsCard{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}.settingsCard h4{margin:0 0 5px}.settingsCard p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
+.airportResults{display:grid;gap:6px;margin-top:8px;max-height:250px;overflow:auto}.airportResult{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:11px;padding:10px;text-align:left}.airportResult:hover{background:#f8fafc}.airportResult b{display:block}.airportResult small{color:var(--muted)}
+.selectedAirport{margin-top:8px;background:#ecfdf3;color:#027a48;border-radius:10px;padding:9px;font-size:12px;font-weight:800}
+.yearMonth{cursor:pointer;transition:.15s}.yearMonth:hover{border-color:#c5cad3}.yearMonth.open{grid-column:1/-1}.yearLayer{margin-top:9px;border-top:1px solid #eef0f3;padding-top:8px}.yearDay{border:1px solid #eef0f3;border-radius:10px;margin:6px 0;overflow:hidden}.yearDayHead{padding:9px 10px;background:#fafbfc;font-size:12px;font-weight:800;display:flex;justify-content:space-between;cursor:pointer}.yearItems{padding:7px}.countBadge{font-size:10px;background:#eef2f7;border-radius:999px;padding:4px 7px;color:#475467}
+@media(max-width:900px){.app.plannerHidden{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -122,7 +128,7 @@ textarea{min-height:90px;resize:vertical}
   <aside class="sidebar" id="sidebar">
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v6</div>
+      <div class="version hideWhenCollapsed">v7</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -130,15 +136,6 @@ textarea{min-height:90px;resize:vertical}
     </button>
 
     <div id="planner" class="hideWhenCollapsed"></div>
-
-    <div class="sidebarFooter hideWhenCollapsed">
-      <div class="saveRow">
-        <button class="iconBtn" onclick="exportTrip()">💾 Save</button>
-        <button class="iconBtn" onclick="document.getElementById('fileInput').click()">📂 Load</button>
-        <input id="fileInput" type="file" accept=".json,application/json" style="display:none" onchange="importTrip(event)">
-      </div>
-      <div class="status" id="status">✓ Autosave ready</div>
-    </div>
   </aside>
 
   <main class="main">
@@ -154,7 +151,7 @@ textarea{min-height:90px;resize:vertical}
           <button id="v-month" onclick="setView('month')">📅 Month</button>
           <button id="v-year" onclick="setView('year')">🧭 Year</button>
         </div>
-        <div class="navrow">
+        <div class="navrow"><button onclick="openSettings()" title="Settings">⚙️</button>
           <button onclick="movePeriod(-1)">◀</button>
           <button onclick="goToday()">Today</button>
           <button onclick="movePeriod(1)">▶</button>
@@ -173,6 +170,7 @@ textarea{min-height:90px;resize:vertical}
 </div>
 
 <script>
+const WORLD_AIRPORTS=[{"iata": "BNE", "name": "Brisbane Airport", "city": "Brisbane", "country": "Australia"}, {"iata": "OOL", "name": "Gold Coast Airport", "city": "Gold Coast", "country": "Australia"}, {"iata": "SYD", "name": "Sydney Kingsford Smith Airport", "city": "Sydney", "country": "Australia"}, {"iata": "MEL", "name": "Melbourne Airport", "city": "Melbourne", "country": "Australia"}, {"iata": "PER", "name": "Perth Airport", "city": "Perth", "country": "Australia"}, {"iata": "ADL", "name": "Adelaide Airport", "city": "Adelaide", "country": "Australia"}, {"iata": "CNS", "name": "Cairns Airport", "city": "Cairns", "country": "Australia"}, {"iata": "HND", "name": "Haneda Airport", "city": "Tokyo", "country": "Japan"}, {"iata": "NRT", "name": "Narita International Airport", "city": "Tokyo", "country": "Japan"}, {"iata": "KIX", "name": "Kansai International Airport", "city": "Osaka", "country": "Japan"}, {"iata": "ITM", "name": "Osaka Itami Airport", "city": "Osaka", "country": "Japan"}, {"iata": "CTS", "name": "New Chitose Airport", "city": "Sapporo", "country": "Japan"}, {"iata": "FUK", "name": "Fukuoka Airport", "city": "Fukuoka", "country": "Japan"}, {"iata": "NGO", "name": "Chubu Centrair International Airport", "city": "Nagoya", "country": "Japan"}, {"iata": "OKA", "name": "Naha Airport", "city": "Okinawa", "country": "Japan"}, {"iata": "BKK", "name": "Suvarnabhumi Airport", "city": "Bangkok", "country": "Thailand"}, {"iata": "DMK", "name": "Don Mueang International Airport", "city": "Bangkok", "country": "Thailand"}, {"iata": "HKT", "name": "Phuket International Airport", "city": "Phuket", "country": "Thailand"}, {"iata": "CNX", "name": "Chiang Mai International Airport", "city": "Chiang Mai", "country": "Thailand"}, {"iata": "SIN", "name": "Singapore Changi Airport", "city": "Singapore", "country": "Singapore"}, {"iata": "KUL", "name": "Kuala Lumpur International Airport", "city": "Kuala Lumpur", "country": "Malaysia"}, {"iata": "PEN", "name": "Penang International Airport", "city": "George Town", "country": "Malaysia"}, {"iata": "DPS", "name": "Ngurah Rai International Airport", "city": "Bali / Denpasar", "country": "Indonesia"}, {"iata": "CGK", "name": "Soekarno-Hatta International Airport", "city": "Jakarta", "country": "Indonesia"}, {"iata": "SGN", "name": "Tan Son Nhat International Airport", "city": "Ho Chi Minh City", "country": "Vietnam"}, {"iata": "HAN", "name": "Noi Bai International Airport", "city": "Hanoi", "country": "Vietnam"}, {"iata": "DAD", "name": "Da Nang International Airport", "city": "Da Nang", "country": "Vietnam"}, {"iata": "MNL", "name": "Ninoy Aquino International Airport", "city": "Manila", "country": "Philippines"}, {"iata": "CEB", "name": "Mactan-Cebu International Airport", "city": "Cebu", "country": "Philippines"}, {"iata": "ICN", "name": "Incheon International Airport", "city": "Seoul", "country": "South Korea"}, {"iata": "GMP", "name": "Gimpo International Airport", "city": "Seoul", "country": "South Korea"}, {"iata": "HKG", "name": "Hong Kong International Airport", "city": "Hong Kong", "country": "Hong Kong"}, {"iata": "TPE", "name": "Taiwan Taoyuan International Airport", "city": "Taipei", "country": "Taiwan"}, {"iata": "PEK", "name": "Beijing Capital International Airport", "city": "Beijing", "country": "China"}, {"iata": "PKX", "name": "Beijing Daxing International Airport", "city": "Beijing", "country": "China"}, {"iata": "PVG", "name": "Shanghai Pudong International Airport", "city": "Shanghai", "country": "China"}, {"iata": "DEL", "name": "Indira Gandhi International Airport", "city": "Delhi", "country": "India"}, {"iata": "BOM", "name": "Chhatrapati Shivaji Maharaj International Airport", "city": "Mumbai", "country": "India"}, {"iata": "DXB", "name": "Dubai International Airport", "city": "Dubai", "country": "UAE"}, {"iata": "DOH", "name": "Hamad International Airport", "city": "Doha", "country": "Qatar"}, {"iata": "AKL", "name": "Auckland Airport", "city": "Auckland", "country": "New Zealand"}, {"iata": "CHC", "name": "Christchurch Airport", "city": "Christchurch", "country": "New Zealand"}, {"iata": "ZQN", "name": "Queenstown Airport", "city": "Queenstown", "country": "New Zealand"}, {"iata": "LHR", "name": "Heathrow Airport", "city": "London", "country": "United Kingdom"}, {"iata": "LGW", "name": "Gatwick Airport", "city": "London", "country": "United Kingdom"}, {"iata": "STN", "name": "Stansted Airport", "city": "London", "country": "United Kingdom"}, {"iata": "CDG", "name": "Charles de Gaulle Airport", "city": "Paris", "country": "France"}, {"iata": "ORY", "name": "Orly Airport", "city": "Paris", "country": "France"}, {"iata": "AMS", "name": "Amsterdam Schiphol Airport", "city": "Amsterdam", "country": "Netherlands"}, {"iata": "FRA", "name": "Frankfurt Airport", "city": "Frankfurt", "country": "Germany"}, {"iata": "MUC", "name": "Munich Airport", "city": "Munich", "country": "Germany"}, {"iata": "FCO", "name": "Rome Fiumicino Airport", "city": "Rome", "country": "Italy"}, {"iata": "MXP", "name": "Milan Malpensa Airport", "city": "Milan", "country": "Italy"}, {"iata": "MAD", "name": "Madrid-Barajas Airport", "city": "Madrid", "country": "Spain"}, {"iata": "BCN", "name": "Barcelona-El Prat Airport", "city": "Barcelona", "country": "Spain"}, {"iata": "ZRH", "name": "Zurich Airport", "city": "Zurich", "country": "Switzerland"}, {"iata": "VIE", "name": "Vienna International Airport", "city": "Vienna", "country": "Austria"}, {"iata": "ATH", "name": "Athens International Airport", "city": "Athens", "country": "Greece"}, {"iata": "IST", "name": "Istanbul Airport", "city": "Istanbul", "country": "Türkiye"}, {"iata": "JFK", "name": "John F. Kennedy International Airport", "city": "New York", "country": "USA"}, {"iata": "LGA", "name": "LaGuardia Airport", "city": "New York", "country": "USA"}, {"iata": "EWR", "name": "Newark Liberty International Airport", "city": "Newark / New York", "country": "USA"}, {"iata": "LAX", "name": "Los Angeles International Airport", "city": "Los Angeles", "country": "USA"}, {"iata": "SFO", "name": "San Francisco International Airport", "city": "San Francisco", "country": "USA"}, {"iata": "SEA", "name": "Seattle-Tacoma International Airport", "city": "Seattle", "country": "USA"}, {"iata": "ORD", "name": "O'Hare International Airport", "city": "Chicago", "country": "USA"}, {"iata": "DFW", "name": "Dallas Fort Worth International Airport", "city": "Dallas", "country": "USA"}, {"iata": "MIA", "name": "Miami International Airport", "city": "Miami", "country": "USA"}, {"iata": "LAS", "name": "Harry Reid International Airport", "city": "Las Vegas", "country": "USA"}, {"iata": "HNL", "name": "Daniel K. Inouye International Airport", "city": "Honolulu", "country": "USA"}, {"iata": "YVR", "name": "Vancouver International Airport", "city": "Vancouver", "country": "Canada"}, {"iata": "YYZ", "name": "Toronto Pearson International Airport", "city": "Toronto", "country": "Canada"}, {"iata": "YUL", "name": "Montréal-Trudeau International Airport", "city": "Montreal", "country": "Canada"}, {"iata": "MEX", "name": "Mexico City International Airport", "city": "Mexico City", "country": "Mexico"}, {"iata": "GRU", "name": "São Paulo/Guarulhos International Airport", "city": "São Paulo", "country": "Brazil"}, {"iata": "EZE", "name": "Ministro Pistarini International Airport", "city": "Buenos Aires", "country": "Argentina"}, {"iata": "SCL", "name": "Arturo Merino Benítez International Airport", "city": "Santiago", "country": "Chile"}, {"iata": "JNB", "name": "O. R. Tambo International Airport", "city": "Johannesburg", "country": "South Africa"}, {"iata": "CPT", "name": "Cape Town International Airport", "city": "Cape Town", "country": "South Africa"}, {"iata": "CAI", "name": "Cairo International Airport", "city": "Cairo", "country": "Egypt"}, {"iata": "NBO", "name": "Jomo Kenyatta International Airport", "city": "Nairobi", "country": "Kenya"}];
 const TYPES={
   flight:{label:"Flight",icon:"✈️",desc:"Airports, airline and times"},
   hotel:{label:"Hotel",icon:"🏨",desc:"Accommodation and stay dates"},
@@ -202,6 +200,8 @@ let flow={mode:"home",step:0,draft:{},editingId:null};
 let view="week";
 let focusDate=state.items.length?new Date(state.items[0].date+"T12:00:00"):new Date();
 let expandedMonthDate=null;
+let expandedYearMonth=null;
+let expandedYearDay=null;
 
 function loadState(){
   try{
@@ -221,7 +221,7 @@ function val(id){return document.getElementById(id)?.value.trim()||""}
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
 function iso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function startOfWeek(d){const x=new Date(d);const n=(x.getDay()+6)%7;x.setDate(x.getDate()-n);x.setHours(12,0,0,0);return x}
-function toggleSidebar(){document.getElementById("sidebar").classList.toggle("collapsed")}
+function toggleSidebar(){document.getElementById("sidebar").classList.toggle("collapsed");document.querySelector(".app").classList.toggle("plannerHidden")}
 
 function renderHome(){
   return `<div class="kicker">Build your itinerary</div>
@@ -251,27 +251,40 @@ function controls(last=false){
 }
 function nextStep(){capture();flow.step++;renderPlanner()}
 function backStep(){capture();if(flow.step===0){flow={mode:"home",step:0,draft:{},editingId:null}}else flow.step--;renderPlanner()}
-function airportSuggestions(city,field){
-  const list=AIRPORTS[String(city||"").toLowerCase().trim()]||[];
-  if(!list.length)return `<div class="sub" style="font-size:12px;margin-top:8px">Type a city such as Tokyo, Osaka, Brisbane or Bangkok for airport suggestions.</div>`;
-  return `<div class="suggestions">${list.map(a=>`<button class="chip" onclick="pickAirport('${field}','${a[0]} — ${a[1]}')">${a[0]} · ${a[1]}</button>`).join("")}</div>`;
+function airportSuggestions(query,field){
+  const q=String(query||"").toLowerCase().trim();
+  if(q.length<2)return `<div class="sub" style="font-size:12px;margin-top:8px">Start typing a city, airport name or IATA code.</div>`;
+  const list=WORLD_AIRPORTS.filter(a=>`${a.city} ${a.name} ${a.iata} ${a.country}`.toLowerCase().includes(q)).slice(0,12);
+  if(!list.length)return `<div class="sub" style="font-size:12px;margin-top:8px">No match yet. You can keep typing or enter the airport manually.</div>`;
+  return `<div class="airportResults">${list.map(a=>`<button class="airportResult" onclick="pickAirport('${field}','${a.iata} — ${a.name}')"><b>${a.iata} · ${a.city}</b><small>${a.name} · ${a.country}</small></button>`).join("")}</div>`;
 }
 function pickAirport(field,value){flow.draft[field]=value;renderPlanner()}
 function renderFlight(){
   const d=flow.draft;
-  if(flow.step===0)return `<div class="kicker">Flight · 1 of 5</div><h1>Where are you flying to?</h1><p class="sub">Start with the destination city.</p>
-    <label>Destination city</label><input data-field="arriveCity" value="${esc(d.arriveCity)}" placeholder="e.g. Tokyo">${airportSuggestions(d.arriveCity,"arriveAirport")}${controls()}`;
-  if(flow.step===1)return `<div class="kicker">Flight · 2 of 5</div><h1>Which airport?</h1>
-    <label>Arrival airport</label><input data-field="arriveAirport" value="${esc(d.arriveAirport)}" placeholder="Choose or type airport">${airportSuggestions(d.arriveCity,"arriveAirport")}${controls()}`;
-  if(flow.step===2)return `<div class="kicker">Flight · 3 of 5</div><h1>Where are you flying from?</h1>
-    <label>Departure city</label><input data-field="departCity" value="${esc(d.departCity)}" placeholder="e.g. Brisbane">
-    <label>Departure airport</label><input data-field="departAirport" value="${esc(d.departAirport)}" placeholder="e.g. BNE — Brisbane Airport">${airportSuggestions(d.departCity,"departAirport")}${controls()}`;
-  if(flow.step===3)return `<div class="kicker">Flight · 4 of 5</div><h1>When is the flight?</h1>
-    <div class="row"><div><label>Date</label><input type="date" data-field="date" value="${esc(d.date)}"></div><div><label>Departure</label><input type="time" data-field="time" value="${esc(d.time)}"></div></div>
-    <label>Arrival time</label><input type="time" data-field="arrivalTime" value="${esc(d.arrivalTime)}">${controls()}`;
-  return `<div class="kicker">Flight · 5 of 5</div><h1>Flight details</h1>
+  if(flow.step===0)return `<div class="kicker">Flight · 1 of 4</div><h1>Where are you flying from?</h1><p class="sub">Search worldwide by city, airport name or code.</p>
+    <label>Departure airport</label><input data-field="departSearch" value="${esc(d.departSearch||"")}" placeholder="Brisbane, BNE, Heathrow…" oninput="liveAirportSearch('departAirport',this.value)">
+    <div id="airportMatches">${airportSuggestions(d.departSearch,"departAirport")}</div>${d.departAirport?`<div class="selectedAirport">✓ ${esc(d.departAirport)}</div>`:""}${controls()}`;
+  if(flow.step===1)return `<div class="kicker">Flight · 2 of 4</div><h1>Where are you flying to?</h1><p class="sub">Search worldwide by city, airport name or code.</p>
+    <label>Arrival airport</label><input data-field="arriveSearch" value="${esc(d.arriveSearch||"")}" placeholder="Tokyo, HND, Narita…" oninput="liveAirportSearch('arriveAirport',this.value)">
+    <div id="airportMatches">${airportSuggestions(d.arriveSearch,"arriveAirport")}</div>${d.arriveAirport?`<div class="selectedAirport">✓ ${esc(d.arriveAirport)}</div>`:""}${controls()}`;
+  if(flow.step===2)return `<div class="kicker">Flight · 3 of 4</div><h1>Departure & arrival</h1>
+    <label>Departure</label><div class="row"><input type="date" data-field="date" value="${esc(d.date)}"><input type="time" data-field="time" value="${esc(d.time)}"></div>
+    <label>Arrival</label><div class="row"><input type="date" data-field="arrivalDate" value="${esc(d.arrivalDate||d.date)}"><input type="time" data-field="arrivalTime" value="${esc(d.arrivalTime)}"></div>
+    <div class="suggestions"><button class="chip" onclick="setArrivalOffset(0)">Same day</button><button class="chip" onclick="setArrivalOffset(1)">+1 day</button><button class="chip" onclick="setArrivalOffset(2)">+2 days</button></div>${controls()}`;
+  return `<div class="kicker">Flight · 4 of 4</div><h1>Flight details</h1>
     <div class="row"><div><label>Airline</label><input data-field="airline" value="${esc(d.airline)}" placeholder="Qantas"></div><div><label>Flight number</label><input data-field="flightNo" value="${esc(d.flightNo)}" placeholder="QF61"></div></div>
-    <label>Notes</label><textarea data-field="notes" placeholder="Terminal, booking reference, baggage…">${esc(d.notes)}</textarea>${controls(true)}`;
+    <label>Booking reference</label><input data-field="bookingRef" value="${esc(d.bookingRef)}" placeholder="Optional">
+    <label>Notes</label><textarea data-field="notes" placeholder="Terminal, seat, baggage…">${esc(d.notes)}</textarea>${controls(true)}`;
+}
+function liveAirportSearch(field,q){
+  flow.draft[field==="departAirport"?"departSearch":"arriveSearch"]=q;
+  document.getElementById("airportMatches").innerHTML=airportSuggestions(q,field);
+}
+function setArrivalOffset(n){
+  capture();
+  const base=flow.draft.date?new Date(flow.draft.date+"T12:00:00"):new Date();
+  flow.draft.arrivalDate=iso(addDays(base,n));
+  renderPlanner();
 }
 function genericTitle(type){
   return {hotel:"Where are you staying?",activity:"What are you doing?",restaurant:"Where are you eating?",transport:"What transport are you taking?",other:"What are you adding?"}[type];
@@ -296,9 +309,9 @@ function finishItem(){
   if(!d.date){alert("Please add a date.");return}
   let item={...d,id:flow.editingId||uid()};
   if(d.type==="flight"){
-    item.title=`Flight to ${d.arriveCity||d.arriveAirport||"destination"}`;
+    item.title=`Flight ${String(d.departAirport||"").split(" ")[0]||""} → ${String(d.arriveAirport||"").split(" ")[0]||""}`;
     item.location=`${d.departAirport||d.departCity||""} → ${d.arriveAirport||d.arriveCity||""}`;
-    item.meta=[d.airline,d.flightNo,d.arrivalTime?`Arrive ${d.arrivalTime}`:""].filter(Boolean).join(" · ");
+    item.meta=[d.airline,d.flightNo,d.arrivalDate?`Arrive ${d.arrivalDate} ${d.arrivalTime||""}`:"",d.bookingRef?`Ref ${d.bookingRef}`:""].filter(Boolean).join(" · ");
   }else{
     item.meta=d.notes||"";
   }
@@ -389,9 +402,15 @@ function renderCalendar(){
   cal.className="yearGrid";cal.style.gridTemplateColumns="";
   let h="";
   for(let m=0;m<12;m++){
-    const monthItems=state.items.filter(i=>{const d=new Date(i.date+"T12:00:00");return d.getFullYear()===focusDate.getFullYear()&&d.getMonth()===m});
-    h+=`<div class="yearMonth"><h3>${new Date(focusDate.getFullYear(),m,1).toLocaleDateString(undefined,{month:"long"})}</h3>
-      ${monthItems.length?monthItems.sort(sortItems).slice(0,6).map(i=>eventHTML(i,true)).join(""):`<div class="empty">No plans</div>`}
+    const monthItems=state.items.filter(i=>{const d=new Date(i.date+"T12:00:00");return d.getFullYear()===focusDate.getFullYear()&&d.getMonth()===m}).sort(sortItems);
+    const open=expandedYearMonth===m, groups={}; monthItems.forEach(i=>(groups[i.date]??=[]).push(i));
+    h+=`<div class="yearMonth ${open?"open":""}" onclick="toggleYearMonth(event,${m})">
+      <h3>${open?"▾":"▸"} ${new Date(focusDate.getFullYear(),m,1).toLocaleDateString(undefined,{month:"long"})} <span class="countBadge">${monthItems.length}</span></h3>
+      ${!open?(monthItems.length?monthItems.slice(0,3).map(i=>eventHTML(i,true)).join(""):`<div class="empty">No plans</div>`):`
+      <div class="yearLayer">${Object.entries(groups).map(([date,items])=>`<div class="yearDay">
+        <div class="yearDayHead" onclick="event.stopPropagation();toggleYearDay('${date}')"><span>${expandedYearDay===date?"▾":"▸"} ${new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})}</span><span>${items.length} item${items.length===1?"":"s"}</span></div>
+        ${expandedYearDay===date?`<div class="yearItems">${items.map(i=>eventHTML(i,false)).join("")}</div>`:""}
+      </div>`).join("")||`<div class="empty">No plans</div>`}</div>`}
     </div>`;
   }
   cal.innerHTML=h;
@@ -399,6 +418,23 @@ function renderCalendar(){
 function sortItems(a,b){return (a.date+(a.time||"99:99")).localeCompare(b.date+(b.time||"99:99"))}
 function dayCellHTML(d,items){return `<div class="dayCell expanded"><div class="dayHeader"><div class="dayName">${d.toLocaleDateString(undefined,{weekday:"long"})}</div><div class="dayNum">${d.getDate()}</div></div>${items.length?items.map(i=>eventHTML(i,false)).join(""):`<div class="empty">No plans yet</div>`}</div>`}
 function toggleMonthDay(ds){expandedMonthDate=expandedMonthDate===ds?null:ds;renderCalendar()}
+
+
+function toggleYearMonth(e,m){if(e.target.closest(".event"))return;expandedYearMonth=expandedYearMonth===m?null:m;expandedYearDay=null;renderCalendar()}
+function toggleYearDay(date){expandedYearDay=expandedYearDay===date?null:date;renderCalendar()}
+function openSettings(){
+  document.getElementById("modalCard").innerHTML=`
+    <div class="modalTop"><div><div class="kicker">Wonder Plan</div><h3>Settings</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
+    <div class="settingsList" style="margin-top:16px">
+      <div class="settingsCard"><h4>Automatic saving</h4><p>Your itinerary is saved locally on this device automatically.</p></div>
+      <div class="settingsCard"><h4>Backup & restore</h4><p>Export a portable backup or restore one from another device.</p>
+        <div class="actions"><button class="btn secondary" onclick="exportTrip()">⬇ Export backup</button><button class="btn secondary" onclick="document.getElementById('settingsFile').click()">⬆ Import backup</button></div>
+        <input id="settingsFile" type="file" accept=".json,application/json" style="display:none" onchange="importTrip(event)">
+      </div>
+      <div class="settingsCard"><h4>Connected bookings</h4><p>Planned: connect your inbox and live travel data to import flight and hotel confirmations automatically.</p></div>
+    </div>`;
+  document.getElementById("modal").classList.add("open");
+}
 
 function exportTrip(){
   const payload={app:"Wonder Plan",version:6,savedAt:new Date().toISOString(),data:state};
