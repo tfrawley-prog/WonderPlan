@@ -463,6 +463,56 @@ textarea{min-height:90px;resize:vertical}
   .tripPill{max-width:170px;padding:6px 9px}
 }
 
+
+/* V11.1 — clearer trip home + cleaner flight flow */
+.tripHome{
+  position:fixed;inset:0;z-index:120;background:#f7f8fb;
+  overflow:auto;padding:calc(env(safe-area-inset-top) + 24px) 18px calc(30px + env(safe-area-inset-bottom));
+}
+.tripHome.hidden{display:none}
+.tripHomeInner{max-width:980px;margin:0 auto}
+.tripHomeTop{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}
+.tripHomeBrand{font-size:22px;font-weight:950;letter-spacing:-.03em}
+.tripHomeSub{color:#667085;font-size:12px;margin-top:3px}
+.tripHomeGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tripHomeCard{
+  position:relative;border:1px solid #e4e7ec;background:#fff;border-radius:22px;padding:18px;
+  min-height:170px;text-align:left;cursor:pointer;box-shadow:0 5px 20px rgba(16,24,40,.04)
+}
+.tripHomeCard h3{font-size:18px;margin:12px 0 5px}
+.tripHomeCard p{font-size:12px;color:#667085;margin:0;line-height:1.45}
+.tripHomeIcon{font-size:30px}
+.tripHomeMeta{position:absolute;left:18px;right:18px;bottom:16px;font-size:11px;color:#98a2b3}
+.newTripCard{
+  border:1px dashed #cbd5e1;background:rgba(255,255,255,.65);display:grid;place-items:center;text-align:center
+}
+.newTripCard .plus{width:46px;height:46px;border-radius:50%;background:#101828;color:#fff;display:grid;place-items:center;font-size:24px;margin:auto}
+.backHomeBtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:850;cursor:pointer}
+.flightSearchHero{border:1px solid #dfe5f0;background:#fafbff;border-radius:18px;padding:14px;margin:10px 0 14px}
+.flightSearchHero h4{margin:0 0 5px;font-size:14px}
+.flightSearchHero p{margin:0 0 10px;color:#667085;font-size:11px;line-height:1.45}
+.flightSearchRow{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.manualLink{display:inline-block;margin-top:8px;font-size:11px;font-weight:800;color:#475467;text-decoration:underline;cursor:pointer}
+.importBeta{opacity:.72}
+@media(max-width:780px){
+  .tripHomeGrid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .tripHome{padding:calc(env(safe-area-inset-top) + 16px) 12px calc(24px + env(safe-area-inset-bottom))}
+  .tripHomeTop{align-items:flex-start}
+  .tripHomeGrid{grid-template-columns:1fr}
+  .tripHomeCard{min-height:145px}
+  .flightSearchRow{grid-template-columns:1fr 1fr}
+  /* Keep Day / Week / Month / Year in one horizontal row */
+  .segment{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:0!important;
+    width:100%!important;
+  }
+  .segment button{display:block!important;min-width:0!important}
+}
+
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -472,7 +522,7 @@ textarea{min-height:90px;resize:vertical}
     <div class="mobileSheetTop"><div class="mobileSheetHandle"></div><button class="mobileSheetClose" onclick="closeMobilePlanner()" aria-label="Close">✕</button></div>
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v11</div>
+      <div class="version hideWhenCollapsed">v11.1</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -486,7 +536,7 @@ textarea{min-height:90px;resize:vertical}
     <div class="topbar">
       <div class="titleWrap">
         <div>
-          <button class="tripPill" onclick="openTrips()"><span>✦</span><span id="activeTripName">My Trip</span><span>⌄</span></button>
+          <button class="backHomeBtn" onclick="showTripHome()">← Trips</button> <button class="tripPill" onclick="openTrips()"><span>✦</span><span id="activeTripName">My Trip</span><span>⌄</span></button>
           <h2 id="calendarTitle" style="margin-top:7px">Your itinerary</h2>
         </div>
         <p>Tap a plan to view, edit or delete it.</p>
@@ -513,7 +563,6 @@ textarea{min-height:90px;resize:vertical}
       <button class="productTab" id="tab-timeline" onclick="showSection('timeline')">☷ Timeline</button>
       <button class="productTab" id="tab-map" onclick="showSection('map')">⌖ Places</button>
       <button class="productTab" onclick="openTrips()">✦ Trips</button>
-      <button class="productTab" onclick="openImportBooking()">✨ Import booking</button>
     </div>
     <div class="filterBar" id="filterBar"></div>
     <div class="calendarScroller">
@@ -522,6 +571,17 @@ textarea{min-height:90px;resize:vertical}
   </main>
 </div>
 
+
+
+<div class="tripHome" id="tripHome">
+  <div class="tripHomeInner">
+    <div class="tripHomeTop">
+      <div><div class="tripHomeBrand">Wonder Plan</div><div class="tripHomeSub">Choose a trip to continue planning.</div></div>
+      <button class="btn primary" onclick="editTrip()">＋ New trip</button>
+    </div>
+    <div class="tripHomeGrid" id="tripHomeGrid"></div>
+  </div>
+</div>
 
 <div class="mobileShade" id="mobileShade" onclick="closeMobilePlanner()"></div>
 <nav class="mobileNav" id="mobileNav" aria-label="Wonder Plan navigation">
@@ -622,14 +682,38 @@ function updateTripUI(){
   const t=activeTrip();const el=document.getElementById("activeTripName");
   if(el)el.textContent=t?.name||"My Trip";
 }
-function switchTrip(id){
+function switchTrip(id){closeModal();enterTrip(id)}
+
+function renderTripHome(){
+  const grid=document.getElementById("tripHomeGrid");if(!grid)return;
   syncActiveTrip();
-  state.activeTripId=id;
-  const t=activeTrip();state.items=t?.items||[];
-  focusDate=t?.startDate?new Date(t.startDate+"T12:00:00"):(state.items[0]?.date?new Date(state.items[0].date+"T12:00:00"):new Date());
-  persist("✓ Trip opened");
-  closeModal();renderAll();showSection(isMobile()?"timeline":"calendar");
+  const cards=(state.trips||[]).map(t=>{
+    const count=(t.items||[]).length;
+    const dateText=t.startDate?(t.endDate&&t.endDate!==t.startDate?`${t.startDate} → ${t.endDate}`:t.startDate):"Dates not set";
+    return `<button class="tripHomeCard" onclick="enterTrip('${t.id}')">
+      <div class="tripHomeIcon">${esc(t.emoji||"✈️")}</div>
+      <h3>${esc(t.name||"Untitled trip")}</h3>
+      <p>${esc(t.destination||"Destination not set")}</p>
+      <div class="tripHomeMeta">${esc(dateText)} · ${count} ${count===1?"plan":"plans"}</div>
+    </button>`;
+  }).join("");
+  grid.innerHTML=cards+`<button class="tripHomeCard newTripCard" onclick="editTrip()"><div><div class="plus">＋</div><h3>New trip</h3><p>Start planning somewhere new.</p></div></button>`;
 }
+function showTripHome(){
+  syncActiveTrip();persist("✓ Saved locally",false);renderTripHome();
+  document.getElementById("tripHome")?.classList.remove("hidden");
+  closeMobilePlanner();closeModal();
+}
+function enterTrip(id){
+  syncActiveTrip();state.activeTripId=id;
+  const t=activeTrip();state.items=t?.items||[];
+  if(t?.startDate)focusDate=new Date(t.startDate+"T12:00:00");
+  persist("✓ Trip opened",false);
+  document.getElementById("tripHome")?.classList.add("hidden");
+  appSection=isMobile()?"timeline":"calendar";
+  renderAll();showSection(appSection);
+}
+
 function openTrips(){
   syncActiveTrip();
   if(isMobile())setMobileNavActive("m-trips");
@@ -666,6 +750,7 @@ function saveTrip(id=""){
     if(t.startDate)focusDate=new Date(t.startDate+"T12:00:00");
   }
   persist("✓ Trip saved");closeModal();renderAll();
+  if(document.getElementById("tripHome")&&!document.getElementById("tripHome").classList.contains("hidden"))renderTripHome();
 }
 function deleteTrip(id){
   if(!confirm("Delete this trip and all of its plans?"))return;
@@ -727,9 +812,6 @@ function renderHome(){
   return `<div class="kicker">Build your itinerary</div>
   <h1>What are you adding?</h1>
   <p class="sub">Choose a type first. Wonder Plan will only ask what it needs for that item.</p>
-  <button class="typeCard" style="width:100%;margin:0 0 10px;text-align:left" onclick="closeMobilePlanner();openImportBooking()">
-      <div class="typeIcon">✨</div><div class="typeTitle">Import a booking</div><div class="typeDesc">Paste a confirmation or add a screenshot and Wonder Plan will pull out useful details.</div>
-    </button>
   <div class="typeGrid">
     ${Object.entries(TYPES).map(([k,v])=>`
       <button class="typeCard" onclick="startType('${k}')">
@@ -776,7 +858,6 @@ function renderFlight(){
     <label>Arrival</label><div class="row"><input type="date" data-field="arrivalDate" value="${esc(d.arrivalDate||d.date)}"><input type="time" data-field="arrivalTime" value="${esc(d.arrivalTime)}"></div>
     <div class="suggestions"><button class="chip" onclick="setArrivalOffset(0)">Same day</button><button class="chip" onclick="setArrivalOffset(1)">+1 day</button><button class="chip" onclick="setArrivalOffset(2)">+2 days</button></div>${controls()}`;
   return `<div class="kicker">Flight · 4 of 4</div><h1>Flight details</h1>
-    <div class="importBox"><div class="smartBadge">SMART LOOKUP</div><h4 style="margin:7px 0 5px">Know your flight number?</h4><div class="row"><input id="lookupFlightNo" value="${esc(d.flightNo||"")}" placeholder="QF61"><input id="lookupFlightDate" type="date" value="${esc(d.date||"")}"></div><button class="btn secondary" onclick="flightLookup()">Look up flight</button><div class="helperNote">V11 can recognise common airline prefixes and routes from the airports you selected. Live schedules/terminal data will require a flight-data provider connection.</div></div>
     <div class="row"><div><label>Airline</label><input data-field="airline" value="${esc(d.airline)}" placeholder="Qantas"></div><div><label>Flight number</label><input data-field="flightNo" value="${esc(d.flightNo)}" placeholder="QF61"></div></div>
     <label>Booking reference</label><input data-field="bookingRef" value="${esc(d.bookingRef)}" placeholder="Optional">
     <label>Notes</label><textarea data-field="notes" placeholder="Terminal, seat, baggage…">${esc(d.notes)}</textarea>
@@ -895,6 +976,27 @@ function viewAttachment(id){
   const i=state.items.find(x=>x.id===id);if(!i?.attachment)return;
   document.getElementById("modalCard").className="modalCard imageViewer";
   document.getElementById("modalCard").innerHTML=`<button class="modalClose" onclick="openItem('${i.id}')">✕</button><img src="${i.attachment.data}" alt="Booking attachment">`;
+}
+
+
+function showManualFlightEntry(){
+  flow.draft.manualEntry=true;renderPlanner();
+  setTimeout(()=>document.getElementById("airportSearch")?.focus(),50);
+}
+function searchFlightFirst(){
+  const no=(document.getElementById("flightSearchNo")?.value||"").trim().toUpperCase();
+  const date=document.getElementById("flightSearchDate")?.value||"";
+  if(!no||!date){alert("Enter a flight number and departure date.");return}
+  flow.draft.flightNo=no;flow.draft.date=date;
+  const prefixes={QF:"Qantas",JQ:"Jetstar",VA:"Virgin Australia",NZ:"Air New Zealand",SQ:"Singapore Airlines",EK:"Emirates",QR:"Qatar Airways",CX:"Cathay Pacific",JL:"Japan Airlines",NH:"ANA",TG:"Thai Airways",AA:"American Airlines",UA:"United Airlines",DL:"Delta",BA:"British Airways"};
+  const prefix=(no.match(/^[A-Z]{2}/)||[])[0];if(prefixes[prefix])flow.draft.airline=prefixes[prefix];
+  document.getElementById("modalCard").className="modalCard";
+  document.getElementById("modalCard").innerHTML=`
+    <div class="modalTop"><div><div class="kicker">Flight lookup</div><h3>${esc(no)} · ${esc(date)}</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
+    <div class="wonderPanel"><h4>Live lookup is the next connection</h4><p>The flow is now correct: flight number + date first, then Wonder Plan should populate airports, scheduled departure/arrival times, airline and terminals automatically.</p></div>
+    <p class="sub">A public GitHub Pages app cannot safely contain the private API key needed for reliable live flight data. We need a tiny secure backend/proxy for that lookup. Until it is connected, you can continue manually.</p>
+    <div class="actions"><button class="btn secondary" onclick="closeModal();showManualFlightEntry()">Enter manually</button><button class="btn primary" onclick="closeModal();showManualFlightEntry()">Continue</button></div>`;
+  document.getElementById("modal").classList.add("open");
 }
 
 function flightLookup(){
@@ -1210,7 +1312,8 @@ function openSettings(){
         <input id="settingsFile" type="file" accept=".json,application/json" style="display:none" onchange="importTrip(event)">
       </div>
       <div class="settingsCard"><h4>Trip sharing</h4><p>Share a lightweight trip summary using the iPhone/iPad share sheet.</p><button class="btn secondary" onclick="shareCurrentTrip()">↗ Share current trip</button></div>
-      <div class="settingsCard"><h4>Smart services</h4><p>Booking-text import and Wonder Checks work locally. Live flight status, terminal data, route travel times, screenshot OCR and email import require external data/API connections; the V11 interface is ready for those connections without exposing secret API keys in the public GitHub app.</p></div>
+      <div class="settingsCard importBeta"><h4>Booking import · Beta</h4><p>Eventually you'll be able to paste a Booking.com, airline or hotel confirmation and have the stay/flight populated automatically. The current text parser is experimental.</p><button class="btn secondary" onclick="openImportBooking()">Try booking import beta</button></div>
+      <div class="settingsCard"><h4>Smart services</h4><p>Wonder Checks work locally. Live flight status, terminal data, route travel times, screenshot OCR and email import require external data/API connections; the V11 interface is ready for those connections without exposing secret API keys in the public GitHub app.</p></div>
       <div class="settingsCard"><h4>Calendar layers</h4><p>Use the category switches above the calendar to show or hide flights, stays, activities, meals and transport without deleting anything.</p></div>
     </div>`;
   document.getElementById("modal").classList.add("open");
@@ -1308,7 +1411,7 @@ async function downloadCloudState(){
   return await r.json();
 }
 function cloudPayload(){
-  return {app:"Wonder Plan",version:11,modifiedAt:state.modifiedAt||new Date().toISOString(),state};
+  return {app:"Wonder Plan",version:"11.1",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
 }
 async function createCloudFile(){
   const boundary="wp_"+Math.random().toString(36).slice(2);
@@ -1384,7 +1487,7 @@ async function manualCloudSync(){
   }catch(e){console.error(e);toastSync("Sync failed — reconnect Google Drive if needed")}
 }
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:11,savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:"11.1",savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -1407,6 +1510,7 @@ function importTrip(e){
 }
 function renderAll(){
   renderPlanner();updateTripUI();
+  if(document.getElementById("tripHome")&&!document.getElementById("tripHome").classList.contains("hidden"))renderTripHome();
   if(appSection==="timeline")renderTimeline();
   else if(appSection==="map")renderMap();
   else renderCalendar();
@@ -1415,6 +1519,8 @@ cloudLastSync=localStorage.getItem("wonderPlanCloudLastSync")||"";
 cloudReconnectNeeded=localStorage.getItem("wonderPlanCloudConnected")==="1";
 renderAll();
 showSection(appSection);
+renderTripHome();
+document.getElementById("tripHome")?.classList.remove("hidden");
 restoreGoogleDriveConnection();
 </script>
 
