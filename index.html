@@ -100,7 +100,7 @@ textarea{min-height:90px;resize:vertical}
 .yearGrid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:10px;min-width:760px}
 .yearMonth{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
 .yearMonth h3{margin:0 0 8px;font-size:15px}
-.modal{position:fixed;inset:0;background:rgba(16,24,40,.38);display:none;place-items:center;padding:18px;z-index:50}
+.modal{position:fixed;inset:0;background:rgba(16,24,40,.38);display:none;place-items:center;padding:18px;z-index:220}
 .modal.open{display:grid}
 .modalCard{width:min(520px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:20px;padding:18px;box-shadow:0 24px 70px rgba(16,24,40,.22)}
 .modalTop{display:flex;justify-content:space-between;gap:12px}
@@ -513,6 +513,34 @@ textarea{min-height:90px;resize:vertical}
   .segment button{display:block!important;min-width:0!important}
 }
 
+
+/* V11.2 fixes */
+@media(max-width:600px){
+  .controls{display:block!important}
+  .segment{
+    display:flex!important;
+    flex-direction:row!important;
+    gap:4px!important;
+    width:100%!important;
+    padding:4px!important;
+  }
+  .segment button{
+    flex:1 1 25%!important;
+    display:block!important;
+    font-size:11px!important;
+    padding:9px 4px!important;
+    white-space:nowrap!important;
+  }
+  .segment button::after{content:none!important}
+  .segment button::first-letter{font-size:inherit!important}
+  .navrow{margin-top:8px}
+}
+.lookupIntro{border:1px solid #dfe5f0;background:#fafbff;border-radius:18px;padding:14px;margin:10px 0 14px}
+.lookupIntro h4{margin:0 0 5px;font-size:14px}
+.lookupIntro p{margin:0 0 10px;color:#667085;font-size:11px;line-height:1.45}
+.lookupStatus{font-size:11px;color:#667085;margin-top:8px;line-height:1.4}
+.importMainCard{grid-column:1/-1;border-style:dashed;background:#fbfcff}
+
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -522,7 +550,7 @@ textarea{min-height:90px;resize:vertical}
     <div class="mobileSheetTop"><div class="mobileSheetHandle"></div><button class="mobileSheetClose" onclick="closeMobilePlanner()" aria-label="Close">✕</button></div>
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v11.1</div>
+      <div class="version hideWhenCollapsed">v11.2</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -730,6 +758,7 @@ function openTrips(){
 }
 function editTrip(id=""){
   const t=id?state.trips.find(x=>x.id===id):null;
+  document.getElementById("modalCard").className="modalCard";
   document.getElementById("modalCard").innerHTML=`
     <div class="modalTop"><div><div class="kicker">${t?"Edit trip":"New trip"}</div><h3>${t?"Trip details":"Where are you going?"}</h3></div><button class="modalClose" onclick="openTrips()">✕</button></div>
     <label>Trip name</label><input id="tripName" value="${esc(t?.name||"")}" placeholder="Japan Winter 2027">
@@ -737,7 +766,8 @@ function editTrip(id=""){
     <div class="row"><div><label>Start</label><input id="tripStart" type="date" value="${esc(t?.startDate||"")}"></div><div><label>End</label><input id="tripEnd" type="date" value="${esc(t?.endDate||"")}"></div></div>
     <label>Travellers</label><input id="tripTravellers" value="${esc(t?.travellers||"")}" placeholder="Tom, Jake…">
     <label>Trip icon</label><input id="tripEmoji" value="${esc(t?.emoji||"✈️")}" placeholder="✈️">
-    <div class="actions"><button class="btn secondary" onclick="openTrips()">Back</button><button class="btn primary" onclick="saveTrip('${id}')">${t?"Save changes":"Create trip"}</button>${t&&state.trips.length>1?`<button class="btn danger" onclick="deleteTrip('${id}')">Delete trip</button>`:""}</div>`;
+    <div class="actions"><button class="btn secondary" onclick="showTripHome()">Back</button><button class="btn primary" onclick="saveTrip('${id}')">${t?"Save changes":"Create trip"}</button>${t&&state.trips.length>1?`<button class="btn danger" onclick="deleteTrip('${id}')">Delete trip</button>`:""}</div>`;
+  document.getElementById("modal").classList.add("open");
 }
 function saveTrip(id=""){
   const name=val("tripName")||"Untitled Trip";
@@ -749,8 +779,8 @@ function saveTrip(id=""){
     const t={id:tripId(),...obj,items:[]};state.trips.push(t);state.activeTripId=t.id;state.items=t.items;
     if(t.startDate)focusDate=new Date(t.startDate+"T12:00:00");
   }
-  persist("✓ Trip saved");closeModal();renderAll();
-  if(document.getElementById("tripHome")&&!document.getElementById("tripHome").classList.contains("hidden"))renderTripHome();
+  persist("✓ Trip saved");closeModal();renderAll();renderTripHome();
+  document.getElementById("tripHome")?.classList.remove("hidden");
 }
 function deleteTrip(id){
   if(!confirm("Delete this trip and all of its plans?"))return;
@@ -813,6 +843,11 @@ function renderHome(){
   <h1>What are you adding?</h1>
   <p class="sub">Choose a type first. Wonder Plan will only ask what it needs for that item.</p>
   <div class="typeGrid">
+    <button class="typeCard importMainCard" onclick="closeMobilePlanner();openImportBooking()">
+      <div class="typeIcon">✨</div>
+      <div class="typeTitle">Import a booking</div>
+      <div class="typeDesc">Paste a Booking.com, hotel, airline or activity confirmation and review the details Wonder Plan extracts.</div>
+    </button>
     ${Object.entries(TYPES).map(([k,v])=>`
       <button class="typeCard" onclick="startType('${k}')">
         <div class="typeIcon">${v.icon}</div>
@@ -847,21 +882,54 @@ function airportSuggestions(query,field){
 function pickAirport(field,value){flow.draft[field]=value;renderPlanner()}
 function renderFlight(){
   const d=flow.draft;
-  if(flow.step===0)return `<div class="kicker">Flight · 1 of 4</div><h1>Where are you flying from?</h1><p class="sub">Search worldwide by city, airport name or code.</p>
+  if(flow.step===0)return `<div class="kicker">Flight · 1 of 5</div><h1>Find your flight</h1>
+    <p class="sub">Start with only the flight number and travel date.</p>
+    <div class="lookupIntro">
+      <h4>✈️ Flight lookup</h4>
+      <p>Example: QF61 on 18 February 2027. Once the live flight-data connection is enabled, Wonder Plan will populate the airline, airports, scheduled times and terminals for you.</p>
+      <label>Flight number</label><input data-field="flightNo" value="${esc(d.flightNo||"")}" placeholder="QF61">
+      <label>Departure date</label><input type="date" data-field="date" value="${esc(d.date||"")}">
+      <button class="btn primary" style="width:100%;margin-top:10px" onclick="tryFlightLookup()">Find flight</button>
+      <div class="lookupStatus">Live schedule lookup is not connected yet, so Wonder Plan will never pretend it found a flight when it didn't.</div>
+    </div>
+    <button class="btn secondary" style="width:100%" onclick="capture();flow.step=1;flow.draft.manualEntry=true;renderPlanner()">Enter manually instead</button>
+    <div class="actions"><button class="btn secondary" onclick="goHome()">Back</button></div>`;
+
+  if(flow.step===1)return `<div class="kicker">Flight · 2 of 5</div><h1>Departure airport</h1><p class="sub">Search worldwide by city, airport name or code.</p>
     <label>Departure airport</label><input data-field="departSearch" value="${esc(d.departSearch||"")}" placeholder="Brisbane, BNE, Heathrow…" oninput="liveAirportSearch('departAirport',this.value)">
     <div id="airportMatches">${airportSuggestions(d.departSearch,"departAirport")}</div>${d.departAirport?`<div class="selectedAirport">✓ ${esc(d.departAirport)}</div>`:""}${controls()}`;
-  if(flow.step===1)return `<div class="kicker">Flight · 2 of 4</div><h1>Where are you flying to?</h1><p class="sub">Search worldwide by city, airport name or code.</p>
+
+  if(flow.step===2)return `<div class="kicker">Flight · 3 of 5</div><h1>Arrival airport</h1><p class="sub">Search worldwide by city, airport name or code.</p>
     <label>Arrival airport</label><input data-field="arriveSearch" value="${esc(d.arriveSearch||"")}" placeholder="Tokyo, HND, Narita…" oninput="liveAirportSearch('arriveAirport',this.value)">
     <div id="airportMatches">${airportSuggestions(d.arriveSearch,"arriveAirport")}</div>${d.arriveAirport?`<div class="selectedAirport">✓ ${esc(d.arriveAirport)}</div>`:""}${controls()}`;
-  if(flow.step===2)return `<div class="kicker">Flight · 3 of 4</div><h1>Departure & arrival</h1>
+
+  if(flow.step===3)return `<div class="kicker">Flight · 4 of 5</div><h1>Departure & arrival</h1>
     <label>Departure</label><div class="row"><input type="date" data-field="date" value="${esc(d.date)}"><input type="time" data-field="time" value="${esc(d.time)}"></div>
     <label>Arrival</label><div class="row"><input type="date" data-field="arrivalDate" value="${esc(d.arrivalDate||d.date)}"><input type="time" data-field="arrivalTime" value="${esc(d.arrivalTime)}"></div>
     <div class="suggestions"><button class="chip" onclick="setArrivalOffset(0)">Same day</button><button class="chip" onclick="setArrivalOffset(1)">+1 day</button><button class="chip" onclick="setArrivalOffset(2)">+2 days</button></div>${controls()}`;
-  return `<div class="kicker">Flight · 4 of 4</div><h1>Flight details</h1>
+
+  return `<div class="kicker">Flight · 5 of 5</div><h1>Review flight</h1>
     <div class="row"><div><label>Airline</label><input data-field="airline" value="${esc(d.airline)}" placeholder="Qantas"></div><div><label>Flight number</label><input data-field="flightNo" value="${esc(d.flightNo)}" placeholder="QF61"></div></div>
     <label>Booking reference</label><input data-field="bookingRef" value="${esc(d.bookingRef)}" placeholder="Optional">
     <label>Notes</label><textarea data-field="notes" placeholder="Terminal, seat, baggage…">${esc(d.notes)}</textarea>
     ${attachmentField()}${controls(true)}`;
+}
+function tryFlightLookup(){
+  capture();
+  const no=(flow.draft.flightNo||"").trim().toUpperCase();
+  const date=flow.draft.date||"";
+  if(!no||!date){alert("Enter the flight number and departure date first.");return}
+  flow.draft.flightNo=no;
+  const prefixes={QF:"Qantas",JQ:"Jetstar",VA:"Virgin Australia",NZ:"Air New Zealand",SQ:"Singapore Airlines",EK:"Emirates",QR:"Qatar Airways",CX:"Cathay Pacific",JL:"Japan Airlines",NH:"ANA",TG:"Thai Airways",AA:"American Airlines",UA:"United Airlines",DL:"Delta",BA:"British Airways"};
+  const prefix=(no.match(/^[A-Z]{2}/)||[])[0];
+  if(prefixes[prefix])flow.draft.airline=prefixes[prefix];
+  document.getElementById("modalCard").className="modalCard";
+  document.getElementById("modalCard").innerHTML=`
+    <div class="modalTop"><div><div class="kicker">Flight lookup</div><h3>${esc(no)} · ${esc(date)}</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
+    <div class="wonderPanel"><h4>Live flight data isn't connected yet</h4><p>The layout is now correct, but real route/times/terminal lookup needs a flight-data API behind a secure server. The public GitHub app cannot safely hold that secret key.</p></div>
+    <p class="sub">I have kept ${esc(flow.draft.airline||no)} and ${esc(date)} so you only need to fill the missing route/times manually for now.</p>
+    <div class="actions"><button class="btn primary" onclick="closeModal();flow.step=1;flow.draft.manualEntry=true;renderPlanner()">Continue manually</button></div>`;
+  document.getElementById("modal").classList.add("open");
 }
 function liveAirportSearch(field,q){
   flow.draft[field==="departAirport"?"departSearch":"arriveSearch"]=q;
@@ -1108,31 +1176,62 @@ function openImportBooking(){
     <div class="actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="parseBooking()">Analyse booking</button></div>`;
   document.getElementById("modal").classList.add("open");
 }
+function normaliseBookingDate(text){
+  if(!text)return "";
+  let m=text.match(/\b(20\d{2})[-\/](\d{1,2})[-\/](\d{1,2})\b/);
+  if(m)return `${m[1]}-${String(m[2]).padStart(2,"0")}-${String(m[3]).padStart(2,"0")}`;
+  m=text.match(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](20\d{2})\b/);
+  if(m)return `${m[3]}-${String(m[2]).padStart(2,"0")}-${String(m[1]).padStart(2,"0")}`;
+  m=text.match(/\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)?[a-z]*[,]?\s*(\d{1,2})\s+([A-Za-z]{3,9})\s+(20\d{2})\b/i);
+  if(m){
+    const months={jan:1,january:1,feb:2,february:2,mar:3,march:3,apr:4,april:4,may:5,jun:6,june:6,jul:7,july:7,aug:8,august:8,sep:9,september:9,oct:10,october:10,nov:11,november:11,dec:12,december:12};
+    const mo=months[m[2].toLowerCase()];if(mo)return `${m[3]}-${String(mo).padStart(2,"0")}-${String(m[1]).padStart(2,"0")}`;
+  }
+  return "";
+}
 function parseBooking(){
   const text=(document.getElementById("importText")?.value||"").trim();
-  if(!text){alert("Paste the booking text first.");return}
-  const flight=(text.match(/\b([A-Z]{2})\s?(\d{2,4})\b/)||[]);
-  const ref=(text.match(/(?:booking|confirmation|reference|ref)[\s:#-]*([A-Z0-9]{5,10})/i)||[])[1]||"";
+  if(!text){alert("Paste the booking confirmation text first.");return}
+  const flight=(text.match(/\b([A-Z]{2})\s?(\d{2,4}[A-Z]?)\b/)||[]);
+  const ref=(text.match(/(?:booking|confirmation|reservation|reference|ref|confirmation number)[\s:#-]*([A-Z0-9-]{5,14})/i)||[])[1]||"";
   const iatas=[...text.toUpperCase().matchAll(/\b[A-Z]{3}\b/g)].map(x=>x[0]).filter(x=>WORLD_AIRPORTS.some(a=>a.iata===x));
-  const dates=[...text.matchAll(/\b(20\d{2})[-\/](\d{1,2})[-\/](\d{1,2})\b/g)].map(m=>`${m[1]}-${String(m[2]).padStart(2,"0")}-${String(m[3]).padStart(2,"0")}`);
+  const dateCandidates=[
+    ...(text.match(/\b20\d{2}[-\/]\d{1,2}[-\/]\d{1,2}\b/g)||[]),
+    ...(text.match(/\b\d{1,2}[\/.-]\d{1,2}[\/.-]20\d{2}\b/g)||[]),
+    ...(text.match(/\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*[,]?\s+\d{1,2}\s+[A-Za-z]{3,9}\s+20\d{2}\b/gi)||[])
+  ];
+  const dates=[...new Set(dateCandidates.map(normaliseBookingDate).filter(Boolean))];
   const looksFlight=!!flight.length||iatas.length>=2;
-  const looksHotel=/hotel|check[- ]?in|check[- ]?out|accommodation|room/i.test(text);
+  const looksHotel=/booking\.com|hotel|check[- ]?in|check[- ]?out|accommodation|room|property/i.test(text);
   const guess=looksFlight?"flight":looksHotel?"hotel":"other";
-  const title=looksFlight?`Flight ${iatas[0]||""}${iatas[1]?` → ${iatas[1]}`:""}`:looksHotel?"Imported hotel booking":"Imported booking";
+
+  let property="";
+  if(looksHotel){
+    const lines=text.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+    property=lines.find(l=>l.length>3&&l.length<80&&!/booking|confirmation|check.?in|check.?out|guest|reference|reservation|date|room/i.test(l))||"Imported stay";
+  }
+  const title=looksFlight?`Flight ${iatas[0]||""}${iatas[1]?` → ${iatas[1]}`:""}`:(property||"Imported booking");
   document.getElementById("modalCard").innerHTML=`
     <div class="modalTop"><div><div class="kicker">I found this</div><h3>${esc(title)}</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
-    <div class="importResult"><h4>${guess==="flight"?"✈️ Flight":guess==="hotel"?"🏨 Hotel":"＋ Booking"}</h4>
-      <p class="sub">${flight[0]?`Flight ${esc(flight[0])}<br>`:""}${iatas.length?`Airports: ${esc(iatas.slice(0,2).join(" → "))}<br>`:""}${dates.length?`Dates: ${esc(dates.slice(0,2).join(" → "))}<br>`:""}${ref?`Reference: ${esc(ref)}`:""}</p>
+    <div class="importResult"><h4>${guess==="flight"?"✈️ Flight":guess==="hotel"?"🏨 Stay":"＋ Booking"}</h4>
+      <p class="sub">
+        ${property&&guess==="hotel"?`Property: ${esc(property)}<br>`:""}
+        ${flight[0]?`Flight: ${esc(flight[0].replace(/\s+/g,""))}<br>`:""}
+        ${iatas.length?`Airports: ${esc(iatas.slice(0,2).join(" → "))}<br>`:""}
+        ${dates.length?`Dates: ${esc(dates.slice(0,2).join(" → "))}<br>`:""}
+        ${ref?`Reference: ${esc(ref)}`:""}
+      </p>
     </div>
-    <div class="actions"><button class="btn secondary" onclick="openImportBooking()">Back</button><button class="btn primary" onclick="acceptImportedBooking('${guess}','${esc(flight[0]||"")}','${esc(iatas[0]||"")}','${esc(iatas[1]||"")}','${esc(dates[0]||"")}','${esc(dates[1]||"")}','${esc(ref)}')">Review & add</button></div>`;
+    <div class="helperNote">Review the extracted information before adding it. You can correct anything Wonder Plan didn't identify.</div>
+    <div class="actions"><button class="btn secondary" onclick="openImportBooking()">Back</button><button class="btn primary" onclick="acceptImportedBooking('${guess}','${esc((flight[0]||"").replace(/\s+/g,""))}','${esc(iatas[0]||"")}','${esc(iatas[1]||"")}','${esc(dates[0]||"")}','${esc(dates[1]||"")}','${esc(ref)}','${esc(property)}')">Review & add</button></div>`;
 }
-function acceptImportedBooking(type,flightNo,from,to,date,endDate,ref){
+function acceptImportedBooking(type,flightNo,from,to,date,endDate,ref,property=""){
   closeModal();
   if(type==="flight"){
     const fa=WORLD_AIRPORTS.find(a=>a.iata===from),ta=WORLD_AIRPORTS.find(a=>a.iata===to);
     flow={mode:"flight",step:2,editingId:null,draft:{type:"flight",flightNo,date,departAirport:fa?`${fa.iata} — ${fa.name}`:from,arriveAirport:ta?`${ta.iata} — ${ta.name}`:to,bookingRef:ref,arrivalDate:endDate||date}};
   }else{
-    flow={mode:type,step:1,editingId:null,draft:{type,title:type==="hotel"?"Imported hotel booking":"Imported booking",date,endDate:type==="hotel"?endDate:"",bookingRef:ref}};
+    flow={mode:type,step:1,editingId:null,draft:{type,title:type==="hotel"?(property||"Imported stay"):"Imported booking",date,endDate:type==="hotel"?endDate:"",bookingRef:ref}};
   }
   renderPlanner();if(isMobile())openMobilePlanner();
 }
@@ -1312,7 +1411,7 @@ function openSettings(){
         <input id="settingsFile" type="file" accept=".json,application/json" style="display:none" onchange="importTrip(event)">
       </div>
       <div class="settingsCard"><h4>Trip sharing</h4><p>Share a lightweight trip summary using the iPhone/iPad share sheet.</p><button class="btn secondary" onclick="shareCurrentTrip()">↗ Share current trip</button></div>
-      <div class="settingsCard importBeta"><h4>Booking import · Beta</h4><p>Eventually you'll be able to paste a Booking.com, airline or hotel confirmation and have the stay/flight populated automatically. The current text parser is experimental.</p><button class="btn secondary" onclick="openImportBooking()">Try booking import beta</button></div>
+      <div class="settingsCard importBeta"><h4>Booking import</h4><p>Eventually you'll be able to paste a Booking.com, airline or hotel confirmation and have the stay/flight populated automatically. The current text parser is experimental.</p><button class="btn secondary" onclick="openImportBooking()">Try booking import beta</button></div>
       <div class="settingsCard"><h4>Smart services</h4><p>Wonder Checks work locally. Live flight status, terminal data, route travel times, screenshot OCR and email import require external data/API connections; the V11 interface is ready for those connections without exposing secret API keys in the public GitHub app.</p></div>
       <div class="settingsCard"><h4>Calendar layers</h4><p>Use the category switches above the calendar to show or hide flights, stays, activities, meals and transport without deleting anything.</p></div>
     </div>`;
@@ -1411,7 +1510,7 @@ async function downloadCloudState(){
   return await r.json();
 }
 function cloudPayload(){
-  return {app:"Wonder Plan",version:"11.1",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
+  return {app:"Wonder Plan",version:"11.2",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
 }
 async function createCloudFile(){
   const boundary="wp_"+Math.random().toString(36).slice(2);
@@ -1487,7 +1586,7 @@ async function manualCloudSync(){
   }catch(e){console.error(e);toastSync("Sync failed — reconnect Google Drive if needed")}
 }
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:"11.1",savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:"11.2",savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
