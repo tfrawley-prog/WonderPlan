@@ -186,15 +186,247 @@ textarea{min-height:90px;resize:vertical}
 .cloudActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .syncToast{position:fixed;right:18px;bottom:18px;z-index:100;background:#101828;color:#fff;border-radius:12px;padding:10px 13px;font-size:12px;font-weight:750;box-shadow:0 10px 30px rgba(16,24,40,.25);opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}
 .syncToast.show{opacity:1;transform:translateY(0)}
+
+/* V10 — dedicated mobile app layout */
+.mobileNav,.mobileShade,.mobileSheetTop{display:none}
+
+@media(max-width:600px){
+  html,body{height:100%;overflow:hidden;background:#fff}
+  body{padding:0}
+  .app{
+    display:block;
+    min-height:100dvh;
+    padding:0;
+    background:#fff;
+  }
+  .main{
+    position:fixed;
+    inset:0 0 72px 0;
+    min-height:0;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
+    overflow:hidden;
+    background:#fff;
+  }
+  .topbar{
+    display:block;
+    margin:0 0 8px;
+  }
+  .titleWrap{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .titleWrap h2{
+    font-size:21px;
+    line-height:1.15;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .titleWrap p{display:none}
+  .controls{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .segment{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    border-radius:14px;
+    padding:3px;
+  }
+  .segment button{
+    min-width:0;
+    padding:9px 3px;
+    font-size:0;
+  }
+  .segment button::first-letter{font-size:16px}
+  #v-day::after{content:"Day";font-size:10px;display:block;margin-top:2px}
+  #v-week::after{content:"Week";font-size:10px;display:block;margin-top:2px}
+  #v-month::after{content:"Month";font-size:10px;display:block;margin-top:2px}
+  #v-year::after{content:"Year";font-size:10px;display:block;margin-top:2px}
+  .navrow{
+    display:grid;
+    grid-template-columns:38px 1fr 38px;
+    width:100%;
+    align-items:center;
+  }
+  .navrow .roundControl:first-child,
+  .navrow .roundControl:last-child{display:none}
+  .navrow button:nth-of-type(2){grid-column:1}
+  .dateContext{grid-column:2;min-width:0;width:100%;height:38px}
+  .navrow button:nth-of-type(3){grid-column:3}
+  .filterBar{
+    margin:0 -12px;
+    padding:2px 12px 10px;
+  }
+  .filterChip{padding:7px 10px}
+  .calendarScroller{
+    max-height:none;
+    height:calc(100% - 126px);
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:0 0 18px;
+  }
+  .calendar{min-width:0!important;width:100%}
+  .dayCell{
+    min-height:150px;
+    border-radius:16px;
+    padding:12px;
+  }
+  .dayCell.expanded{min-height:240px}
+  .event{
+    padding:10px;
+    border-radius:12px;
+    margin-bottom:8px;
+  }
+  .eventTitle{font-size:13px}
+  .eventTime,.eventMeta{font-size:11px}
+  .yearGrid{min-width:0;grid-template-columns:1fr}
+  .yearMonth.open{grid-column:auto}
+  .modal{
+    align-items:end;
+    padding:0;
+    background:rgba(16,24,40,.42);
+  }
+  .modalCard{
+    width:100%;
+    max-height:88dvh;
+    border-radius:22px 22px 0 0;
+    padding:18px 16px calc(18px + env(safe-area-inset-bottom));
+  }
+  .detailGrid{grid-template-columns:1fr 1fr}
+
+  /* Planner becomes a full-height slide-up app sheet */
+  .sidebar{
+    display:flex;
+    position:fixed;
+    z-index:80;
+    left:0;right:0;bottom:0;
+    top:6dvh;
+    min-height:0;
+    padding:14px 16px calc(22px + env(safe-area-inset-bottom));
+    border:0;
+    border-radius:24px 24px 0 0;
+    box-shadow:0 -18px 60px rgba(16,24,40,.18);
+    transform:translateY(110%);
+    transition:transform .24s ease;
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+    background:#fff;
+  }
+  .sidebar.mobileOpen{transform:translateY(0)}
+  .sidebar.collapsed{padding:14px 16px calc(22px + env(safe-area-inset-bottom));overflow:auto}
+  .sidebar.collapsed .hideWhenCollapsed{display:block}
+  .sidebar.collapsed .collapseText{display:inline}
+  .brandrow,.sidebarToggle{display:none}
+  .mobileSheetTop{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:sticky;
+    top:-14px;
+    z-index:5;
+    background:#fff;
+    margin:-14px -16px 8px;
+    padding:9px 16px 6px;
+  }
+  .mobileSheetHandle{
+    width:38px;height:5px;border-radius:999px;background:#d0d5dd
+  }
+  .mobileSheetClose{
+    position:absolute;right:14px;top:7px;
+    width:34px;height:34px;border:0;border-radius:50%;
+    background:#f2f4f7;color:#344054;font-weight:900
+  }
+  #planner{padding-bottom:14px}
+  #planner h1{font-size:26px}
+  .typeGrid{grid-template-columns:1fr 1fr;gap:9px}
+  .typeCard{min-height:98px;padding:14px}
+  .row{grid-template-columns:1fr}
+  input,select,textarea{font-size:16px}
+  .actions{
+    position:sticky;
+    bottom:calc(-22px - env(safe-area-inset-bottom));
+    z-index:4;
+    margin:20px -16px -22px;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.96);
+    border-top:1px solid var(--line);
+    backdrop-filter:blur(12px)
+  }
+  .airportResults{max-height:34dvh}
+  .mobileShade{
+    display:block;
+    position:fixed;
+    inset:0;
+    z-index:70;
+    background:rgba(16,24,40,.32);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .mobileShade.open{opacity:1;pointer-events:auto}
+
+  /* fixed iPhone-style navigation */
+  .mobileNav{
+    display:grid;
+    grid-template-columns:1fr 1fr 1.12fr 1fr;
+    position:fixed;
+    z-index:65;
+    left:0;right:0;bottom:0;
+    height:calc(68px + env(safe-area-inset-bottom));
+    padding:6px 8px env(safe-area-inset-bottom);
+    border-top:1px solid #e7eaf0;
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  }
+  .mobileNavBtn{
+    border:0;background:transparent;color:#667085;
+    border-radius:14px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;font-size:10px;font-weight:800;
+  }
+  .mobileNavBtn .mIcon{font-size:19px;line-height:1}
+  .mobileNavBtn.active{color:#101828}
+  .mobileNavBtn.add{
+    color:#fff;background:#101828;
+    margin:2px 7px;
+    border-radius:17px;
+    box-shadow:0 7px 18px rgba(16,24,40,.18);
+  }
+  .mobileNavBtn.add .mIcon{font-size:22px}
+  .syncToast{
+    left:12px;right:12px;bottom:calc(80px + env(safe-area-inset-bottom));
+    text-align:center
+  }
+}
+
+@media(max-width:380px){
+  .main{padding-left:10px;padding-right:10px}
+  .filterBar{margin-left:-10px;margin-right:-10px;padding-left:10px;padding-right:10px}
+  .typeCard{padding:12px}
+}
+
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar" id="sidebar">
+    <div class="mobileSheetTop"><div class="mobileSheetHandle"></div><button class="mobileSheetClose" onclick="closeMobilePlanner()" aria-label="Close">✕</button></div>
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v9</div>
+      <div class="version hideWhenCollapsed">v10.1</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -234,6 +466,15 @@ textarea{min-height:90px;resize:vertical}
   </main>
 </div>
 
+
+<div class="mobileShade" id="mobileShade" onclick="closeMobilePlanner()"></div>
+<nav class="mobileNav" id="mobileNav" aria-label="Wonder Plan navigation">
+  <button class="mobileNavBtn active" id="m-calendar" onclick="mobileCalendar()"><span class="mIcon">▦</span><span>Calendar</span></button>
+  <button class="mobileNavBtn" id="m-today" onclick="mobileToday()"><span class="mIcon">◎</span><span>Today</span></button>
+  <button class="mobileNavBtn add" id="m-add" onclick="mobileAdd()"><span class="mIcon">＋</span><span>Add plan</span></button>
+  <button class="mobileNavBtn" id="m-settings" onclick="mobileSettings()"><span class="mIcon">⚙</span><span>Settings</span></button>
+</nav>
+
 <div class="modal" id="modal">
   <div class="modalCard" id="modalCard"></div>
 </div>
@@ -266,7 +507,7 @@ const AIRPORTS={
 
 let state=loadState();
 let flow={mode:"home",step:0,draft:{},editingId:null};
-let view="week";
+let view=window.matchMedia("(max-width:600px)").matches?"day":"week";
 let focusDate=state.items.length?new Date(state.items[0].date+"T12:00:00"):new Date();
 let expandedMonthDate=null;
 let expandedYearMonth=null;
@@ -282,6 +523,7 @@ let cloudConnected=false;
 let cloudEmail="";
 let cloudLastSync="";
 let cloudSyncTimer=null;
+let cloudReconnectNeeded=false;
 
 
 function loadState(){
@@ -310,7 +552,37 @@ function val(id){return document.getElementById(id)?.value.trim()||""}
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
 function iso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function startOfWeek(d){const x=new Date(d);const n=(x.getDay()+6)%7;x.setDate(x.getDate()-n);x.setHours(12,0,0,0);return x}
-function toggleSidebar(){document.getElementById("sidebar").classList.toggle("collapsed");document.querySelector(".app").classList.toggle("plannerHidden")}
+function isMobile(){return window.matchMedia("(max-width:600px)").matches}
+function setMobileNavActive(id){
+  document.querySelectorAll(".mobileNavBtn").forEach(b=>b.classList.remove("active"));
+  const el=document.getElementById(id);if(el)el.classList.add("active");
+}
+function openMobilePlanner(){
+  if(!isMobile())return;
+  document.getElementById("sidebar").classList.add("mobileOpen");
+  document.getElementById("mobileShade").classList.add("open");
+  document.body.classList.add("mobilePlannerOpen");
+  setMobileNavActive("m-add");
+}
+function closeMobilePlanner(){
+  if(!isMobile())return;
+  document.getElementById("sidebar").classList.remove("mobileOpen");
+  document.getElementById("mobileShade").classList.remove("open");
+  document.body.classList.remove("mobilePlannerOpen");
+  setMobileNavActive("m-calendar");
+}
+function mobileAdd(){
+  flow={mode:"home",step:0,draft:{},editingId:null};
+  renderPlanner();openMobilePlanner();
+}
+function mobileCalendar(){closeMobilePlanner();closeModal();setMobileNavActive("m-calendar")}
+function mobileToday(){closeMobilePlanner();closeModal();goToday();setMobileNavActive("m-today");setTimeout(()=>setMobileNavActive("m-calendar"),500)}
+function mobileSettings(){closeMobilePlanner();openSettings();setMobileNavActive("m-settings")}
+function toggleSidebar(){
+  if(isMobile()){flow={mode:"home",step:0,draft:{},editingId:null};renderPlanner();openMobilePlanner();return}
+  document.getElementById("sidebar").classList.toggle("collapsed");
+  document.querySelector(".app").classList.toggle("plannerHidden")
+}
 
 function renderHome(){
   return `<div class="kicker">Build your itinerary</div>
@@ -328,6 +600,7 @@ function renderHome(){
 function startType(type,item=null){
   flow.mode=type;flow.step=0;flow.editingId=item?.id||null;flow.draft=item?JSON.parse(JSON.stringify(item)):{type};
   renderPlanner();
+  if(isMobile())openMobilePlanner();
 }
 function capture(){
   document.querySelectorAll("[data-field]").forEach(el=>flow.draft[el.dataset.field]=el.value.trim());
@@ -446,6 +719,7 @@ function finishItem(){
   persist();
   flow={mode:"home",step:0,draft:{},editingId:null};
   renderAll();
+  if(isMobile())closeMobilePlanner();
 }
 function removeItem(id){
   if(!confirm("Delete this plan?"))return;
@@ -478,7 +752,7 @@ function viewAttachment(id){
   document.getElementById("modalCard").className="modalCard imageViewer";
   document.getElementById("modalCard").innerHTML=`<button class="modalClose" onclick="openItem('${i.id}')">✕</button><img src="${i.attachment.data}" alt="Booking attachment">`;
 }
-function closeModal(){document.getElementById("modal").classList.remove("open")}
+function closeModal(){document.getElementById("modal").classList.remove("open");if(isMobile())setMobileNavActive("m-calendar")}
 
 function setView(v){view=v;expandedMonthDate=null;renderCalendar()}
 function goToday(){focusDate=new Date();renderCalendar()}
@@ -614,20 +888,30 @@ function toggleMonthDay(ds){focusDate=new Date(ds+"T12:00:00");expandedMonthDate
 function toggleYearMonth(e,m){if(e.target.closest(".event"))return;expandedYearMonth=expandedYearMonth===m?null:m;expandedYearDay=null;renderCalendar()}
 function toggleYearDay(date){focusDate=new Date(date+"T12:00:00");expandedYearDay=expandedYearDay===date?null:date;renderCalendar()}
 function cloudStatusHTML(){
-  const stateClass=cloudConnected?"on":"";
-  const stateText=cloudConnected?"Connected":"Not connected";
+  const remembered=localStorage.getItem("wonderPlanCloudConnected")==="1";
+  const stateClass=cloudConnected?"on":(remembered&&cloudReconnectNeeded?"warn":"");
+  const stateText=cloudConnected?"Connected":(remembered&&cloudReconnectNeeded?"Reconnect":"Not connected");
   return `<div class="cloudCard">
     <div class="cloudHead">
       <div class="cloudBrand"><div class="cloudIcon">☁️</div><div><h4 style="margin:0">Google Drive Sync</h4><div class="cloudMeta">Sync the same trip between your iPad and iPhone.</div></div></div>
       <span class="cloudState ${stateClass}">${stateText}</span>
     </div>
-    <div class="cloudMeta">${cloudConnected?(cloudEmail?`Connected as ${esc(cloudEmail)}<br>`:"")+`Last synced: ${cloudLastSync||"Not yet"}`:"Your trip stays local until you connect Google Drive."}</div>
+    <div class="cloudMeta">${cloudConnected
+      ? (cloudEmail?`Connected as ${esc(cloudEmail)}<br>`:"")+`Last synced: ${cloudLastSync||"Not yet"}`
+      : remembered&&cloudReconnectNeeded
+        ? `Wonder Plan remembers this Drive connection, but Google needs a quick sign-in refresh.`
+        : `Your trip stays local until you connect Google Drive.`}</div>
     <div class="cloudActions">
-      ${cloudConnected?`<button class="btn secondary" onclick="manualCloudSync()">↻ Sync now</button><button class="btn secondary" onclick="disconnectGoogleDrive()">Disconnect</button>`:`<button class="btn" onclick="connectGoogleDrive()">Connect Google Drive</button>`}
+      ${cloudConnected
+        ? `<button class="btn secondary" onclick="manualCloudSync()">↻ Sync now</button><button class="btn secondary" onclick="disconnectGoogleDrive()">Disconnect</button>`
+        : remembered&&cloudReconnectNeeded
+          ? `<button class="btn" onclick="connectGoogleDrive(false)">Reconnect Google Drive</button><button class="btn secondary" onclick="disconnectGoogleDrive()">Forget connection</button>`
+          : `<button class="btn" onclick="connectGoogleDrive()">Connect Google Drive</button>`}
     </div>
   </div>`;
 }
 function openSettings(){
+  if(isMobile())setMobileNavActive("m-settings");
   document.getElementById("modalCard").className="modalCard";
   document.getElementById("modalCard").innerHTML=`
     <div class="modalTop"><div><div class="kicker">Wonder Plan</div><h3>Settings</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
@@ -657,11 +941,19 @@ function initGoogleTokenClient(){
     client_id:GOOGLE_CLIENT_ID,
     scope:DRIVE_SCOPE,
     callback:async(resp)=>{
-      if(resp.error){toastSync("Google connection failed");return}
+      if(resp.error){
+        googleAccessToken="";
+        cloudConnected=false;
+        cloudReconnectNeeded=localStorage.getItem("wonderPlanCloudConnected")==="1";
+        if(!window.__wpSilentAuth)toastSync("Google connection needs refreshing");
+        if(document.getElementById("modal")?.classList.contains("open"))openSettings();
+        return;
+      }
       googleAccessToken=resp.access_token||"";
       cloudConnected=!!googleAccessToken;
-      localStorage.setItem("wonderPlanCloudConnected",cloudConnected?"1":"0");
+      cloudReconnectNeeded=false;
       if(cloudConnected){
+        localStorage.setItem("wonderPlanCloudConnected","1");
         await resolveCloudOnConnect();
         if(document.getElementById("modal")?.classList.contains("open"))openSettings();
       }
@@ -669,15 +961,34 @@ function initGoogleTokenClient(){
   });
   return true;
 }
-function connectGoogleDrive(){
+function connectGoogleDrive(firstConnect=true){
+  window.__wpSilentAuth=false;
   if(!initGoogleTokenClient()){toastSync("Google is still loading — try again in a moment");return}
-  googleTokenClient.requestAccessToken({prompt:"consent"});
+  googleTokenClient.requestAccessToken({prompt:firstConnect?"consent":""});
+}
+function restoreGoogleDriveConnection(){
+  if(localStorage.getItem("wonderPlanCloudConnected")!=="1")return;
+  cloudReconnectNeeded=true;
+  let attempts=0;
+  const timer=setInterval(()=>{
+    attempts++;
+    if(initGoogleTokenClient()){
+      clearInterval(timer);
+      window.__wpSilentAuth=true;
+      try{googleTokenClient.requestAccessToken({prompt:""});}
+      catch(e){cloudReconnectNeeded=true;}
+      setTimeout(()=>{window.__wpSilentAuth=false},3000);
+    }else if(attempts>=30){
+      clearInterval(timer);
+      cloudReconnectNeeded=true;
+    }
+  },200);
 }
 async function disconnectGoogleDrive(){
   if(googleAccessToken&&window.google?.accounts?.oauth2){
     try{google.accounts.oauth2.revoke(googleAccessToken,()=>{})}catch(e){}
   }
-  googleAccessToken="";cloudConnected=false;cloudFileId=null;cloudEmail="";cloudLastSync="";
+  googleAccessToken="";cloudConnected=false;cloudReconnectNeeded=false;cloudFileId=null;cloudEmail="";cloudLastSync="";
   localStorage.removeItem("wonderPlanCloudConnected");
   toastSync("Google Drive disconnected");
   openSettings();
@@ -687,7 +998,12 @@ async function driveFetch(url,options={}){
   const headers=new Headers(options.headers||{});
   headers.set("Authorization","Bearer "+googleAccessToken);
   const response=await fetch(url,{...options,headers});
-  if(response.status===401){googleAccessToken="";cloudConnected=false;throw new Error("Google session expired")}
+  if(response.status===401){
+    googleAccessToken="";
+    cloudConnected=false;
+    cloudReconnectNeeded=localStorage.getItem("wonderPlanCloudConnected")==="1";
+    throw new Error("Google session expired");
+  }
   if(!response.ok)throw new Error(await response.text()||("Drive error "+response.status));
   return response;
 }
@@ -704,7 +1020,7 @@ async function downloadCloudState(){
   return await r.json();
 }
 function cloudPayload(){
-  return {app:"Wonder Plan",version:9,modifiedAt:state.modifiedAt||new Date().toISOString(),state};
+  return {app:"Wonder Plan",version:10,modifiedAt:state.modifiedAt||new Date().toISOString(),state};
 }
 async function createCloudFile(){
   const boundary="wp_"+Math.random().toString(36).slice(2);
@@ -780,7 +1096,7 @@ async function manualCloudSync(){
   }catch(e){console.error(e);toastSync("Sync failed — reconnect Google Drive if needed")}
 }
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:9,savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:"10.1",savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -802,7 +1118,10 @@ function importTrip(e){
   r.readAsText(file);
 }
 function renderAll(){renderPlanner();renderCalendar()}
+cloudLastSync=localStorage.getItem("wonderPlanCloudLastSync")||"";
+cloudReconnectNeeded=localStorage.getItem("wonderPlanCloudConnected")==="1";
 renderAll();
+restoreGoogleDriveConnection();
 </script>
 
 <script>
