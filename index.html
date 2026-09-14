@@ -534,6 +534,141 @@ textarea{min-height:90px;resize:vertical}
 
 .importMainCard{grid-column:1/-1;border-style:dashed;background:#fbfcff}
 
+
+/* V11.4 — Home, view controls and trip money */
+.tripHome{
+  background:
+    radial-gradient(circle at 85% 8%,rgba(114,169,255,.12),transparent 24%),
+    linear-gradient(180deg,#f8fbff 0%,#f6f8fb 100%);
+}
+.tripHomeInner{max-width:1180px}
+.tripHomeTop{margin-bottom:18px}
+.tripHomeBrandWrap{display:flex;align-items:center;gap:12px}
+.tripHomeLogo{
+  width:48px;height:48px;border-radius:15px;display:grid;place-items:center;
+  color:#fff;font-size:30px;font-weight:900;transform:rotate(-9deg);
+  background:linear-gradient(145deg,#2d9cff,#5e71ff);
+  box-shadow:0 8px 18px rgba(64,113,223,.23)
+}
+.tripHomeBrand{font-size:30px}
+.tripHomeSub{font-size:13px}
+.homeSettings{
+  width:44px;height:44px;border:1px solid #dfe5ee;background:#fff;border-radius:14px;
+  font-size:18px;box-shadow:0 5px 14px rgba(16,24,40,.06)
+}
+.tripHero{
+  position:relative;overflow:hidden;min-height:230px;border-radius:24px;padding:28px;
+  display:flex;align-items:flex-end;margin:4px 0 26px;color:#fff;
+  background:
+    radial-gradient(circle at 77% 27%,rgba(255,255,255,.22),transparent 18%),
+    linear-gradient(135deg,#176ecb 0%,#3294d5 37%,#6e81d8 100%);
+  box-shadow:0 14px 34px rgba(38,88,161,.18)
+}
+.tripHero::before{
+  content:"";position:absolute;inset:auto -8% -36% -8%;height:78%;
+  background:
+    linear-gradient(145deg,transparent 0 29%,rgba(239,247,255,.96) 30% 48%,transparent 49%) 22% 100%/45% 100% no-repeat,
+    linear-gradient(35deg,transparent 0 35%,rgba(193,224,244,.7) 36% 57%,transparent 58%) 60% 100%/58% 84% no-repeat;
+  opacity:.85
+}
+.tripHero::after{
+  content:attr(data-art);position:absolute;right:6%;bottom:18px;font-size:92px;
+  filter:drop-shadow(0 10px 10px rgba(0,0,0,.16));opacity:.93
+}
+.tripHeroContent{position:relative;z-index:2;max-width:570px;text-shadow:0 2px 12px rgba(0,0,0,.15)}
+.tripHeroEyebrow{font-size:11px;font-weight:900;letter-spacing:.24em;text-transform:uppercase;margin-bottom:10px}
+.tripHero h1{font-size:42px;margin:0 0 7px;color:#fff}
+.tripHero p{margin:0 0 18px;font-size:14px;color:rgba(255,255,255,.92)}
+.tripHeroBtn{border:0;border-radius:999px;background:#fff;color:#172033;padding:11px 18px;font-weight:900}
+.tripHomeSectionHead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 0 12px}
+.tripHomeSectionHead h2{font-size:24px;margin:0}
+.tripHomeSectionHead p{font-size:12px;color:#667085;margin:4px 0 0}
+.homeNewTrip{flex:0 0 auto;padding:10px 14px}
+.tripHomeGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.tripHomeCard{
+  min-height:205px;padding:0;overflow:hidden;border-radius:20px;
+  box-shadow:0 7px 22px rgba(16,24,40,.055);background:#fff
+}
+.tripCardCover{
+  height:108px;padding:15px;display:flex;align-items:flex-start;justify-content:space-between;
+  background:linear-gradient(140deg,#d9edff,#dbe1ff);position:relative;overflow:hidden
+}
+.tripCardCover::after{content:attr(data-art);position:absolute;right:14px;bottom:-4px;font-size:62px}
+.tripCardMenu{position:relative;z-index:2;width:32px;height:32px;border:0;border-radius:10px;background:rgba(255,255,255,.92);font-weight:900}
+.tripCardBody{padding:13px 15px 15px}
+.tripCardBody h3{margin:0 0 4px;font-size:16px}
+.tripCardBody p{margin:0;font-size:11px;color:#667085}
+.tripCardStats{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.tripStat{font-size:10px;font-weight:800;padding:6px 8px;border-radius:999px;background:#f5f7fa;color:#344054}
+.newTripCard{min-height:205px;padding:18px}
+.homeExplore{
+  margin-top:18px;min-height:90px;padding:18px 22px;border-radius:20px;
+  background:linear-gradient(120deg,#eef6ff,#f3f7ff);display:flex;align-items:center;gap:14px;
+  border:1px solid #e0e9f5;overflow:hidden;position:relative
+}
+.homeExploreIcon{font-size:30px}
+.homeExplore b{display:block;font-size:15px}.homeExplore span{display:block;color:#667085;font-size:11px;margin-top:3px}
+.homeExploreArt{margin-left:auto;font-size:60px;color:#75a7ea;opacity:.35;transform:rotate(-12deg)}
+
+.controls{flex-wrap:nowrap}
+.segment{
+  display:grid!important;grid-template-columns:repeat(4,minmax(82px,1fr))!important;
+  gap:4px!important;padding:4px!important;min-width:390px;width:auto!important;
+  background:#f4f6f9;border:1px solid #edf0f4
+}
+.segment button{
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;
+  min-width:0!important;white-space:nowrap!important;font-size:12px!important;padding:9px 10px!important
+}
+.segment button::after{content:none!important}
+.segment button::first-letter{font-size:inherit!important}
+.segment button.active{background:#e6f1ff;color:#1268cc;box-shadow:none}
+.navrow{flex-wrap:nowrap}
+.topbar{align-items:flex-start}
+
+.costRow{display:grid;grid-template-columns:1fr 110px;gap:10px}
+.costHint{font-size:10px;color:#98a2b3;margin-top:5px}
+.moneyTop{
+  display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:12px;margin-bottom:14px
+}
+.moneyCard{border:1px solid var(--line);border-radius:18px;background:#fff;padding:16px}
+.moneyCard.primary{background:linear-gradient(135deg,#111827,#24334f);color:#fff;border:0}
+.moneyCard small{color:#98a2b3;display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.moneyCard strong{display:block;font-size:26px;margin-top:5px}
+.moneyCard.primary small{color:#cbd5e1}
+.moneyToolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:4px 0 14px}
+.moneyToolbar .left{display:flex;align-items:center;gap:8px}
+.moneyToggle{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800}
+.moneyBreakdown{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.moneyList{border:1px solid var(--line);background:#fff;border-radius:18px;overflow:hidden}
+.moneyList h3{margin:0;padding:14px 15px;border-bottom:1px solid #eef1f5;font-size:14px}
+.moneyItem{display:grid;grid-template-columns:1fr auto;gap:12px;padding:11px 15px;border-bottom:1px solid #f0f2f5}
+.moneyItem:last-child{border-bottom:0}
+.moneyItem b{font-size:12px}.moneyItem span{font-size:10px;color:#667085;display:block;margin-top:2px}
+.moneyItem .amount{text-align:right;font-weight:900;font-size:12px}
+.moneyItem .amount small{display:block;color:#98a2b3;margin-top:2px}
+.moneyEmpty{padding:28px;text-align:center;color:#98a2b3;font-size:12px}
+.costPill{display:inline-flex;align-items:center;margin-left:6px;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.68);font-size:9px;font-weight:900}
+.fxNote{font-size:10px;color:#98a2b3;margin-top:8px}
+
+@media(max-width:900px){
+  .tripHomeGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .controls{width:auto!important;display:flex!important;flex-direction:column;align-items:flex-end}
+  .segment{min-width:390px}
+  .moneyTop{grid-template-columns:1fr 1fr}.moneyCard.primary{grid-column:1/-1}
+}
+@media(max-width:600px){
+  .tripHomeGrid{grid-template-columns:1fr}
+  .tripHero{min-height:190px;padding:20px}.tripHero h1{font-size:31px}.tripHero::after{font-size:67px}
+  .tripHomeBrand{font-size:24px}.tripHomeLogo{width:42px;height:42px}
+  .tripHomeSectionHead{align-items:center}.tripHomeSectionHead p{display:none}
+  .homeNewTrip{font-size:11px}
+  .controls{width:100%!important;display:block!important}
+  .segment{min-width:0!important;width:100%!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .segment button{font-size:10px!important;padding:8px 2px!important;gap:3px!important}
+  .moneyTop,.moneyBreakdown{grid-template-columns:1fr}.moneyCard.primary{grid-column:auto}
+}
+
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -543,7 +678,7 @@ textarea{min-height:90px;resize:vertical}
     <div class="mobileSheetTop"><div class="mobileSheetHandle"></div><button class="mobileSheetClose" onclick="closeMobilePlanner()" aria-label="Close">✕</button></div>
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v11.3</div>
+      <div class="version hideWhenCollapsed">v11.4</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -583,7 +718,8 @@ textarea{min-height:90px;resize:vertical}
       <button class="productTab active" id="tab-calendar" onclick="showSection('calendar')">▦ Calendar</button>
       <button class="productTab" id="tab-timeline" onclick="showSection('timeline')">☷ Timeline</button>
       <button class="productTab" id="tab-map" onclick="showSection('map')">⌖ Places</button>
-      <button class="productTab" onclick="openTrips()">✦ Trips</button>
+      <button class="productTab" id="tab-money" onclick="showSection('money')">＄ Money</button>
+      <button class="productTab" onclick="showTripHome()">✦ Trips</button>
     </div>
     <div class="filterBar" id="filterBar"></div>
     <div class="calendarScroller">
@@ -597,16 +733,29 @@ textarea{min-height:90px;resize:vertical}
 <div class="tripHome" id="tripHome">
   <div class="tripHomeInner">
     <div class="tripHomeTop">
-      <div><div class="tripHomeBrand">Wonder Plan</div><div class="tripHomeSub">Your trips, all in one place.</div></div>
-      <button class="btn primary" onclick="editTrip()">＋ New trip</button>
+      <div class="tripHomeBrandWrap">
+        <div class="tripHomeLogo">⌁</div>
+        <div><div class="tripHomeBrand">Wonder Plan</div><div class="tripHomeSub">Your trips, all in one place.</div></div>
+      </div>
+      <button class="homeSettings" onclick="openSettings()" title="Settings">⚙</button>
+    </div>
+    <div id="tripHomeHero"></div>
+    <div class="tripHomeSectionHead">
+      <div><h2>Your Trips</h2><p>Open a trip or start planning somewhere new.</p></div>
+      <button class="btn primary homeNewTrip" onclick="editTrip()">＋ New trip</button>
     </div>
     <div class="tripHomeGrid" id="tripHomeGrid"></div>
+    <div class="homeExplore">
+      <div class="homeExploreIcon">🧭</div>
+      <div><b>Explore the world, your way.</b><span>Plan, organise and keep every booking in one place.</span></div>
+      <div class="homeExploreArt">⌁</div>
+    </div>
   </div>
 </div>
 
 <div class="mobileShade" id="mobileShade" onclick="closeMobilePlanner()"></div>
 <nav class="mobileNav" id="mobileNav" aria-label="Wonder Plan navigation">
-  <button class="mobileNavBtn" id="m-trips" onclick="openTrips()"><span class="mIcon">✦</span><span>Trips</span></button>
+  <button class="mobileNavBtn" id="m-trips" onclick="showTripHome()"><span class="mIcon">✦</span><span>Trips</span></button>
   <button class="mobileNavBtn active" id="m-calendar" onclick="mobileTimeline()"><span class="mIcon">☷</span><span>Itinerary</span></button>
   <button class="mobileNavBtn add" id="m-add" onclick="mobileAdd()"><span class="mIcon">＋</span><span>Add</span></button>
   <button class="mobileNavBtn" id="m-map" onclick="mobileMap()"><span class="mIcon">⌖</span><span>Places</span></button>
@@ -627,6 +776,12 @@ const TYPES={
   transport:{label:"Transport",icon:"🚆",desc:"Train, ferry, bus or car"},
   other:{label:"Other",icon:"＋",desc:"Anything else"}
 };
+const CURRENCIES=["AUD","JPY","USD","EUR","GBP","NZD","THB","IDR","VND","PHP","MYR","SGD","KRW","CAD","CHF","CNY","HKD"];
+let moneyDisplayCurrency=localStorage.getItem("wonderPlanMoneyCurrency")||"AUD";
+let showCosts=localStorage.getItem("wonderPlanShowCosts")!=="0";
+let fxRates={};
+let fxUpdated="";
+
 const AIRPORTS={
   tokyo:[["HND","Haneda Airport"],["NRT","Narita International Airport"]],
   osaka:[["KIX","Kansai International Airport"],["ITM","Osaka International Airport"]],
@@ -705,20 +860,47 @@ function updateTripUI(){
 }
 function switchTrip(id){closeModal();enterTrip(id)}
 
+function tripArt(t){
+  const s=((t?.destination||"")+" "+(t?.name||"")).toLowerCase();
+  if(/japan|tokyo|kyoto|osaka|myoko|ski/.test(s))return /ski|myoko/.test(s)?"🏔️":"⛩️";
+  if(/thailand|phuket|bangkok|island|bali|indonesia/.test(s))return "🏝️";
+  if(/europe|italy|france|uk|london/.test(s))return "🏛️";
+  return t?.emoji||"✈️";
+}
+function tripCounts(t){
+  const items=t?.items||[];
+  return {
+    flights:items.filter(i=>i.type==="flight").length,
+    stays:items.filter(i=>i.type==="hotel").length,
+    plans:items.length
+  }
+}
 function renderTripHome(){
-  const grid=document.getElementById("tripHomeGrid");if(!grid)return;
+  const grid=document.getElementById("tripHomeGrid"),hero=document.getElementById("tripHomeHero");if(!grid||!hero)return;
   syncActiveTrip();
-  const cards=(state.trips||[]).map(t=>{
-    const count=(t.items||[]).length;
-    const dateText=t.startDate?(t.endDate&&t.endDate!==t.startDate?`${t.startDate} → ${t.endDate}`:t.startDate):"Dates not set";
-    return `<button class="tripHomeCard" onclick="enterTrip('${t.id}')">
-      <div class="tripHomeIcon">${esc(t.emoji||"✈️")}</div>
-      <h3>${esc(t.name||"Untitled trip")}</h3>
-      <p>${esc(t.destination||"Destination not set")}</p>
-      <div class="tripHomeMeta">${esc(dateText)} · ${count} ${count===1?"plan":"plans"} <span style="float:right;font-weight:850;color:#475467">Open →</span></div>
-    </button>`;
+  const trips=state.trips||[];
+  const featured=trips.find(t=>t.id===state.activeTripId)||trips[0];
+  if(featured){
+    const dateText=featured.startDate?(featured.endDate&&featured.endDate!==featured.startDate?`${formatTripDate(featured.startDate)} – ${formatTripDate(featured.endDate)}`:formatTripDate(featured.startDate)):"Add dates when you're ready";
+    hero.innerHTML=`<div class="tripHero" data-art="${tripArt(featured)}">
+      <div class="tripHeroContent"><div class="tripHeroEyebrow">Next adventure</div><h1>${esc(featured.name||"My Trip")}</h1>
+      <p>${esc(featured.destination||"Your next trip")} · ${esc(dateText)}</p>
+      <button class="tripHeroBtn" onclick="enterTrip('${featured.id}')">Open Trip →</button></div></div>`;
+  }else hero.innerHTML="";
+  const cards=trips.map((t,idx)=>{
+    const c=tripCounts(t);
+    const dateText=t.startDate?(t.endDate&&t.endDate!==t.startDate?`${formatTripDate(t.startDate)} – ${formatTripDate(t.endDate)}`:formatTripDate(t.startDate)):"Dates not set";
+    return `<div class="tripHomeCard" onclick="enterTrip('${t.id}')" style="cursor:pointer">
+        <div class="tripCardCover" data-art="${tripArt(t)}"><button class="tripCardMenu" onclick="event.stopPropagation();editTrip('${t.id}')" title="Edit trip">•••</button></div>
+        <div class="tripCardBody"><h3>${esc(t.name||"Untitled trip")}</h3><p>${esc(dateText)}${t.destination?` · ${esc(t.destination)}`:""}</p>
+        <div class="tripCardStats"><span class="tripStat">✈ ${c.flights}</span><span class="tripStat">▣ ${c.stays}</span><span class="tripStat">⌖ ${c.plans}</span></div></div>
+    </div>`;
   }).join("");
-  grid.innerHTML=cards+`<button class="tripHomeCard newTripCard" onclick="editTrip()"><div><div class="plus">＋</div><h3>New trip</h3><p>Start planning somewhere new.</p></div></button>`;
+  grid.innerHTML=cards+`<button class="tripHomeCard newTripCard" onclick="editTrip()"><div><div class="plus">＋</div><h3>New Trip</h3><p>Start planning somewhere new.</p></div></button>`;
+}
+function formatTripDate(ds){
+  if(!ds)return "";
+  return new Date(ds+"T12:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
 }
 function showTripHome(){
   syncActiveTrip();persist("✓ Saved locally",false);renderTripHome();
@@ -905,6 +1087,12 @@ function renderFlight(){
     <p class="sub">Add the useful booking details you want available during the trip.</p>
     <div class="row"><div><label>Airline</label><input data-field="airline" value="${esc(d.airline||"")}" placeholder="Qantas"></div><div><label>Flight number</label><input data-field="flightNo" value="${esc(d.flightNo||"")}" placeholder="QF61"></div></div>
     <label>Booking reference</label><input data-field="bookingRef" value="${esc(d.bookingRef||"")}" placeholder="Optional">
+
+    <div class="costRow">
+      <div><label>Price</label><input type="number" min="0" step="0.01" data-field="price" value="${esc(d.price||"")}" placeholder="Optional"></div>
+      <div><label>Currency</label><select data-field="currency">${CURRENCIES.map(c=>`<option value="${c}" ${(d.currency||moneyDisplayCurrency)===c?"selected":""}>${c}</option>`).join("")}</select></div>
+    </div>
+    <div class="costHint">Add the total cost for this booking/item. You can convert the whole trip later on the Money page.</div>
     <label>Notes</label><textarea data-field="notes" placeholder="Terminal, seat, baggage…">${esc(d.notes||"")}</textarea>
     ${attachmentField()}${controls(true)}`;
 }
@@ -940,6 +1128,12 @@ function renderGeneric(){
   return `<div class="kicker">${TYPES[t].label} · 3 of 3</div><h1>Details</h1>
     <label>Location / address</label><input data-field="location" value="${esc(d.location)}" placeholder="Optional">
     <label>Booking reference</label><input data-field="bookingRef" value="${esc(d.bookingRef||"")}" placeholder="Optional">
+
+    <div class="costRow">
+      <div><label>Price</label><input type="number" min="0" step="0.01" data-field="price" value="${esc(d.price||"")}" placeholder="Optional"></div>
+      <div><label>Currency</label><select data-field="currency">${CURRENCIES.map(c=>`<option value="${c}" ${(d.currency||moneyDisplayCurrency)===c?"selected":""}>${c}</option>`).join("")}</select></div>
+    </div>
+    <div class="costHint">Add the total cost for this booking/item. You can convert the whole trip later on the Money page.</div>
     <label>Notes</label><textarea data-field="notes" placeholder="Ideas, details, instructions…">${esc(d.notes)}</textarea>
     ${attachmentField()}${controls(true)}`;
 }
@@ -1045,33 +1239,18 @@ async function shareCurrentTrip(){
 }
 function showSection(section){
   appSection=section;
-  document.querySelectorAll(".productTab[id^='tab-']").forEach(b=>b.classList.remove("active"));
-  document.getElementById("tab-"+section)?.classList.add("active");
-  const filter=document.getElementById("filterBar");
+  ["calendar","timeline","map","money"].forEach(s=>document.getElementById("tab-"+s)?.classList.toggle("active",s===section));
   const seg=document.querySelector(".segment");
-  if(filter)filter.style.display=section==="calendar"?"flex":"none";
-  if(seg)seg.style.display=section==="calendar"?"grid":"none";
-  if(section==="calendar")renderCalendar();
+  const nav=document.querySelector(".navrow");
+  const filters=document.getElementById("filterBar");
+  const showCalendarControls=section==="calendar";
+  if(seg)seg.style.display=showCalendarControls?"grid":"none";
+  if(nav)nav.style.display=showCalendarControls?"flex":"none";
+  if(filters)filters.style.display=showCalendarControls?"flex":"none";
   if(section==="timeline")renderTimeline();
-  if(section==="map")renderMap();
-}
-function wonderInsights(){
-  const insights=[];
-  const items=[...state.items].sort(sortItems);
-  for(let i=0;i<items.length-1;i++){
-    const a=items[i],b=items[i+1];
-    if(a.date===b.date&&a.time&&b.time){
-      const mins=(parseInt(b.time.slice(0,2))*60+parseInt(b.time.slice(3)))-(parseInt(a.time.slice(0,2))*60+parseInt(a.time.slice(3)));
-      if(mins>=0&&mins<60)insights.push(`${a.title} and ${b.title} are only ${mins} minutes apart. Check travel time before you lock them in.`);
-    }
-    if(a.type==="flight"&&a.arrivalDate===b.date&&a.arrivalTime&&b.time){
-      const gap=(parseInt(b.time.slice(0,2))*60+parseInt(b.time.slice(3)))-(parseInt(a.arrivalTime.slice(0,2))*60+parseInt(a.arrivalTime.slice(3)));
-      if(gap>=0&&gap<150)insights.push(`Your ${a.title} arrival is close to ${b.title}. Allow for baggage, immigration and travel from the airport.`);
-    }
-  }
-  const hotels=items.filter(i=>i.type==="hotel");
-  if(items.length&&!hotels.length)insights.push("No accommodation has been added yet. Adding your stays helps Wonder Plan understand where each day starts and ends.");
-  return [...new Set(insights)].slice(0,3);
+  else if(section==="map")renderMap();
+  else if(section==="money")renderMoney();
+  else renderCalendar();
 }
 function renderTimeline(){
   updateTripUI();
@@ -1241,6 +1420,7 @@ function eventHTML(i,compact=false,ds=i.date){
     <div class="eventTitle">${esc(i.title)}</div>
     ${!spanning&&i.location?`<div class="eventMeta">${esc(i.location)}</div>`:""}
     ${!spanning&&i.meta?`<div class="eventMeta">${esc(i.meta)}</div>`:""}
+    ${showCosts&&Number(i.price)>0?`<span class="costPill">${formatMoney(Number(i.price),i.currency||moneyDisplayCurrency)}</span>`:""}
   </div>`;
 }
 function renderFilters(){
@@ -1346,6 +1526,73 @@ function cloudStatusHTML(){
     </div>
   </div>`;
 }
+
+function formatMoney(value,currency=moneyDisplayCurrency){
+  try{return new Intl.NumberFormat(undefined,{style:"currency",currency,maximumFractionDigits:currency==="JPY"||currency==="KRW"||currency==="VND"||currency==="IDR"?0:2}).format(value)}
+  catch(e){return `${currency} ${Number(value||0).toFixed(2)}`}
+}
+async function refreshFxRates(silent=false){
+  const currencies=[...new Set(state.items.filter(i=>Number(i.price)>0).map(i=>i.currency||moneyDisplayCurrency).concat([moneyDisplayCurrency]))];
+  fxRates={[moneyDisplayCurrency]:1};
+  try{
+    await Promise.all(currencies.filter(c=>c!==moneyDisplayCurrency).map(async c=>{
+      const r=await fetch(`https://api.frankfurter.dev/v2/rate/${encodeURIComponent(c.toLowerCase())}/${encodeURIComponent(moneyDisplayCurrency.toLowerCase())}`);
+      if(!r.ok)throw new Error("rate");
+      const d=await r.json();fxRates[c]=Number(d.rate)||0;fxUpdated=d.date||"";
+    }));
+    localStorage.setItem("wonderPlanFxRates",JSON.stringify({base:moneyDisplayCurrency,rates:fxRates,date:fxUpdated,time:Date.now()}));
+    if(!silent)toastSync(`Exchange rates updated${fxUpdated?` · ${fxUpdated}`:""}`);
+  }catch(e){
+    const saved=JSON.parse(localStorage.getItem("wonderPlanFxRates")||"null");
+    if(saved?.base===moneyDisplayCurrency){fxRates=saved.rates||{};fxUpdated=saved.date||""}
+    if(!silent)toastSync("Couldn't refresh rates — using cached rates where available");
+  }
+  if(appSection==="money")renderMoney();
+  else if(appSection==="calendar")renderCalendar();
+}
+function convertedPrice(i){
+  const p=Number(i.price)||0,c=i.currency||moneyDisplayCurrency;
+  if(!p)return 0;
+  if(c===moneyDisplayCurrency)return p;
+  return fxRates[c]?p*fxRates[c]:null;
+}
+function setMoneyCurrency(c){
+  moneyDisplayCurrency=c;localStorage.setItem("wonderPlanMoneyCurrency",c);refreshFxRates(true);renderMoney();
+}
+function toggleCosts(){
+  showCosts=!showCosts;localStorage.setItem("wonderPlanShowCosts",showCosts?"1":"0");
+  if(appSection==="money")renderMoney();else renderCalendar();
+}
+function renderMoney(){
+  updateTripUI();
+  const cal=document.getElementById("calendar"),t=activeTrip();
+  document.getElementById("calendarTitle").textContent="Trip money";
+  document.getElementById("dateContext").textContent=t?.name||"Money";
+  cal.className="";
+  const priced=state.items.filter(i=>Number(i.price)>0);
+  const converted=priced.map(i=>({i,v:convertedPrice(i)}));
+  const known=converted.filter(x=>x.v!==null);
+  const total=known.reduce((s,x)=>s+x.v,0);
+  const byType={};
+  known.forEach(({i,v})=>byType[i.type]=(byType[i.type]||0)+v);
+  const currencies=[...new Set(priced.map(i=>i.currency||moneyDisplayCurrency))];
+  cal.innerHTML=`<div class="moneyToolbar">
+    <div class="left"><label class="moneyToggle"><input type="checkbox" ${showCosts?"checked":""} onchange="toggleCosts()"> Show prices on itinerary</label></div>
+    <div style="display:flex;gap:7px;align-items:center"><select style="width:auto;padding:9px 12px" onchange="setMoneyCurrency(this.value)">${CURRENCIES.map(c=>`<option value="${c}" ${c===moneyDisplayCurrency?"selected":""}>Show total in ${c}</option>`).join("")}</select><button class="btn secondary" onclick="refreshFxRates()">↻ Rates</button></div>
+  </div>
+  <div class="moneyTop">
+    <div class="moneyCard primary"><small>Estimated trip total</small><strong>${formatMoney(total,moneyDisplayCurrency)}</strong><div class="fxNote">${priced.length} priced item${priced.length===1?"":"s"}${fxUpdated?` · rates ${fxUpdated}`:""}</div></div>
+    <div class="moneyCard"><small>Original currencies</small><strong>${currencies.length}</strong></div>
+    <div class="moneyCard"><small>Items without price</small><strong>${state.items.length-priced.length}</strong></div>
+  </div>
+  <div class="moneyBreakdown">
+    <div class="moneyList"><h3>Breakdown</h3>${Object.keys(byType).length?Object.entries(byType).sort((a,b)=>b[1]-a[1]).map(([type,v])=>`<div class="moneyItem"><div><b>${TYPES[type]?.icon||"•"} ${TYPES[type]?.label||type}</b><span>${state.items.filter(i=>i.type===type&&Number(i.price)>0).length} priced item(s)</span></div><div class="amount">${formatMoney(v,moneyDisplayCurrency)}</div></div>`).join(""):`<div class="moneyEmpty">Add prices to your flights, stays and activities to build a trip budget.</div>`}</div>
+    <div class="moneyList"><h3>All priced items</h3>${priced.length?priced.sort(sortItems).map(i=>{const cv=convertedPrice(i);return `<div class="moneyItem"><div><b>${TYPES[i.type]?.icon||"•"} ${esc(i.title)}</b><span>${esc(i.date||"")} · ${esc(i.currency||moneyDisplayCurrency)}</span></div><div class="amount">${formatMoney(Number(i.price),i.currency||moneyDisplayCurrency)}${cv!==null&&(i.currency||moneyDisplayCurrency)!==moneyDisplayCurrency?`<small>≈ ${formatMoney(cv,moneyDisplayCurrency)}</small>`:""}</div></div>`}).join(""):`<div class="moneyEmpty">No prices added yet.</div>`}</div>
+  </div>
+  ${converted.some(x=>x.v===null)?`<div class="fxNote">Some totals are excluded because an exchange rate is unavailable. Tap “Rates” when online.</div>`:""}`;
+  if(priced.some(i=>(i.currency||moneyDisplayCurrency)!==moneyDisplayCurrency)&&Object.keys(fxRates).length<=1)refreshFxRates(true);
+}
+
 function openSettings(){
   if(isMobile())setMobileNavActive("m-settings");
   document.getElementById("modalCard").className="modalCard";
@@ -1383,6 +1630,10 @@ function initGoogleTokenClient(){
         googleAccessToken="";
         cloudConnected=false;
         cloudReconnectNeeded=localStorage.getItem("wonderPlanCloudConnected")==="1";
+try{
+  const savedFx=JSON.parse(localStorage.getItem("wonderPlanFxRates")||"null");
+  if(savedFx?.base===moneyDisplayCurrency){fxRates=savedFx.rates||{};fxUpdated=savedFx.date||""}
+}catch(e){}
         if(!window.__wpSilentAuth)toastSync("Google connection needs refreshing");
         if(document.getElementById("modal")?.classList.contains("open"))openSettings();
         return;
@@ -1440,6 +1691,10 @@ async function driveFetch(url,options={}){
     googleAccessToken="";
     cloudConnected=false;
     cloudReconnectNeeded=localStorage.getItem("wonderPlanCloudConnected")==="1";
+try{
+  const savedFx=JSON.parse(localStorage.getItem("wonderPlanFxRates")||"null");
+  if(savedFx?.base===moneyDisplayCurrency){fxRates=savedFx.rates||{};fxUpdated=savedFx.date||""}
+}catch(e){}
     throw new Error("Google session expired");
   }
   if(!response.ok)throw new Error(await response.text()||("Drive error "+response.status));
@@ -1458,7 +1713,7 @@ async function downloadCloudState(){
   return await r.json();
 }
 function cloudPayload(){
-  return {app:"Wonder Plan",version:"11.3",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
+  return {app:"Wonder Plan",version:"11.4",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
 }
 async function createCloudFile(){
   const boundary="wp_"+Math.random().toString(36).slice(2);
@@ -1534,7 +1789,7 @@ async function manualCloudSync(){
   }catch(e){console.error(e);toastSync("Sync failed — reconnect Google Drive if needed")}
 }
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:"11.3",savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:"11.4",savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -1560,10 +1815,15 @@ function renderAll(){
   if(document.getElementById("tripHome")&&!document.getElementById("tripHome").classList.contains("hidden"))renderTripHome();
   if(appSection==="timeline")renderTimeline();
   else if(appSection==="map")renderMap();
+  else if(appSection==="money")renderMoney();
   else renderCalendar();
 }
 cloudLastSync=localStorage.getItem("wonderPlanCloudLastSync")||"";
 cloudReconnectNeeded=localStorage.getItem("wonderPlanCloudConnected")==="1";
+try{
+  const savedFx=JSON.parse(localStorage.getItem("wonderPlanFxRates")||"null");
+  if(savedFx?.base===moneyDisplayCurrency){fxRates=savedFx.rates||{};fxUpdated=savedFx.date||""}
+}catch(e){}
 renderAll();
 showSection(appSection);
 renderTripHome();
