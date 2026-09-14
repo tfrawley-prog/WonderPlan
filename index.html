@@ -176,14 +176,25 @@ textarea{min-height:90px;resize:vertical}
   .dateContext{min-width:82px}
 }
 
+
+.cloudCard{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}
+.cloudHead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.cloudBrand{display:flex;align-items:center;gap:10px}.cloudIcon{width:34px;height:34px;border-radius:10px;background:#f2f4f7;display:grid;place-items:center;font-size:18px}
+.cloudState{font-size:11px;font-weight:850;border-radius:999px;padding:5px 8px;background:#f2f4f7;color:#667085}
+.cloudState.on{background:#ecfdf3;color:#027a48}.cloudState.warn{background:#fff6df;color:#9a6300}
+.cloudMeta{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.45}
+.cloudActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.syncToast{position:fixed;right:18px;bottom:18px;z-index:100;background:#101828;color:#fff;border-radius:12px;padding:10px 13px;font-size:12px;font-weight:750;box-shadow:0 10px 30px rgba(16,24,40,.25);opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}
+.syncToast.show{opacity:1;transform:translateY(0)}
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v8</div>
+      <div class="version hideWhenCollapsed">v9</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -261,17 +272,36 @@ let expandedMonthDate=null;
 let expandedYearMonth=null;
 let expandedYearDay=null;
 let typeFilters={flight:true,hotel:true,activity:true,restaurant:true,transport:true,other:true};
+const GOOGLE_CLIENT_ID="201470588785-f9551t777ga2ehes74vgvm1lfia21rdl.apps.googleusercontent.com";
+const DRIVE_SCOPE="https://www.googleapis.com/auth/drive.appdata";
+const CLOUD_FILE_NAME="wonder-plan-sync.json";
+let googleTokenClient=null;
+let googleAccessToken="";
+let cloudFileId=null;
+let cloudConnected=false;
+let cloudEmail="";
+let cloudLastSync="";
+let cloudSyncTimer=null;
+
 
 function loadState(){
   try{
     const raw=localStorage.getItem("wonderPlanV6");
-    if(raw) return JSON.parse(raw);
+    if(raw){
+      const parsed=JSON.parse(raw);
+      if(!parsed.modifiedAt)parsed.modifiedAt=new Date(0).toISOString();
+      return parsed;
+    }
   }catch(e){}
-  return {items:[]};
+  return {items:[],modifiedAt:new Date(0).toISOString()};
 }
-function persist(msg="✓ Saved locally"){
-  try{localStorage.setItem("wonderPlanV6",JSON.stringify(state));setStatus(msg)}
-  catch(e){setStatus("Local save unavailable")}
+function persist(msg="✓ Saved locally",touch=true){
+  if(touch)state.modifiedAt=new Date().toISOString();
+  try{
+    localStorage.setItem("wonderPlanV6",JSON.stringify(state));
+    setStatus(msg);
+    if(touch&&cloudConnected&&googleAccessToken)scheduleCloudSave();
+  }catch(e){setStatus("Local save unavailable")}
 }
 function setStatus(t){const el=document.getElementById("status");if(el)el.textContent=t}
 function uid(){return "wp_"+Date.now()+"_"+Math.random().toString(36).slice(2)}
@@ -583,24 +613,174 @@ function dayCellHTML(d,items){
 function toggleMonthDay(ds){focusDate=new Date(ds+"T12:00:00");expandedMonthDate=expandedMonthDate===ds?null:ds;renderCalendar()}
 function toggleYearMonth(e,m){if(e.target.closest(".event"))return;expandedYearMonth=expandedYearMonth===m?null:m;expandedYearDay=null;renderCalendar()}
 function toggleYearDay(date){focusDate=new Date(date+"T12:00:00");expandedYearDay=expandedYearDay===date?null:date;renderCalendar()}
+function cloudStatusHTML(){
+  const stateClass=cloudConnected?"on":"";
+  const stateText=cloudConnected?"Connected":"Not connected";
+  return `<div class="cloudCard">
+    <div class="cloudHead">
+      <div class="cloudBrand"><div class="cloudIcon">☁️</div><div><h4 style="margin:0">Google Drive Sync</h4><div class="cloudMeta">Sync the same trip between your iPad and iPhone.</div></div></div>
+      <span class="cloudState ${stateClass}">${stateText}</span>
+    </div>
+    <div class="cloudMeta">${cloudConnected?(cloudEmail?`Connected as ${esc(cloudEmail)}<br>`:"")+`Last synced: ${cloudLastSync||"Not yet"}`:"Your trip stays local until you connect Google Drive."}</div>
+    <div class="cloudActions">
+      ${cloudConnected?`<button class="btn secondary" onclick="manualCloudSync()">↻ Sync now</button><button class="btn secondary" onclick="disconnectGoogleDrive()">Disconnect</button>`:`<button class="btn" onclick="connectGoogleDrive()">Connect Google Drive</button>`}
+    </div>
+  </div>`;
+}
 function openSettings(){
   document.getElementById("modalCard").className="modalCard";
   document.getElementById("modalCard").innerHTML=`
     <div class="modalTop"><div><div class="kicker">Wonder Plan</div><h3>Settings</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
     <div class="settingsList" style="margin-top:16px">
-      <div class="settingsCard"><h4>Automatic saving</h4><p>Your itinerary is saved locally on this device automatically.</p></div>
+      ${cloudStatusHTML()}
+      <div class="settingsCard"><h4>Automatic saving</h4><p>Your itinerary is saved locally on this device automatically. Cloud sync is an extra copy for your other devices.</p></div>
       <div class="settingsCard"><h4>Backup & restore</h4><p>Export a portable backup or restore one from another device.</p>
         <div class="actions"><button class="btn secondary" onclick="exportTrip()">⬇ Export backup</button><button class="btn secondary" onclick="document.getElementById('settingsFile').click()">⬆ Import backup</button></div>
         <input id="settingsFile" type="file" accept=".json,application/json" style="display:none" onchange="importTrip(event)">
       </div>
-      <div class="settingsCard"><h4>Connected bookings</h4><p>Planned: connect your inbox and live travel data to import flight and hotel confirmations automatically.</p></div>
+      <div class="settingsCard"><h4>Connected bookings</h4><p>Next step: import flight and hotel confirmations from your bookings. This is separate from Drive Sync.</p></div>
       <div class="settingsCard"><h4>Calendar layers</h4><p>Use the category switches above the calendar to show or hide flights, stays, activities, meals and transport without deleting anything.</p></div>
     </div>`;
   document.getElementById("modal").classList.add("open");
 }
 
+function toastSync(message){
+  const el=document.getElementById("syncToast");if(!el)return;
+  el.textContent=message;el.classList.add("show");
+  clearTimeout(el._timer);el._timer=setTimeout(()=>el.classList.remove("show"),2600);
+}
+function formatSyncTime(){return new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})}
+function initGoogleTokenClient(){
+  if(!window.google?.accounts?.oauth2)return false;
+  if(googleTokenClient)return true;
+  googleTokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:GOOGLE_CLIENT_ID,
+    scope:DRIVE_SCOPE,
+    callback:async(resp)=>{
+      if(resp.error){toastSync("Google connection failed");return}
+      googleAccessToken=resp.access_token||"";
+      cloudConnected=!!googleAccessToken;
+      localStorage.setItem("wonderPlanCloudConnected",cloudConnected?"1":"0");
+      if(cloudConnected){
+        await resolveCloudOnConnect();
+        if(document.getElementById("modal")?.classList.contains("open"))openSettings();
+      }
+    }
+  });
+  return true;
+}
+function connectGoogleDrive(){
+  if(!initGoogleTokenClient()){toastSync("Google is still loading — try again in a moment");return}
+  googleTokenClient.requestAccessToken({prompt:"consent"});
+}
+async function disconnectGoogleDrive(){
+  if(googleAccessToken&&window.google?.accounts?.oauth2){
+    try{google.accounts.oauth2.revoke(googleAccessToken,()=>{})}catch(e){}
+  }
+  googleAccessToken="";cloudConnected=false;cloudFileId=null;cloudEmail="";cloudLastSync="";
+  localStorage.removeItem("wonderPlanCloudConnected");
+  toastSync("Google Drive disconnected");
+  openSettings();
+}
+async function driveFetch(url,options={}){
+  if(!googleAccessToken)throw new Error("Not connected");
+  const headers=new Headers(options.headers||{});
+  headers.set("Authorization","Bearer "+googleAccessToken);
+  const response=await fetch(url,{...options,headers});
+  if(response.status===401){googleAccessToken="";cloudConnected=false;throw new Error("Google session expired")}
+  if(!response.ok)throw new Error(await response.text()||("Drive error "+response.status));
+  return response;
+}
+async function findCloudFile(){
+  const q=encodeURIComponent(`name='${CLOUD_FILE_NAME}' and trashed=false`);
+  const r=await driveFetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,name,modifiedTime)&pageSize=10`);
+  const j=await r.json();
+  cloudFileId=j.files?.[0]?.id||null;
+  return cloudFileId;
+}
+async function downloadCloudState(){
+  if(!cloudFileId)return null;
+  const r=await driveFetch(`https://www.googleapis.com/drive/v3/files/${cloudFileId}?alt=media`);
+  return await r.json();
+}
+function cloudPayload(){
+  return {app:"Wonder Plan",version:9,modifiedAt:state.modifiedAt||new Date().toISOString(),state};
+}
+async function createCloudFile(){
+  const boundary="wp_"+Math.random().toString(36).slice(2);
+  const metadata=JSON.stringify({name:CLOUD_FILE_NAME,parents:["appDataFolder"]});
+  const body=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(cloudPayload())}\r\n--${boundary}--`;
+  const r=await driveFetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",{
+    method:"POST",headers:{"Content-Type":"multipart/related; boundary="+boundary},body
+  });
+  const j=await r.json();cloudFileId=j.id;
+}
+async function uploadCloudState(){
+  if(!cloudFileId){await createCloudFile()}
+  else{
+    await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${cloudFileId}?uploadType=media`,{
+      method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(cloudPayload())
+    });
+  }
+  cloudLastSync=formatSyncTime();
+  localStorage.setItem("wonderPlanCloudLastSync",cloudLastSync);
+  toastSync("✓ Synced to Google Drive");
+}
+async function resolveCloudOnConnect(){
+  try{
+    await findCloudFile();
+    if(!cloudFileId){
+      await uploadCloudState();
+      return;
+    }
+    const cloud=await downloadCloudState();
+    const cloudState=cloud?.state||cloud;
+    const cloudTime=new Date(cloud?.modifiedAt||cloudState?.modifiedAt||0).getTime();
+    const localTime=new Date(state.modifiedAt||0).getTime();
+    if(cloudTime>localTime){
+      const useCloud=confirm("A newer Wonder Plan trip was found in Google Drive. Load that version on this device?");
+      if(useCloud){
+        state=cloudState;
+        if(!state.modifiedAt)state.modifiedAt=cloud?.modifiedAt||new Date().toISOString();
+        persist("✓ Loaded from Google Drive",false);
+        focusDate=state.items.length?new Date(state.items[0].date+"T12:00:00"):new Date();
+        renderPlanner();renderCalendar();
+        cloudLastSync=formatSyncTime();toastSync("✓ Cloud trip loaded");
+      }else{
+        await uploadCloudState();
+      }
+    }else if(localTime>cloudTime){
+      await uploadCloudState();
+    }else{
+      cloudLastSync=formatSyncTime();toastSync("✓ Google Drive connected");
+    }
+  }catch(e){
+    console.error(e);
+    toastSync(e.message==="Google session expired"?"Google session expired — reconnect":"Cloud sync failed");
+  }
+}
+function scheduleCloudSave(){
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer=setTimeout(()=>uploadCloudState().catch(e=>{console.error(e);toastSync("Cloud sync paused")}),1200);
+}
+async function manualCloudSync(){
+  try{
+    await findCloudFile();
+    if(!cloudFileId){await uploadCloudState();openSettings();return}
+    const cloud=await downloadCloudState(),cloudState=cloud?.state||cloud;
+    const cloudTime=new Date(cloud?.modifiedAt||cloudState?.modifiedAt||0).getTime();
+    const localTime=new Date(state.modifiedAt||0).getTime();
+    if(cloudTime>localTime){
+      const useCloud=confirm("Google Drive has a newer copy. Replace this device's copy with the cloud version?");
+      if(useCloud){
+        state=cloudState;persist("✓ Loaded from cloud",false);renderPlanner();renderCalendar();toastSync("✓ Cloud trip loaded");
+      }else await uploadCloudState();
+    }else await uploadCloudState();
+    cloudLastSync=formatSyncTime();openSettings();
+  }catch(e){console.error(e);toastSync("Sync failed — reconnect Google Drive if needed")}
+}
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:8,savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:9,savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -633,5 +813,6 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
+<div id="syncToast" class="syncToast"></div>
 </body>
 </html>
