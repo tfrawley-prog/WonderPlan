@@ -417,6 +417,52 @@ textarea{min-height:90px;resize:vertical}
   .typeCard{padding:12px}
 }
 
+
+/* V11 — Trips, timeline, import, maps and Wonder Checks */
+.tripPill{
+  display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);
+  border-radius:999px;background:#fff;padding:7px 10px;font-size:12px;font-weight:850;
+  color:#344054;cursor:pointer;max-width:220px
+}
+.tripPill span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.desktopProductNav{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 10px}
+.productTab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:800;color:#667085;cursor:pointer}
+.productTab.active{background:#101828;color:#fff;border-color:#101828}
+.tripGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.tripCard{border:1px solid var(--line);background:#fff;border-radius:18px;padding:14px;text-align:left;cursor:pointer}
+.tripCard.active{border-color:#101828;box-shadow:0 0 0 1px #101828 inset}
+.tripCard h4{margin:6px 0 3px;font-size:15px}.tripCard p{margin:0;color:var(--muted);font-size:11px}
+.tripEmoji{font-size:24px}
+.timeline{max-width:760px;margin:0 auto;padding-bottom:30px}
+.timelineDay{margin:0 0 20px}.timelineDayHead{position:sticky;top:0;z-index:3;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);padding:10px 3px 8px;border-bottom:1px solid var(--line);font-size:15px;font-weight:900}
+.timelineItem{display:grid;grid-template-columns:58px 10px 1fr;gap:9px;padding:11px 2px}
+.timelineTime{font-size:11px;color:#667085;font-weight:800;text-align:right;padding-top:5px}
+.timelineDot{width:9px;height:9px;border-radius:50%;background:#101828;margin-top:7px;position:relative}
+.timelineDot:after{content:"";position:absolute;top:9px;bottom:-38px;left:4px;width:1px;background:#e4e7ec}
+.timelineItem:last-child .timelineDot:after{display:none}
+.timelineCard{border:1px solid var(--line);border-radius:14px;padding:11px 12px;background:#fff;cursor:pointer}
+.timelineCard b{display:block;font-size:13px}.timelineCard small{display:block;color:#667085;margin-top:3px;line-height:1.35}
+.wonderPanel{border:1px solid #dfe5f0;border-radius:16px;padding:13px;background:linear-gradient(135deg,#fbfcff,#f5f7ff);margin-bottom:16px}
+.wonderPanel h4{margin:0 0 5px;font-size:13px}.wonderPanel p{margin:0;color:#667085;font-size:11px;line-height:1.45}
+.insight{border-top:1px solid #e9edf5;padding:9px 0 0;margin-top:9px;font-size:11px;color:#475467;line-height:1.4}
+.mapList{max-width:760px;margin:0 auto}.placeCard{border:1px solid var(--line);border-radius:16px;padding:13px;margin-bottom:9px;background:#fff}
+.placeCard h4{margin:0 0 5px;font-size:13px}.placeCard p{margin:0 0 9px;font-size:11px;color:#667085}
+.importBox{border:1px dashed #cbd5e1;border-radius:16px;padding:14px;background:#fafcff;margin-top:12px}
+.importResult{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px;background:#fff}
+.importResult h4{margin:0 0 7px;font-size:13px}
+.helperNote{font-size:11px;color:#667085;line-height:1.45;margin-top:8px}
+.smartBadge{display:inline-flex;border-radius:999px;background:#eef4ff;color:#3538cd;padding:4px 7px;font-size:10px;font-weight:850}
+.shareRow{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:600px){
+  .desktopProductNav{display:none}
+  .mobileNav{grid-template-columns:1fr 1fr 1.12fr 1fr 1fr}
+  .tripGrid{grid-template-columns:1fr}
+  .timeline{padding:0 1px 24px}
+  .timelineItem{grid-template-columns:46px 9px 1fr;gap:7px}
+  .timelineTime{font-size:10px}
+  .tripPill{max-width:170px;padding:6px 9px}
+}
+
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -426,7 +472,7 @@ textarea{min-height:90px;resize:vertical}
     <div class="mobileSheetTop"><div class="mobileSheetHandle"></div><button class="mobileSheetClose" onclick="closeMobilePlanner()" aria-label="Close">✕</button></div>
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v10.1</div>
+      <div class="version hideWhenCollapsed">v11</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -439,7 +485,10 @@ textarea{min-height:90px;resize:vertical}
   <main class="main">
     <div class="topbar">
       <div class="titleWrap">
-        <h2 id="calendarTitle">Your itinerary</h2>
+        <div>
+          <button class="tripPill" onclick="openTrips()"><span>✦</span><span id="activeTripName">My Trip</span><span>⌄</span></button>
+          <h2 id="calendarTitle" style="margin-top:7px">Your itinerary</h2>
+        </div>
         <p>Tap a plan to view, edit or delete it.</p>
       </div>
       <div class="controls">
@@ -459,6 +508,13 @@ textarea{min-height:90px;resize:vertical}
       </div>
     </div>
 
+    <div class="desktopProductNav">
+      <button class="productTab active" id="tab-calendar" onclick="showSection('calendar')">▦ Calendar</button>
+      <button class="productTab" id="tab-timeline" onclick="showSection('timeline')">☷ Timeline</button>
+      <button class="productTab" id="tab-map" onclick="showSection('map')">⌖ Places</button>
+      <button class="productTab" onclick="openTrips()">✦ Trips</button>
+      <button class="productTab" onclick="openImportBooking()">✨ Import booking</button>
+    </div>
     <div class="filterBar" id="filterBar"></div>
     <div class="calendarScroller">
       <div id="calendar"></div>
@@ -469,9 +525,10 @@ textarea{min-height:90px;resize:vertical}
 
 <div class="mobileShade" id="mobileShade" onclick="closeMobilePlanner()"></div>
 <nav class="mobileNav" id="mobileNav" aria-label="Wonder Plan navigation">
-  <button class="mobileNavBtn active" id="m-calendar" onclick="mobileCalendar()"><span class="mIcon">▦</span><span>Calendar</span></button>
-  <button class="mobileNavBtn" id="m-today" onclick="mobileToday()"><span class="mIcon">◎</span><span>Today</span></button>
-  <button class="mobileNavBtn add" id="m-add" onclick="mobileAdd()"><span class="mIcon">＋</span><span>Add plan</span></button>
+  <button class="mobileNavBtn" id="m-trips" onclick="openTrips()"><span class="mIcon">✦</span><span>Trips</span></button>
+  <button class="mobileNavBtn active" id="m-calendar" onclick="mobileTimeline()"><span class="mIcon">☷</span><span>Itinerary</span></button>
+  <button class="mobileNavBtn add" id="m-add" onclick="mobileAdd()"><span class="mIcon">＋</span><span>Add</span></button>
+  <button class="mobileNavBtn" id="m-map" onclick="mobileMap()"><span class="mIcon">⌖</span><span>Places</span></button>
   <button class="mobileNavBtn" id="m-settings" onclick="mobileSettings()"><span class="mIcon">⚙</span><span>Settings</span></button>
 </nav>
 
@@ -506,6 +563,8 @@ const AIRPORTS={
 };
 
 let state=loadState();
+migrateTrips();
+let appSection=isMobile()?"timeline":"calendar";
 let flow={mode:"home",step:0,draft:{},editingId:null};
 let view=window.matchMedia("(max-width:600px)").matches?"day":"week";
 let focusDate=state.items.length?new Date(state.items[0].date+"T12:00:00"):new Date();
@@ -535,9 +594,87 @@ function loadState(){
       return parsed;
     }
   }catch(e){}
-  return {items:[],modifiedAt:new Date(0).toISOString()};
+  return {items:[],trips:[],activeTripId:null,modifiedAt:new Date(0).toISOString()};
 }
+
+function tripId(){return "trip_"+Date.now()+"_"+Math.random().toString(36).slice(2)}
+function migrateTrips(){
+  if(!Array.isArray(state.trips))state.trips=[];
+  if(!state.trips.length){
+    const existing=Array.isArray(state.items)?state.items:[];
+    let start=existing.map(x=>x.date).filter(Boolean).sort()[0]||"";
+    let end=existing.map(x=>itemEndDateSafe(x)).filter(Boolean).sort().slice(-1)[0]||"";
+    const t={id:tripId(),name:"My Trip",destination:"",startDate:start,endDate:end,emoji:"✈️",travellers:"",items:existing};
+    state.trips=[t];state.activeTripId=t.id;state.items=t.items;
+  }else{
+    if(!state.activeTripId||!state.trips.some(t=>t.id===state.activeTripId))state.activeTripId=state.trips[0].id;
+    const t=state.trips.find(t=>t.id===state.activeTripId);
+    if(!Array.isArray(t.items))t.items=[];
+    state.items=t.items;
+  }
+}
+function itemEndDateSafe(i){return (i?.type==="hotel"&&i.endDate)||(i?.type==="flight"&&i.arrivalDate)||i?.date||""}
+function activeTrip(){return state.trips.find(t=>t.id===state.activeTripId)||state.trips[0]}
+function syncActiveTrip(){
+  const t=activeTrip();if(t)t.items=state.items;
+}
+function updateTripUI(){
+  const t=activeTrip();const el=document.getElementById("activeTripName");
+  if(el)el.textContent=t?.name||"My Trip";
+}
+function switchTrip(id){
+  syncActiveTrip();
+  state.activeTripId=id;
+  const t=activeTrip();state.items=t?.items||[];
+  focusDate=t?.startDate?new Date(t.startDate+"T12:00:00"):(state.items[0]?.date?new Date(state.items[0].date+"T12:00:00"):new Date());
+  persist("✓ Trip opened");
+  closeModal();renderAll();showSection(isMobile()?"timeline":"calendar");
+}
+function openTrips(){
+  syncActiveTrip();
+  if(isMobile())setMobileNavActive("m-trips");
+  const trips=state.trips||[];
+  document.getElementById("modalCard").className="modalCard";
+  document.getElementById("modalCard").innerHTML=`
+    <div class="modalTop"><div><div class="kicker">Wonder Plan</div><h3>My Trips</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
+    <div class="tripGrid">${trips.map(t=>`<button class="tripCard ${t.id===state.activeTripId?"active":""}" onclick="switchTrip('${t.id}')">
+      <div class="tripEmoji">${esc(t.emoji||"✈️")}</div><h4>${esc(t.name||"Untitled trip")}</h4>
+      <p>${esc(t.destination||"Add destination")}${t.startDate?` · ${esc(t.startDate)}`:""}</p>
+    </button>`).join("")}</div>
+    <div class="actions"><button class="btn primary" onclick="editTrip()">＋ New trip</button>${trips.length>1?`<button class="btn secondary" onclick="editTrip('${state.activeTripId}')">Edit current</button>`:"<button class='btn secondary' onclick=\"editTrip('"+state.activeTripId+"')\">Edit trip</button>"}</div>`;
+  document.getElementById("modal").classList.add("open");
+}
+function editTrip(id=""){
+  const t=id?state.trips.find(x=>x.id===id):null;
+  document.getElementById("modalCard").innerHTML=`
+    <div class="modalTop"><div><div class="kicker">${t?"Edit trip":"New trip"}</div><h3>${t?"Trip details":"Where are you going?"}</h3></div><button class="modalClose" onclick="openTrips()">✕</button></div>
+    <label>Trip name</label><input id="tripName" value="${esc(t?.name||"")}" placeholder="Japan Winter 2027">
+    <label>Destination</label><input id="tripDestination" value="${esc(t?.destination||"")}" placeholder="Japan">
+    <div class="row"><div><label>Start</label><input id="tripStart" type="date" value="${esc(t?.startDate||"")}"></div><div><label>End</label><input id="tripEnd" type="date" value="${esc(t?.endDate||"")}"></div></div>
+    <label>Travellers</label><input id="tripTravellers" value="${esc(t?.travellers||"")}" placeholder="Tom, Jake…">
+    <label>Trip icon</label><input id="tripEmoji" value="${esc(t?.emoji||"✈️")}" placeholder="✈️">
+    <div class="actions"><button class="btn secondary" onclick="openTrips()">Back</button><button class="btn primary" onclick="saveTrip('${id}')">${t?"Save changes":"Create trip"}</button>${t&&state.trips.length>1?`<button class="btn danger" onclick="deleteTrip('${id}')">Delete trip</button>`:""}</div>`;
+}
+function saveTrip(id=""){
+  const name=val("tripName")||"Untitled Trip";
+  const obj={name,destination:val("tripDestination"),startDate:val("tripStart"),endDate:val("tripEnd"),travellers:val("tripTravellers"),emoji:val("tripEmoji")||"✈️"};
+  if(id){
+    const t=state.trips.find(x=>x.id===id);Object.assign(t,obj);
+  }else{
+    syncActiveTrip();
+    const t={id:tripId(),...obj,items:[]};state.trips.push(t);state.activeTripId=t.id;state.items=t.items;
+    if(t.startDate)focusDate=new Date(t.startDate+"T12:00:00");
+  }
+  persist("✓ Trip saved");closeModal();renderAll();
+}
+function deleteTrip(id){
+  if(!confirm("Delete this trip and all of its plans?"))return;
+  state.trips=state.trips.filter(t=>t.id!==id);state.activeTripId=state.trips[0].id;state.items=state.trips[0].items||[];
+  persist("Trip deleted");closeModal();renderAll();
+}
+
 function persist(msg="✓ Saved locally",touch=true){
+  syncActiveTrip();
   if(touch)state.modifiedAt=new Date().toISOString();
   try{
     localStorage.setItem("wonderPlanV6",JSON.stringify(state));
@@ -575,8 +712,10 @@ function mobileAdd(){
   flow={mode:"home",step:0,draft:{},editingId:null};
   renderPlanner();openMobilePlanner();
 }
-function mobileCalendar(){closeMobilePlanner();closeModal();setMobileNavActive("m-calendar")}
-function mobileToday(){closeMobilePlanner();closeModal();goToday();setMobileNavActive("m-today");setTimeout(()=>setMobileNavActive("m-calendar"),500)}
+function mobileTimeline(){closeMobilePlanner();closeModal();showSection("timeline");setMobileNavActive("m-calendar")}
+function mobileMap(){closeMobilePlanner();closeModal();showSection("map");setMobileNavActive("m-map")}
+function mobileCalendar(){closeMobilePlanner();closeModal();showSection("calendar");setMobileNavActive("m-calendar")}
+function mobileToday(){closeMobilePlanner();closeModal();goToday();showSection("timeline");setMobileNavActive("m-calendar")}
 function mobileSettings(){closeMobilePlanner();openSettings();setMobileNavActive("m-settings")}
 function toggleSidebar(){
   if(isMobile()){flow={mode:"home",step:0,draft:{},editingId:null};renderPlanner();openMobilePlanner();return}
@@ -588,6 +727,9 @@ function renderHome(){
   return `<div class="kicker">Build your itinerary</div>
   <h1>What are you adding?</h1>
   <p class="sub">Choose a type first. Wonder Plan will only ask what it needs for that item.</p>
+  <button class="typeCard" style="width:100%;margin:0 0 10px;text-align:left" onclick="closeMobilePlanner();openImportBooking()">
+      <div class="typeIcon">✨</div><div class="typeTitle">Import a booking</div><div class="typeDesc">Paste a confirmation or add a screenshot and Wonder Plan will pull out useful details.</div>
+    </button>
   <div class="typeGrid">
     ${Object.entries(TYPES).map(([k,v])=>`
       <button class="typeCard" onclick="startType('${k}')">
@@ -634,6 +776,7 @@ function renderFlight(){
     <label>Arrival</label><div class="row"><input type="date" data-field="arrivalDate" value="${esc(d.arrivalDate||d.date)}"><input type="time" data-field="arrivalTime" value="${esc(d.arrivalTime)}"></div>
     <div class="suggestions"><button class="chip" onclick="setArrivalOffset(0)">Same day</button><button class="chip" onclick="setArrivalOffset(1)">+1 day</button><button class="chip" onclick="setArrivalOffset(2)">+2 days</button></div>${controls()}`;
   return `<div class="kicker">Flight · 4 of 4</div><h1>Flight details</h1>
+    <div class="importBox"><div class="smartBadge">SMART LOOKUP</div><h4 style="margin:7px 0 5px">Know your flight number?</h4><div class="row"><input id="lookupFlightNo" value="${esc(d.flightNo||"")}" placeholder="QF61"><input id="lookupFlightDate" type="date" value="${esc(d.date||"")}"></div><button class="btn secondary" onclick="flightLookup()">Look up flight</button><div class="helperNote">V11 can recognise common airline prefixes and routes from the airports you selected. Live schedules/terminal data will require a flight-data provider connection.</div></div>
     <div class="row"><div><label>Airline</label><input data-field="airline" value="${esc(d.airline)}" placeholder="Qantas"></div><div><label>Flight number</label><input data-field="flightNo" value="${esc(d.flightNo)}" placeholder="QF61"></div></div>
     <label>Booking reference</label><input data-field="bookingRef" value="${esc(d.bookingRef)}" placeholder="Optional">
     <label>Notes</label><textarea data-field="notes" placeholder="Terminal, seat, baggage…">${esc(d.notes)}</textarea>
@@ -743,6 +886,7 @@ function openItem(id){
       <div class="detail"><small>Type</small><b>${esc(TYPES[i.type]?.label||i.type)}</b></div>
     </div>
     ${i.meta?`<div class="detail"><small>Details</small>${esc(i.meta)}</div>`:""}
+    ${i.location?`<div class="shareRow"><button class="btn secondary" onclick="openMaps('${encodeURIComponent(i.location)}')">⌖ Open in Maps</button><button class="btn secondary" onclick="shareItem('${i.id}')">↗ Share</button></div>`:""}
     ${i.attachment?`<div class="detailAttachment"><img src="${i.attachment.data}" alt="Booking attachment" onclick="viewAttachment('${i.id}')"></div>`:""}
     <div class="actions"><button class="btn secondary" onclick="editItem('${i.id}')">✏️ Edit</button><button class="btn danger" onclick="removeItem('${i.id}')">🗑 Delete</button></div>`;
   document.getElementById("modal").classList.add("open");
@@ -752,10 +896,152 @@ function viewAttachment(id){
   document.getElementById("modalCard").className="modalCard imageViewer";
   document.getElementById("modalCard").innerHTML=`<button class="modalClose" onclick="openItem('${i.id}')">✕</button><img src="${i.attachment.data}" alt="Booking attachment">`;
 }
-function closeModal(){document.getElementById("modal").classList.remove("open");if(isMobile())setMobileNavActive("m-calendar")}
 
-function setView(v){view=v;expandedMonthDate=null;renderCalendar()}
-function goToday(){focusDate=new Date();renderCalendar()}
+function flightLookup(){
+  const no=(document.getElementById("lookupFlightNo")?.value||"").trim().toUpperCase();
+  const date=document.getElementById("lookupFlightDate")?.value||flow.draft.date||"";
+  if(!no){alert("Enter a flight number first.");return}
+  const prefixes={QF:"Qantas",JQ:"Jetstar",VA:"Virgin Australia",NZ:"Air New Zealand",SQ:"Singapore Airlines",EK:"Emirates",QR:"Qatar Airways",CX:"Cathay Pacific",JL:"Japan Airlines",NH:"ANA",TG:"Thai Airways",AA:"American Airlines",UA:"United Airlines",DL:"Delta",BA:"British Airways"};
+  const prefix=(no.match(/^[A-Z]{2}/)||[])[0];
+  flow.draft.flightNo=no;flow.draft.date=date||flow.draft.date;flow.draft.airline=prefixes[prefix]||flow.draft.airline||"";
+  renderPlanner();
+  toastSync(prefixes[prefix]?`✓ Recognised ${prefixes[prefix]}`:"Flight number saved — live lookup provider not connected");
+}
+function openMaps(encoded){
+  const q=decodeURIComponent(encoded||"");if(!q)return;
+  const apple=`https://maps.apple.com/?q=${encodeURIComponent(q)}`;
+  window.open(apple,"_blank");
+}
+async function shareItem(id){
+  const i=state.items.find(x=>x.id===id);if(!i)return;
+  const text=[i.title,i.date+(i.time?` ${i.time}`:""),i.location,i.bookingRef?`Booking: ${i.bookingRef}`:""].filter(Boolean).join("\n");
+  try{if(navigator.share)await navigator.share({title:i.title,text});else{await navigator.clipboard.writeText(text);toastSync("Copied to clipboard")}}catch(e){}
+}
+async function shareCurrentTrip(){
+  syncActiveTrip();const t=activeTrip();if(!t)return;
+  const summary=`${t.name}${t.destination?` — ${t.destination}`:""}\n${t.startDate||""}${t.endDate?` to ${t.endDate}`:""}\n${state.items.length} itinerary items`;
+  try{
+    if(navigator.share)await navigator.share({title:t.name,text:summary});
+    else{await navigator.clipboard.writeText(summary);toastSync("Trip summary copied")}
+  }catch(e){}
+}
+function showSection(section){
+  appSection=section;
+  document.querySelectorAll(".productTab[id^='tab-']").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+section)?.classList.add("active");
+  const filter=document.getElementById("filterBar");
+  const seg=document.querySelector(".segment");
+  if(filter)filter.style.display=section==="calendar"?"flex":"none";
+  if(seg)seg.style.display=section==="calendar"?"grid":"none";
+  if(section==="calendar")renderCalendar();
+  if(section==="timeline")renderTimeline();
+  if(section==="map")renderMap();
+}
+function wonderInsights(){
+  const insights=[];
+  const items=[...state.items].sort(sortItems);
+  for(let i=0;i<items.length-1;i++){
+    const a=items[i],b=items[i+1];
+    if(a.date===b.date&&a.time&&b.time){
+      const mins=(parseInt(b.time.slice(0,2))*60+parseInt(b.time.slice(3)))-(parseInt(a.time.slice(0,2))*60+parseInt(a.time.slice(3)));
+      if(mins>=0&&mins<60)insights.push(`${a.title} and ${b.title} are only ${mins} minutes apart. Check travel time before you lock them in.`);
+    }
+    if(a.type==="flight"&&a.arrivalDate===b.date&&a.arrivalTime&&b.time){
+      const gap=(parseInt(b.time.slice(0,2))*60+parseInt(b.time.slice(3)))-(parseInt(a.arrivalTime.slice(0,2))*60+parseInt(a.arrivalTime.slice(3)));
+      if(gap>=0&&gap<150)insights.push(`Your ${a.title} arrival is close to ${b.title}. Allow for baggage, immigration and travel from the airport.`);
+    }
+  }
+  const hotels=items.filter(i=>i.type==="hotel");
+  if(items.length&&!hotels.length)insights.push("No accommodation has been added yet. Adding your stays helps Wonder Plan understand where each day starts and ends.");
+  return [...new Set(insights)].slice(0,3);
+}
+function renderTimeline(){
+  updateTripUI();
+  const cal=document.getElementById("calendar");cal.className="timeline";cal.style.gridTemplateColumns="";
+  const t=activeTrip();document.getElementById("calendarTitle").textContent=t?.name||"Your itinerary";
+  document.getElementById("dateContext").textContent=t?.destination||"Timeline";
+  const grouped={};
+  [...state.items].sort(sortItems).forEach(i=>{
+    const dates=[i.date];
+    if(i.type==="flight"&&i.arrivalDate&&i.arrivalDate!==i.date)dates.push(i.arrivalDate);
+    dates.forEach(ds=>{(grouped[ds]??=[]).push(i)})
+  });
+  const insights=wonderInsights();
+  let h=`<div class="wonderPanel"><h4>✦ Wonder Checks</h4><p>${insights.length?"A few things worth checking before you travel.":"Your itinerary looks clear so far. Wonder Plan will flag tight timing and missing essentials as you add plans."}</p>${insights.map(x=>`<div class="insight">⚑ ${esc(x)}</div>`).join("")}</div>`;
+  const dates=Object.keys(grouped).sort();
+  if(!dates.length)h+=`<div class="empty" style="padding:50px 10px">No plans yet. Tap + to start building this trip.</div>`;
+  dates.forEach(ds=>{
+    const d=new Date(ds+"T12:00:00");
+    h+=`<section class="timelineDay"><div class="timelineDayHead">${d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})}</div>`;
+    grouped[ds].sort(sortItems).forEach(i=>{
+      const stage=occurrenceStage(i,ds);
+      let time=i.time||"—";if(i.type==="flight"&&stage==="Arrives")time=i.arrivalTime||"—";
+      h+=`<div class="timelineItem"><div class="timelineTime">${esc(time)}</div><div class="timelineDot"></div><div class="timelineCard" onclick="openItem('${i.id}')"><b>${TYPES[i.type]?.icon||"•"} ${esc(i.title)} ${stage?`· ${stage}`:""}</b><small>${esc(i.location||i.meta||TYPES[i.type]?.label||"Plan")}</small></div></div>`;
+    });
+    h+=`</section>`;
+  });
+  cal.innerHTML=h;
+}
+function renderMap(){
+  updateTripUI();
+  const cal=document.getElementById("calendar");cal.className="mapList";cal.style.gridTemplateColumns="";
+  const t=activeTrip();document.getElementById("calendarTitle").textContent="Places";
+  document.getElementById("dateContext").textContent=t?.destination||"Trip map";
+  const places=state.items.filter(i=>i.location && i.type!=="flight");
+  let h=`<div class="wonderPanel"><h4>⌖ Your trip places</h4><p>Tap any location to open it in Apple Maps. A fully plotted in-app map can be added later with a geocoding/maps provider.</p></div>`;
+  h+=places.length?places.map(i=>`<div class="placeCard"><h4>${TYPES[i.type]?.icon||"•"} ${esc(i.title)}</h4><p>${esc(i.location)} · ${esc(i.date||"")}</p><button class="btn secondary" onclick="openMaps('${encodeURIComponent(i.location)}')">Open in Maps ↗</button></div>`).join(""):`<div class="empty" style="padding:50px 10px">Add locations to your hotels, restaurants and activities to build your places list.</div>`;
+  cal.innerHTML=h;
+}
+function openImportBooking(){
+  closeMobilePlanner();
+  document.getElementById("modalCard").className="modalCard";
+  document.getElementById("modalCard").innerHTML=`
+    <div class="modalTop"><div><div class="kicker">✨ Smart import</div><h3>Import a booking</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
+    <p class="sub">Paste the text from a flight, hotel or activity confirmation. You can also attach the screenshot so it stays with the booking.</p>
+    <div class="importBox">
+      <label>Confirmation text</label><textarea id="importText" style="min-height:150px" placeholder="Paste booking confirmation here…"></textarea>
+      <label>Optional screenshot</label><input id="importImage" type="file" accept="image/*">
+      <div class="helperNote">V11 parses common flight numbers, booking references, dates and hotel-style stays locally. Direct screenshot OCR and email reading will need an AI/email service connection.</div>
+    </div>
+    <div class="actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="parseBooking()">Analyse booking</button></div>`;
+  document.getElementById("modal").classList.add("open");
+}
+function parseBooking(){
+  const text=(document.getElementById("importText")?.value||"").trim();
+  if(!text){alert("Paste the booking text first.");return}
+  const flight=(text.match(/\b([A-Z]{2})\s?(\d{2,4})\b/)||[]);
+  const ref=(text.match(/(?:booking|confirmation|reference|ref)[\s:#-]*([A-Z0-9]{5,10})/i)||[])[1]||"";
+  const iatas=[...text.toUpperCase().matchAll(/\b[A-Z]{3}\b/g)].map(x=>x[0]).filter(x=>WORLD_AIRPORTS.some(a=>a.iata===x));
+  const dates=[...text.matchAll(/\b(20\d{2})[-\/](\d{1,2})[-\/](\d{1,2})\b/g)].map(m=>`${m[1]}-${String(m[2]).padStart(2,"0")}-${String(m[3]).padStart(2,"0")}`);
+  const looksFlight=!!flight.length||iatas.length>=2;
+  const looksHotel=/hotel|check[- ]?in|check[- ]?out|accommodation|room/i.test(text);
+  const guess=looksFlight?"flight":looksHotel?"hotel":"other";
+  const title=looksFlight?`Flight ${iatas[0]||""}${iatas[1]?` → ${iatas[1]}`:""}`:looksHotel?"Imported hotel booking":"Imported booking";
+  document.getElementById("modalCard").innerHTML=`
+    <div class="modalTop"><div><div class="kicker">I found this</div><h3>${esc(title)}</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
+    <div class="importResult"><h4>${guess==="flight"?"✈️ Flight":guess==="hotel"?"🏨 Hotel":"＋ Booking"}</h4>
+      <p class="sub">${flight[0]?`Flight ${esc(flight[0])}<br>`:""}${iatas.length?`Airports: ${esc(iatas.slice(0,2).join(" → "))}<br>`:""}${dates.length?`Dates: ${esc(dates.slice(0,2).join(" → "))}<br>`:""}${ref?`Reference: ${esc(ref)}`:""}</p>
+    </div>
+    <div class="actions"><button class="btn secondary" onclick="openImportBooking()">Back</button><button class="btn primary" onclick="acceptImportedBooking('${guess}','${esc(flight[0]||"")}','${esc(iatas[0]||"")}','${esc(iatas[1]||"")}','${esc(dates[0]||"")}','${esc(dates[1]||"")}','${esc(ref)}')">Review & add</button></div>`;
+}
+function acceptImportedBooking(type,flightNo,from,to,date,endDate,ref){
+  closeModal();
+  if(type==="flight"){
+    const fa=WORLD_AIRPORTS.find(a=>a.iata===from),ta=WORLD_AIRPORTS.find(a=>a.iata===to);
+    flow={mode:"flight",step:2,editingId:null,draft:{type:"flight",flightNo,date,departAirport:fa?`${fa.iata} — ${fa.name}`:from,arriveAirport:ta?`${ta.iata} — ${ta.name}`:to,bookingRef:ref,arrivalDate:endDate||date}};
+  }else{
+    flow={mode:type,step:1,editingId:null,draft:{type,title:type==="hotel"?"Imported hotel booking":"Imported booking",date,endDate:type==="hotel"?endDate:"",bookingRef:ref}};
+  }
+  renderPlanner();if(isMobile())openMobilePlanner();
+}
+
+function closeModal(){
+  document.getElementById("modal").classList.remove("open");
+  if(isMobile())setMobileNavActive(appSection==="map"?"m-map":appSection==="timeline"?"m-calendar":"m-calendar");
+}
+
+function setView(v){appSection="calendar";view=v;expandedMonthDate=null;showSection("calendar")}
+function goToday(){focusDate=new Date();if(appSection==="calendar")renderCalendar();else if(appSection==="timeline")renderTimeline()}
 function movePeriod(dir){
   if(view==="day")focusDate=addDays(focusDate,dir);
   if(view==="week")focusDate=addDays(focusDate,dir*7);
@@ -817,6 +1103,7 @@ function renderFilters(){
 function toggleType(t){typeFilters[t]=!typeFilters[t];renderCalendar()}
 function showAllTypes(){const allOn=Object.values(typeFilters).every(Boolean);Object.keys(typeFilters).forEach(k=>typeFilters[k]=!allOn);renderCalendar()}
 function renderCalendar(){
+  updateTripUI();
   renderFilters();
   document.getElementById("dateContext").textContent=dateContextLabel(focusDate);
   ["day","week","month","year"].forEach(v=>document.getElementById("v-"+v).classList.toggle("active",v===view));
@@ -922,7 +1209,8 @@ function openSettings(){
         <div class="actions"><button class="btn secondary" onclick="exportTrip()">⬇ Export backup</button><button class="btn secondary" onclick="document.getElementById('settingsFile').click()">⬆ Import backup</button></div>
         <input id="settingsFile" type="file" accept=".json,application/json" style="display:none" onchange="importTrip(event)">
       </div>
-      <div class="settingsCard"><h4>Connected bookings</h4><p>Next step: import flight and hotel confirmations from your bookings. This is separate from Drive Sync.</p></div>
+      <div class="settingsCard"><h4>Trip sharing</h4><p>Share a lightweight trip summary using the iPhone/iPad share sheet.</p><button class="btn secondary" onclick="shareCurrentTrip()">↗ Share current trip</button></div>
+      <div class="settingsCard"><h4>Smart services</h4><p>Booking-text import and Wonder Checks work locally. Live flight status, terminal data, route travel times, screenshot OCR and email import require external data/API connections; the V11 interface is ready for those connections without exposing secret API keys in the public GitHub app.</p></div>
       <div class="settingsCard"><h4>Calendar layers</h4><p>Use the category switches above the calendar to show or hide flights, stays, activities, meals and transport without deleting anything.</p></div>
     </div>`;
   document.getElementById("modal").classList.add("open");
@@ -1020,7 +1308,7 @@ async function downloadCloudState(){
   return await r.json();
 }
 function cloudPayload(){
-  return {app:"Wonder Plan",version:10,modifiedAt:state.modifiedAt||new Date().toISOString(),state};
+  return {app:"Wonder Plan",version:11,modifiedAt:state.modifiedAt||new Date().toISOString(),state};
 }
 async function createCloudFile(){
   const boundary="wp_"+Math.random().toString(36).slice(2);
@@ -1096,7 +1384,7 @@ async function manualCloudSync(){
   }catch(e){console.error(e);toastSync("Sync failed — reconnect Google Drive if needed")}
 }
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:"10.1",savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:11,savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -1117,10 +1405,16 @@ function importTrip(e){
   };
   r.readAsText(file);
 }
-function renderAll(){renderPlanner();renderCalendar()}
+function renderAll(){
+  renderPlanner();updateTripUI();
+  if(appSection==="timeline")renderTimeline();
+  else if(appSection==="map")renderMap();
+  else renderCalendar();
+}
 cloudLastSync=localStorage.getItem("wonderPlanCloudLastSync")||"";
 cloudReconnectNeeded=localStorage.getItem("wonderPlanCloudConnected")==="1";
 renderAll();
+showSection(appSection);
 restoreGoogleDriveConnection();
 </script>
 

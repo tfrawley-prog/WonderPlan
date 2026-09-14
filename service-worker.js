@@ -1,4 +1,4 @@
-const CACHE = "wonder-plan-v10-1";
+const CACHE = "wonder-plan-v11";
 const ASSETS = [
   "./",
   "./index.html",
