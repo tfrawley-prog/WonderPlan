@@ -776,6 +776,285 @@ textarea{min-height:90px;resize:vertical}
   .plannerExitBtn{position:sticky;float:right;top:8px;margin:0 0 8px 8px}
 }
 
+
+/* V11.7 — cross-device visual refinement */
+:root{
+  --wp-surface:#ffffff;
+  --wp-soft:#f6f8fb;
+  --wp-border:#e4e8ef;
+  --wp-text:#101828;
+  --wp-muted:#667085;
+  --wp-blue:#1672e6;
+}
+.sectionHidden{display:none!important}
+
+/* Header hierarchy */
+.tripUtilityRow{
+  display:grid;
+  grid-template-columns:minmax(220px,1fr) auto;
+  align-items:center;
+  gap:16px;
+  margin-bottom:10px;
+}
+.tripIdentity{display:flex;align-items:center;gap:8px;min-width:0}
+.viewSegment{
+  justify-self:end;
+  min-width:420px!important;
+  max-width:520px;
+  width:auto!important;
+}
+.viewSegment button{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  min-height:42px;
+  padding:8px 14px!important;
+  font-size:12px!important;
+  border-radius:10px!important;
+}
+.viewIcon{font-size:14px;line-height:1;opacity:.78}
+
+.topbar{
+  display:grid!important;
+  grid-template-columns:minmax(240px,1fr) auto!important;
+  align-items:center!important;
+  gap:18px!important;
+  margin-bottom:10px!important;
+}
+.titleWrap h2{
+  margin:0!important;
+  font-size:28px!important;
+  line-height:1.08!important;
+  letter-spacing:-.025em;
+  white-space:normal!important;
+}
+.titleWrap p{
+  margin:5px 0 0!important;
+  color:var(--wp-muted)!important;
+  font-size:12px!important;
+}
+.calendarNav{
+  justify-self:end;
+  display:flex;
+  align-items:center;
+  gap:6px!important;
+  margin:0!important;
+}
+.roundControl{
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  border-radius:11px!important;
+  border:1px solid var(--wp-border)!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+.roundControl:hover{background:var(--wp-soft)!important}
+.dateContext{
+  min-width:112px!important;
+  height:40px;
+  display:grid;
+  place-items:center;
+  padding:0 14px!important;
+  border:1px solid var(--wp-border)!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  font-size:12px!important;
+  font-weight:850!important;
+}
+
+.desktopProductNav{
+  gap:6px!important;
+  margin-bottom:10px!important;
+}
+.productTab{
+  padding:7px 12px!important;
+  font-size:11px!important;
+  border-radius:999px!important;
+  font-weight:800!important;
+}
+
+/* Cleaner category chips */
+.filterBar{
+  gap:6px!important;
+  padding-bottom:9px!important;
+}
+.filterChip,.chip{
+  border-radius:999px!important;
+}
+
+/* Calendar cards */
+.dayCell{
+  border-color:#e6eaf0!important;
+  border-radius:14px!important;
+  box-shadow:none!important;
+  background:#fff!important;
+}
+.dayHeader{
+  padding-bottom:9px!important;
+  border-bottom:1px solid #eef1f5!important;
+  align-items:center!important;
+}
+.dayName{letter-spacing:.035em}
+.dayCell.quickAddTarget:hover{background:#fcfdff!important}
+
+/* Quick add should feel integrated, not like a separate blue control */
+.quickAddBtn{
+  width:25px!important;
+  height:25px!important;
+  border:1px solid #dfe8f6!important;
+  border-radius:8px!important;
+  background:#f7faff!important;
+  color:#4b7fba!important;
+  font-size:15px!important;
+  font-weight:700!important;
+  box-shadow:none!important;
+  transition:.15s ease;
+}
+.quickAddBtn:hover{
+  background:#edf5ff!important;
+  border-color:#cadcf2!important;
+  color:#1769c8!important;
+}
+.dayCell .empty{
+  color:#a0a9b8!important;
+  font-size:10px!important;
+}
+
+/* Event cards slightly quieter */
+.event{
+  border-radius:11px!important;
+  box-shadow:none!important;
+}
+.costPill{
+  font-size:9px!important;
+  padding:2px 6px!important;
+}
+
+/* Home page control alignment */
+.tripHomeTop,.tripHomeSectionHead{align-items:center!important}
+.homeSettings,.tripCardMenu{
+  display:grid!important;
+  place-items:center!important;
+  line-height:1!important;
+}
+.tripCardMenu{
+  width:32px!important;
+  height:32px!important;
+  padding:0!important;
+  margin-left:auto!important;
+}
+.homeNewTrip{
+  width:auto!important;
+  min-width:124px!important;
+  max-width:max-content!important;
+  margin-left:auto!important;
+}
+
+/* Money screen */
+.moneyTop{gap:10px!important}
+.moneyCard{border-radius:16px!important}
+.moneyCard strong{font-size:24px!important}
+.moneyList{border-radius:16px!important}
+
+/* Mobile nav — hard reset so every tab is visually identical */
+@media(max-width:600px){
+  .mobileNav{
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    height:calc(66px + env(safe-area-inset-bottom))!important;
+    padding:5px 6px env(safe-area-inset-bottom)!important;
+  }
+  .mobileNavBtn,
+  .mobileNavBtn span,
+  .mobileNavBtn small{
+    font-family:inherit!important;
+    font-size:10px!important;
+    font-weight:800!important;
+    line-height:1.05!important;
+    letter-spacing:0!important;
+    text-transform:none!important;
+  }
+  .mobileNavBtn{
+    min-width:0!important;
+    width:100%!important;
+    padding:4px 2px!important;
+    gap:4px!important;
+    border-radius:12px!important;
+  }
+  .mobileNavBtn .mIcon{
+    font-family:inherit!important;
+    font-size:18px!important;
+    font-weight:700!important;
+    line-height:1!important;
+    width:auto!important;
+    height:auto!important;
+  }
+  #m-money .mIcon{font-size:18px!important;font-weight:700!important}
+  #m-money span:last-child{font-size:10px!important;font-weight:800!important}
+  .mobileNavBtn.add{
+    margin:2px 5px!important;
+    border-radius:15px!important;
+  }
+  .mobileNavBtn.add .mIcon{font-size:21px!important}
+  .tripUtilityRow{
+    display:block!important;
+    margin-bottom:8px!important;
+  }
+  .tripIdentity{margin-bottom:8px}
+  .viewSegment{
+    min-width:0!important;
+    width:100%!important;
+    max-width:none!important;
+  }
+  .viewSegment button{
+    font-size:10px!important;
+    min-height:38px!important;
+    padding:7px 3px!important;
+    gap:3px!important;
+  }
+  .viewIcon{font-size:12px!important}
+  .topbar{
+    display:block!important;
+    margin-bottom:8px!important;
+  }
+  .titleWrap h2{font-size:26px!important}
+  .calendarNav{
+    margin-top:9px!important;
+    justify-content:flex-start!important;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .calendarNav::-webkit-scrollbar{display:none}
+  .roundControl{width:38px!important;height:38px!important;min-width:38px!important}
+  .dateContext{height:38px!important;min-width:105px!important}
+  .moneyTop{grid-template-columns:1fr!important}
+  .moneyCard.primary{grid-column:auto!important}
+}
+
+/* Tablet: keep controls clear and intentionally placed */
+@media(min-width:601px) and (max-width:1180px){
+  .sidebar:not(.collapsed){width:238px!important;min-width:238px!important}
+  .tripUtilityRow{
+    grid-template-columns:minmax(180px,1fr) auto!important;
+    gap:10px!important;
+  }
+  .viewSegment{min-width:355px!important}
+  .viewSegment button{padding:7px 9px!important;font-size:11px!important}
+  .topbar{
+    grid-template-columns:minmax(180px,1fr) auto!important;
+    gap:10px!important;
+  }
+  .titleWrap h2{font-size:25px!important}
+  .titleWrap p{font-size:10px!important}
+  .calendarNav{gap:5px!important}
+  .roundControl{width:38px!important;height:38px!important;min-width:38px!important}
+  .dateContext{height:38px!important;min-width:102px!important}
+  .sidebar:not(.collapsed) .typeGrid{gap:6px!important}
+  .sidebar:not(.collapsed) .typeCard{min-height:88px!important;padding:9px!important}
+  .sidebar:not(.collapsed) .importMainCard{padding:10px!important}
+}
+
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -785,7 +1064,7 @@ textarea{min-height:90px;resize:vertical}
     <div class="mobileSheetTop"><div class="mobileSheetHandle"></div><button class="mobileSheetClose" onclick="closeMobilePlanner()" aria-label="Close">✕</button></div>
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v11.6.1</div>
+      <div class="version hideWhenCollapsed">v11.7</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -796,37 +1075,39 @@ textarea{min-height:90px;resize:vertical}
   </aside>
 
   <main class="main">
+    <div class="tripUtilityRow">
+      <div class="tripIdentity">
+        <button class="backHomeBtn" onclick="showTripHome()">← Trips</button>
+        <button class="tripPill" onclick="openTrips()"><span>✦</span><span id="activeTripName">My Trip</span><span>⌄</span></button>
+      </div>
+      <div class="viewSegment segment" aria-label="Calendar view">
+        <button id="v-day" onclick="setView('day')"><span class="viewIcon">☀</span><span>Day</span></button>
+        <button id="v-week" onclick="setView('week')"><span class="viewIcon">▦</span><span>Week</span></button>
+        <button id="v-month" onclick="setView('month')"><span class="viewIcon">▣</span><span>Month</span></button>
+        <button id="v-year" onclick="setView('year')"><span class="viewIcon">◫</span><span>Year</span></button>
+      </div>
+    </div>
+
     <div class="topbar">
       <div class="titleWrap">
-        <div>
-          <button class="backHomeBtn" onclick="showTripHome()">← Trips</button> <button class="tripPill" onclick="openTrips()"><span>✦</span><span id="activeTripName">My Trip</span><span>⌄</span></button>
-          <h2 id="calendarTitle" style="margin-top:7px">Your itinerary</h2>
-        </div>
+        <h2 id="calendarTitle">Your itinerary</h2>
         <p>Tap a plan to view, edit or delete it.</p>
       </div>
-      <div class="controls">
-        <div class="segment">
-          <button id="v-day" onclick="setView('day')">☀ Day</button>
-          <button id="v-week" onclick="setView('week')">🗓 Week</button>
-          <button id="v-month" onclick="setView('month')">📅 Month</button>
-          <button id="v-year" onclick="setView('year')">🧭 Year</button>
-        </div>
-        <div class="navrow">
-          <button class="roundControl" onclick="openSettings()" title="Settings">⚙️</button>
-          <button class="roundControl" onclick="movePeriod(-1)" title="Previous">‹</button>
-          <div class="dateContext" id="dateContext">Today</div>
-          <button class="roundControl" onclick="movePeriod(1)" title="Next">›</button>
-          <button class="roundControl" onclick="goToday()" title="Go to today">◎</button>
-        </div>
+      <div class="navrow calendarNav">
+        <button class="roundControl" onclick="openSettings()" title="Settings">⚙</button>
+        <button class="roundControl" onclick="movePeriod(-1)" title="Previous">‹</button>
+        <div class="dateContext" id="dateContext">Today</div>
+        <button class="roundControl" onclick="movePeriod(1)" title="Next">›</button>
+        <button class="roundControl" onclick="goToday()" title="Go to today">◎</button>
       </div>
     </div>
 
     <div class="desktopProductNav">
-      <button class="productTab active" id="tab-calendar" onclick="showSection('calendar')">▦ Calendar</button>
-      <button class="productTab" id="tab-timeline" onclick="showSection('timeline')">☷ Timeline</button>
-      <button class="productTab" id="tab-map" onclick="showSection('map')">⌖ Places</button>
-      <button class="productTab" id="tab-money" onclick="showSection('money')">＄ Money</button>
-      <button class="productTab" onclick="showTripHome()">✦ Trips</button>
+      <button class="productTab active" id="tab-calendar" onclick="showSection('calendar')">Calendar</button>
+      <button class="productTab" id="tab-timeline" onclick="showSection('timeline')">Timeline</button>
+      <button class="productTab" id="tab-map" onclick="showSection('map')">Places</button>
+      <button class="productTab" id="tab-money" onclick="showSection('money')">Money</button>
+      <button class="productTab" onclick="showTripHome()">Trips</button>
     </div>
     <div class="filterBar" id="filterBar"></div>
     <div class="calendarScroller">
@@ -1433,13 +1714,13 @@ async function shareCurrentTrip(){
 function showSection(section){
   appSection=section;
   ["calendar","timeline","map","money"].forEach(s=>document.getElementById("tab-"+s)?.classList.toggle("active",s===section));
-  const seg=document.querySelector(".segment");
-  const nav=document.querySelector(".navrow");
+  const seg=document.querySelector(".viewSegment");
+  const nav=document.querySelector(".calendarNav");
   const filters=document.getElementById("filterBar");
-  const showCalendarControls=section==="calendar";
-  if(seg)seg.style.display=showCalendarControls?"grid":"none";
-  if(nav)nav.style.display=showCalendarControls?"flex":"none";
-  if(filters)filters.style.display=showCalendarControls?"flex":"none";
+  const calendarMode=section==="calendar";
+  seg?.classList.toggle("sectionHidden",!calendarMode);
+  nav?.classList.toggle("sectionHidden",!calendarMode);
+  if(filters)filters.style.display=calendarMode?"flex":"none";
   if(section==="timeline")renderTimeline();
   else if(section==="map")renderMap();
   else if(section==="money")renderMoney();
@@ -1938,7 +2219,7 @@ async function downloadCloudState(){
   return await r.json();
 }
 function cloudPayload(){
-  return {app:"Wonder Plan",version:"11.6.1",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
+  return {app:"Wonder Plan",version:"11.7",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
 }
 async function createCloudFile(){
   const boundary="wp_"+Math.random().toString(36).slice(2);
@@ -2014,7 +2295,7 @@ async function manualCloudSync(){
   }catch(e){console.error(e);toastSync("Sync failed — reconnect Google Drive if needed")}
 }
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:"11.6.1",savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:"11.7",savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
