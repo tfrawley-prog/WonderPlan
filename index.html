@@ -488,11 +488,7 @@ textarea{min-height:90px;resize:vertical}
 }
 .newTripCard .plus{width:46px;height:46px;border-radius:50%;background:#101828;color:#fff;display:grid;place-items:center;font-size:24px;margin:auto}
 .backHomeBtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:850;cursor:pointer}
-.flightSearchHero{border:1px solid #dfe5f0;background:#fafbff;border-radius:18px;padding:14px;margin:10px 0 14px}
-.flightSearchHero h4{margin:0 0 5px;font-size:14px}
-.flightSearchHero p{margin:0 0 10px;color:#667085;font-size:11px;line-height:1.45}
-.flightSearchRow{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.manualLink{display:inline-block;margin-top:8px;font-size:11px;font-weight:800;color:#475467;text-decoration:underline;cursor:pointer}
+
 .importBeta{opacity:.72}
 @media(max-width:780px){
   .tripHomeGrid{grid-template-columns:1fr 1fr}
@@ -535,10 +531,7 @@ textarea{min-height:90px;resize:vertical}
   .segment button::first-letter{font-size:inherit!important}
   .navrow{margin-top:8px}
 }
-.lookupIntro{border:1px solid #dfe5f0;background:#fafbff;border-radius:18px;padding:14px;margin:10px 0 14px}
-.lookupIntro h4{margin:0 0 5px;font-size:14px}
-.lookupIntro p{margin:0 0 10px;color:#667085;font-size:11px;line-height:1.45}
-.lookupStatus{font-size:11px;color:#667085;margin-top:8px;line-height:1.4}
+
 .importMainCard{grid-column:1/-1;border-style:dashed;background:#fbfcff}
 
 </style>
@@ -550,7 +543,7 @@ textarea{min-height:90px;resize:vertical}
     <div class="mobileSheetTop"><div class="mobileSheetHandle"></div><button class="mobileSheetClose" onclick="closeMobilePlanner()" aria-label="Close">✕</button></div>
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v11.2</div>
+      <div class="version hideWhenCollapsed">v11.3</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -604,7 +597,7 @@ textarea{min-height:90px;resize:vertical}
 <div class="tripHome" id="tripHome">
   <div class="tripHomeInner">
     <div class="tripHomeTop">
-      <div><div class="tripHomeBrand">Wonder Plan</div><div class="tripHomeSub">Choose a trip to continue planning.</div></div>
+      <div><div class="tripHomeBrand">Wonder Plan</div><div class="tripHomeSub">Your trips, all in one place.</div></div>
       <button class="btn primary" onclick="editTrip()">＋ New trip</button>
     </div>
     <div class="tripHomeGrid" id="tripHomeGrid"></div>
@@ -722,7 +715,7 @@ function renderTripHome(){
       <div class="tripHomeIcon">${esc(t.emoji||"✈️")}</div>
       <h3>${esc(t.name||"Untitled trip")}</h3>
       <p>${esc(t.destination||"Destination not set")}</p>
-      <div class="tripHomeMeta">${esc(dateText)} · ${count} ${count===1?"plan":"plans"}</div>
+      <div class="tripHomeMeta">${esc(dateText)} · ${count} ${count===1?"plan":"plans"} <span style="float:right;font-weight:850;color:#475467">Open →</span></div>
     </button>`;
   }).join("");
   grid.innerHTML=cards+`<button class="tripHomeCard newTripCard" onclick="editTrip()"><div><div class="plus">＋</div><h3>New trip</h3><p>Start planning somewhere new.</p></div></button>`;
@@ -840,13 +833,13 @@ function toggleSidebar(){
 
 function renderHome(){
   return `<div class="kicker">Build your itinerary</div>
-  <h1>What are you adding?</h1>
+  <h1>Add to your trip</h1>
   <p class="sub">Choose a type first. Wonder Plan will only ask what it needs for that item.</p>
   <div class="typeGrid">
     <button class="typeCard importMainCard" onclick="closeMobilePlanner();openImportBooking()">
       <div class="typeIcon">✨</div>
       <div class="typeTitle">Import a booking</div>
-      <div class="typeDesc">Paste a Booking.com, hotel, airline or activity confirmation and review the details Wonder Plan extracts.</div>
+      <div class="typeDesc">Paste confirmation text from a hotel, airline or activity booking and let Wonder Plan pre-fill the details for you.</div>
     </button>
     ${Object.entries(TYPES).map(([k,v])=>`
       <button class="typeCard" onclick="startType('${k}')">
@@ -882,54 +875,38 @@ function airportSuggestions(query,field){
 function pickAirport(field,value){flow.draft[field]=value;renderPlanner()}
 function renderFlight(){
   const d=flow.draft;
-  if(flow.step===0)return `<div class="kicker">Flight · 1 of 5</div><h1>Find your flight</h1>
-    <p class="sub">Start with only the flight number and travel date.</p>
-    <div class="lookupIntro">
-      <h4>✈️ Flight lookup</h4>
-      <p>Example: QF61 on 18 February 2027. Once the live flight-data connection is enabled, Wonder Plan will populate the airline, airports, scheduled times and terminals for you.</p>
-      <label>Flight number</label><input data-field="flightNo" value="${esc(d.flightNo||"")}" placeholder="QF61">
-      <label>Departure date</label><input type="date" data-field="date" value="${esc(d.date||"")}">
-      <button class="btn primary" style="width:100%;margin-top:10px" onclick="tryFlightLookup()">Find flight</button>
-      <div class="lookupStatus">Live schedule lookup is not connected yet, so Wonder Plan will never pretend it found a flight when it didn't.</div>
-    </div>
-    <button class="btn secondary" style="width:100%" onclick="capture();flow.step=1;flow.draft.manualEntry=true;renderPlanner()">Enter manually instead</button>
-    <div class="actions"><button class="btn secondary" onclick="goHome()">Back</button></div>`;
 
-  if(flow.step===1)return `<div class="kicker">Flight · 2 of 5</div><h1>Departure airport</h1><p class="sub">Search worldwide by city, airport name or code.</p>
-    <label>Departure airport</label><input data-field="departSearch" value="${esc(d.departSearch||"")}" placeholder="Brisbane, BNE, Heathrow…" oninput="liveAirportSearch('departAirport',this.value)">
-    <div id="airportMatches">${airportSuggestions(d.departSearch,"departAirport")}</div>${d.departAirport?`<div class="selectedAirport">✓ ${esc(d.departAirport)}</div>`:""}${controls()}`;
+  if(flow.step===0)return `<div class="kicker">Flight · 1 of 4</div><h1>Where are you flying from?</h1>
+    <p class="sub">Search by city, airport name or airport code.</p>
+    <label>Departure airport</label>
+    <input data-field="departSearch" value="${esc(d.departSearch||"")}" placeholder="Brisbane, BNE, Heathrow…" oninput="liveAirportSearch('departAirport',this.value)">
+    <div id="airportMatches">${airportSuggestions(d.departSearch,"departAirport")}</div>
+    ${d.departAirport?`<div class="selectedAirport">✓ ${esc(d.departAirport)}</div>`:""}
+    ${controls()}`;
 
-  if(flow.step===2)return `<div class="kicker">Flight · 3 of 5</div><h1>Arrival airport</h1><p class="sub">Search worldwide by city, airport name or code.</p>
-    <label>Arrival airport</label><input data-field="arriveSearch" value="${esc(d.arriveSearch||"")}" placeholder="Tokyo, HND, Narita…" oninput="liveAirportSearch('arriveAirport',this.value)">
-    <div id="airportMatches">${airportSuggestions(d.arriveSearch,"arriveAirport")}</div>${d.arriveAirport?`<div class="selectedAirport">✓ ${esc(d.arriveAirport)}</div>`:""}${controls()}`;
+  if(flow.step===1)return `<div class="kicker">Flight · 2 of 4</div><h1>Where are you flying to?</h1>
+    <p class="sub">Search by city, airport name or airport code.</p>
+    <label>Arrival airport</label>
+    <input data-field="arriveSearch" value="${esc(d.arriveSearch||"")}" placeholder="Tokyo, HND, Narita…" oninput="liveAirportSearch('arriveAirport',this.value)">
+    <div id="airportMatches">${airportSuggestions(d.arriveSearch,"arriveAirport")}</div>
+    ${d.arriveAirport?`<div class="selectedAirport">✓ ${esc(d.arriveAirport)}</div>`:""}
+    ${controls()}`;
 
-  if(flow.step===3)return `<div class="kicker">Flight · 4 of 5</div><h1>Departure & arrival</h1>
-    <label>Departure</label><div class="row"><input type="date" data-field="date" value="${esc(d.date)}"><input type="time" data-field="time" value="${esc(d.time)}"></div>
-    <label>Arrival</label><div class="row"><input type="date" data-field="arrivalDate" value="${esc(d.arrivalDate||d.date)}"><input type="time" data-field="arrivalTime" value="${esc(d.arrivalTime)}"></div>
-    <div class="suggestions"><button class="chip" onclick="setArrivalOffset(0)">Same day</button><button class="chip" onclick="setArrivalOffset(1)">+1 day</button><button class="chip" onclick="setArrivalOffset(2)">+2 days</button></div>${controls()}`;
+  if(flow.step===2)return `<div class="kicker">Flight · 3 of 4</div><h1>When is the flight?</h1>
+    <p class="sub">Add the scheduled departure and arrival times from your booking.</p>
+    <label>Departure</label>
+    <div class="row"><input type="date" data-field="date" value="${esc(d.date||"")}"><input type="time" data-field="time" value="${esc(d.time||"")}"></div>
+    <label>Arrival</label>
+    <div class="row"><input type="date" data-field="arrivalDate" value="${esc(d.arrivalDate||d.date||"")}"><input type="time" data-field="arrivalTime" value="${esc(d.arrivalTime||"")}"></div>
+    <div class="suggestions"><button class="chip" onclick="setArrivalOffset(0)">Same day</button><button class="chip" onclick="setArrivalOffset(1)">+1 day</button><button class="chip" onclick="setArrivalOffset(2)">+2 days</button></div>
+    ${controls()}`;
 
-  return `<div class="kicker">Flight · 5 of 5</div><h1>Review flight</h1>
-    <div class="row"><div><label>Airline</label><input data-field="airline" value="${esc(d.airline)}" placeholder="Qantas"></div><div><label>Flight number</label><input data-field="flightNo" value="${esc(d.flightNo)}" placeholder="QF61"></div></div>
-    <label>Booking reference</label><input data-field="bookingRef" value="${esc(d.bookingRef)}" placeholder="Optional">
-    <label>Notes</label><textarea data-field="notes" placeholder="Terminal, seat, baggage…">${esc(d.notes)}</textarea>
+  return `<div class="kicker">Flight · 4 of 4</div><h1>Flight details</h1>
+    <p class="sub">Add the useful booking details you want available during the trip.</p>
+    <div class="row"><div><label>Airline</label><input data-field="airline" value="${esc(d.airline||"")}" placeholder="Qantas"></div><div><label>Flight number</label><input data-field="flightNo" value="${esc(d.flightNo||"")}" placeholder="QF61"></div></div>
+    <label>Booking reference</label><input data-field="bookingRef" value="${esc(d.bookingRef||"")}" placeholder="Optional">
+    <label>Notes</label><textarea data-field="notes" placeholder="Terminal, seat, baggage…">${esc(d.notes||"")}</textarea>
     ${attachmentField()}${controls(true)}`;
-}
-function tryFlightLookup(){
-  capture();
-  const no=(flow.draft.flightNo||"").trim().toUpperCase();
-  const date=flow.draft.date||"";
-  if(!no||!date){alert("Enter the flight number and departure date first.");return}
-  flow.draft.flightNo=no;
-  const prefixes={QF:"Qantas",JQ:"Jetstar",VA:"Virgin Australia",NZ:"Air New Zealand",SQ:"Singapore Airlines",EK:"Emirates",QR:"Qatar Airways",CX:"Cathay Pacific",JL:"Japan Airlines",NH:"ANA",TG:"Thai Airways",AA:"American Airlines",UA:"United Airlines",DL:"Delta",BA:"British Airways"};
-  const prefix=(no.match(/^[A-Z]{2}/)||[])[0];
-  if(prefixes[prefix])flow.draft.airline=prefixes[prefix];
-  document.getElementById("modalCard").className="modalCard";
-  document.getElementById("modalCard").innerHTML=`
-    <div class="modalTop"><div><div class="kicker">Flight lookup</div><h3>${esc(no)} · ${esc(date)}</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
-    <div class="wonderPanel"><h4>Live flight data isn't connected yet</h4><p>The layout is now correct, but real route/times/terminal lookup needs a flight-data API behind a secure server. The public GitHub app cannot safely hold that secret key.</p></div>
-    <p class="sub">I have kept ${esc(flow.draft.airline||no)} and ${esc(date)} so you only need to fill the missing route/times manually for now.</p>
-    <div class="actions"><button class="btn primary" onclick="closeModal();flow.step=1;flow.draft.manualEntry=true;renderPlanner()">Continue manually</button></div>`;
-  document.getElementById("modal").classList.add("open");
 }
 function liveAirportSearch(field,q){
   flow.draft[field==="departAirport"?"departSearch":"arriveSearch"]=q;
@@ -1047,36 +1024,7 @@ function viewAttachment(id){
 }
 
 
-function showManualFlightEntry(){
-  flow.draft.manualEntry=true;renderPlanner();
-  setTimeout(()=>document.getElementById("airportSearch")?.focus(),50);
-}
-function searchFlightFirst(){
-  const no=(document.getElementById("flightSearchNo")?.value||"").trim().toUpperCase();
-  const date=document.getElementById("flightSearchDate")?.value||"";
-  if(!no||!date){alert("Enter a flight number and departure date.");return}
-  flow.draft.flightNo=no;flow.draft.date=date;
-  const prefixes={QF:"Qantas",JQ:"Jetstar",VA:"Virgin Australia",NZ:"Air New Zealand",SQ:"Singapore Airlines",EK:"Emirates",QR:"Qatar Airways",CX:"Cathay Pacific",JL:"Japan Airlines",NH:"ANA",TG:"Thai Airways",AA:"American Airlines",UA:"United Airlines",DL:"Delta",BA:"British Airways"};
-  const prefix=(no.match(/^[A-Z]{2}/)||[])[0];if(prefixes[prefix])flow.draft.airline=prefixes[prefix];
-  document.getElementById("modalCard").className="modalCard";
-  document.getElementById("modalCard").innerHTML=`
-    <div class="modalTop"><div><div class="kicker">Flight lookup</div><h3>${esc(no)} · ${esc(date)}</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
-    <div class="wonderPanel"><h4>Live lookup is the next connection</h4><p>The flow is now correct: flight number + date first, then Wonder Plan should populate airports, scheduled departure/arrival times, airline and terminals automatically.</p></div>
-    <p class="sub">A public GitHub Pages app cannot safely contain the private API key needed for reliable live flight data. We need a tiny secure backend/proxy for that lookup. Until it is connected, you can continue manually.</p>
-    <div class="actions"><button class="btn secondary" onclick="closeModal();showManualFlightEntry()">Enter manually</button><button class="btn primary" onclick="closeModal();showManualFlightEntry()">Continue</button></div>`;
-  document.getElementById("modal").classList.add("open");
-}
 
-function flightLookup(){
-  const no=(document.getElementById("lookupFlightNo")?.value||"").trim().toUpperCase();
-  const date=document.getElementById("lookupFlightDate")?.value||flow.draft.date||"";
-  if(!no){alert("Enter a flight number first.");return}
-  const prefixes={QF:"Qantas",JQ:"Jetstar",VA:"Virgin Australia",NZ:"Air New Zealand",SQ:"Singapore Airlines",EK:"Emirates",QR:"Qatar Airways",CX:"Cathay Pacific",JL:"Japan Airlines",NH:"ANA",TG:"Thai Airways",AA:"American Airlines",UA:"United Airlines",DL:"Delta",BA:"British Airways"};
-  const prefix=(no.match(/^[A-Z]{2}/)||[])[0];
-  flow.draft.flightNo=no;flow.draft.date=date||flow.draft.date;flow.draft.airline=prefixes[prefix]||flow.draft.airline||"";
-  renderPlanner();
-  toastSync(prefixes[prefix]?`✓ Recognised ${prefixes[prefix]}`:"Flight number saved — live lookup provider not connected");
-}
 function openMaps(encoded){
   const q=decodeURIComponent(encoded||"");if(!q)return;
   const apple=`https://maps.apple.com/?q=${encodeURIComponent(q)}`;
@@ -1510,7 +1458,7 @@ async function downloadCloudState(){
   return await r.json();
 }
 function cloudPayload(){
-  return {app:"Wonder Plan",version:"11.2",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
+  return {app:"Wonder Plan",version:"11.3",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
 }
 async function createCloudFile(){
   const boundary="wp_"+Math.random().toString(36).slice(2);
@@ -1586,7 +1534,7 @@ async function manualCloudSync(){
   }catch(e){console.error(e);toastSync("Sync failed — reconnect Google Drive if needed")}
 }
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:"11.2",savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:"11.3",savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -1634,3 +1582,9 @@ if ("serviceWorker" in navigator) {
 <div id="syncToast" class="syncToast"></div>
 </body>
 </html>
+<style>
+@media(max-width:600px){
+  .segment{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:4px!important;width:100%!important}
+  .segment button{display:block!important;width:auto!important;min-width:0!important;padding:9px 3px!important;font-size:11px!important;white-space:nowrap!important}
+}
+</style>
