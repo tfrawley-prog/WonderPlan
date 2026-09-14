@@ -669,6 +669,41 @@ textarea{min-height:90px;resize:vertical}
   .moneyTop,.moneyBreakdown{grid-template-columns:1fr}.moneyCard.primary{grid-column:auto}
 }
 
+
+/* V11.5 UX polish */
+.tripHomeTop,.tripHomeSectionHead{align-items:center}
+.homeNewTrip{width:auto!important;min-width:132px!important;flex:0 0 auto!important}
+.tripHomeGrid{align-items:stretch}.tripHomeCard{width:100%;height:100%;box-sizing:border-box}.newTripCard{display:grid!important;place-items:center!important}
+.tripCardCover,.tripHero{background-size:cover!important;background-position:center!important}
+.tripCardCover.hasPhoto::after,.tripHero.hasPhoto::after{display:none!important}
+.tripCardCover.hasPhoto::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,20,38,.02),rgba(8,20,38,.22));z-index:0}
+.tripHero.hasPhoto::before{content:"";position:absolute!important;inset:0!important;height:auto!important;background:linear-gradient(90deg,rgba(8,20,38,.62),rgba(8,20,38,.12) 72%,rgba(8,20,38,.02))!important;opacity:1!important}
+.tripCardCover>*{position:relative;z-index:2}
+.photoCredit{position:absolute;right:12px;bottom:8px;z-index:3;font-size:8px;color:rgba(255,255,255,.86);background:rgba(0,0,0,.28);padding:3px 6px;border-radius:999px;text-decoration:none}
+.main{min-width:0}
+.topbar{display:grid!important;grid-template-columns:minmax(205px,1fr) auto!important;gap:14px!important;align-items:start!important}
+.topbar>div:first-child{min-width:0}.topbar .controls{justify-self:end;align-self:start;min-width:0}
+.topbar h2{white-space:nowrap;margin-top:8px!important}.topbar .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:330px}
+.segment{min-width:370px!important}.navrow{justify-content:flex-end!important}
+.sidebar:not(.collapsed){width:315px!important}
+.sidebar:not(.collapsed) .brand{font-size:22px!important}.sidebar:not(.collapsed) h1{font-size:27px!important}
+.sidebar:not(.collapsed) .typeGrid{gap:8px!important}.sidebar:not(.collapsed) .typeCard{padding:12px!important;min-height:108px!important}
+.sidebar:not(.collapsed) .typeDesc{font-size:10px!important}.sidebar:not(.collapsed) .importMainCard{min-height:auto!important;padding:13px!important}
+.editOverlay{position:fixed;inset:0;z-index:260;background:rgba(16,24,40,.42);display:none;align-items:center;justify-content:center;padding:22px}
+.editOverlay.open{display:flex}.editSheet{width:min(560px,calc(100vw - 32px));max-height:min(780px,calc(100vh - 44px));overflow:auto;background:#fff;border-radius:24px;box-shadow:0 24px 70px rgba(16,24,40,.25);padding:20px}
+.editSheetTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.editSheetTop h3{margin:0;font-size:18px}
+.editSheetClose{width:36px;height:36px;border:1px solid #e3e7ee;background:#fff;border-radius:11px;font-size:17px}.editSheet .planner{padding:0!important}
+@media(min-width:601px) and (max-width:1180px){
+ .sidebar:not(.collapsed){width:285px!important}.topbar{grid-template-columns:minmax(145px,1fr) auto!important;gap:9px!important}
+ .topbar .sub{max-width:185px;font-size:10px!important}.segment{min-width:340px!important}.segment button{padding:8px 6px!important;font-size:11px!important}
+ .navrow button{padding-left:9px!important;padding-right:9px!important}.homeNewTrip{min-width:124px!important}
+}
+@media(max-width:800px){.tripHomeGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:600px){
+ .tripHomeGrid{grid-template-columns:1fr!important}.topbar{display:block!important}.segment{min-width:0!important}
+ .editOverlay{align-items:flex-end;padding:0}.editSheet{width:100%;max-height:88vh;border-radius:24px 24px 0 0;padding:18px}
+}
+
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -678,7 +713,7 @@ textarea{min-height:90px;resize:vertical}
     <div class="mobileSheetTop"><div class="mobileSheetHandle"></div><button class="mobileSheetClose" onclick="closeMobilePlanner()" aria-label="Close">✕</button></div>
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v11.4</div>
+      <div class="version hideWhenCollapsed">v11.5.2</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -753,6 +788,8 @@ textarea{min-height:90px;resize:vertical}
   </div>
 </div>
 
+<div class="editOverlay" id="editOverlay" onclick="if(event.target===this)closeEditSheet()">
+<div class="editSheet"><div class="editSheetTop"><h3>Edit plan</h3><button class="editSheetClose" onclick="closeEditSheet()">✕</button></div><div id="editSheetBody"></div></div></div>
 <div class="mobileShade" id="mobileShade" onclick="closeMobilePlanner()"></div>
 <nav class="mobileNav" id="mobileNav" aria-label="Wonder Plan navigation">
   <button class="mobileNavBtn" id="m-trips" onclick="showTripHome()"><span class="mIcon">✦</span><span>Trips</span></button>
@@ -860,6 +897,26 @@ function updateTripUI(){
 }
 function switchTrip(id){closeModal();enterTrip(id)}
 
+
+const DESTINATION_PHOTOS={
+ japan:{url:"https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=1600&q=80",credit:"Unsplash",link:"https://unsplash.com/"},
+ thailand:{url:"https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=1600&q=80",credit:"Unsplash",link:"https://unsplash.com/"},
+ indonesia:{url:"https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1600&q=80",credit:"Unsplash",link:"https://unsplash.com/"},
+ vietnam:{url:"https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1600&q=80",credit:"Unsplash",link:"https://unsplash.com/"},
+ italy:{url:"https://images.unsplash.com/photo-1529260830199-42c24126f198?auto=format&fit=crop&w=1600&q=80",credit:"Unsplash",link:"https://unsplash.com/"},
+ france:{url:"https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=80",credit:"Unsplash",link:"https://unsplash.com/"},
+ australia:{url:"https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=1600&q=80",credit:"Unsplash",link:"https://unsplash.com/"},
+ newzealand:{url:"https://images.unsplash.com/photo-1469521669194-babb45599def?auto=format&fit=crop&w=1600&q=80",credit:"Unsplash",link:"https://unsplash.com/"}
+};
+function destinationPhoto(t){
+ if(t?.coverImage)return {url:t.coverImage,credit:"",link:""};
+ const s=((t?.destination||"")+" "+(t?.name||"")).toLowerCase().replace(/\s+/g,"");
+ const aliases=[["japan","japan"],["tokyo","japan"],["kyoto","japan"],["osaka","japan"],["myoko","japan"],["thailand","thailand"],["bangkok","thailand"],["phuket","thailand"],["bali","indonesia"],["indonesia","indonesia"],["vietnam","vietnam"],["italy","italy"],["france","france"],["australia","australia"],["newzealand","newzealand"]];
+ for(const [needle,key] of aliases)if(s.includes(needle))return DESTINATION_PHOTOS[key];
+ return null;
+}
+function photoStyle(p){return p?.url?`background-image:url('${p.url.replace(/'/g,"%27")}')`:""}
+
 function tripArt(t){
   const s=((t?.destination||"")+" "+(t?.name||"")).toLowerCase();
   if(/japan|tokyo|kyoto|osaka|myoko|ski/.test(s))return /ski|myoko/.test(s)?"🏔️":"⛩️";
@@ -882,16 +939,18 @@ function renderTripHome(){
   const featured=trips.find(t=>t.id===state.activeTripId)||trips[0];
   if(featured){
     const dateText=featured.startDate?(featured.endDate&&featured.endDate!==featured.startDate?`${formatTripDate(featured.startDate)} – ${formatTripDate(featured.endDate)}`:formatTripDate(featured.startDate)):"Add dates when you're ready";
-    hero.innerHTML=`<div class="tripHero" data-art="${tripArt(featured)}">
+    const hp=destinationPhoto(featured);
+    hero.innerHTML=`<div class="tripHero ${hp?"hasPhoto":""}" data-art="${tripArt(featured)}" style="${photoStyle(hp)}">
       <div class="tripHeroContent"><div class="tripHeroEyebrow">Next adventure</div><h1>${esc(featured.name||"My Trip")}</h1>
       <p>${esc(featured.destination||"Your next trip")} · ${esc(dateText)}</p>
-      <button class="tripHeroBtn" onclick="enterTrip('${featured.id}')">Open Trip →</button></div></div>`;
+      <button class="tripHeroBtn" onclick="enterTrip('${featured.id}')">Open Trip →</button></div>${hp?.credit?`<a class="photoCredit" href="${hp.link}" target="_blank" onclick="event.stopPropagation()">Photo · ${esc(hp.credit)}</a>`:""}</div>`;
   }else hero.innerHTML="";
   const cards=trips.map((t,idx)=>{
     const c=tripCounts(t);
     const dateText=t.startDate?(t.endDate&&t.endDate!==t.startDate?`${formatTripDate(t.startDate)} – ${formatTripDate(t.endDate)}`:formatTripDate(t.startDate)):"Dates not set";
+    const cp=destinationPhoto(t);
     return `<div class="tripHomeCard" onclick="enterTrip('${t.id}')" style="cursor:pointer">
-        <div class="tripCardCover" data-art="${tripArt(t)}"><button class="tripCardMenu" onclick="event.stopPropagation();editTrip('${t.id}')" title="Edit trip">•••</button></div>
+        <div class="tripCardCover ${cp?"hasPhoto":""}" data-art="${tripArt(t)}" style="${photoStyle(cp)}"><button class="tripCardMenu" onclick="event.stopPropagation();editTrip('${t.id}')" title="Edit trip">•••</button>${cp?.credit?`<a class="photoCredit" href="${cp.link}" target="_blank" onclick="event.stopPropagation()">Photo · ${esc(cp.credit)}</a>`:""}</div>
         <div class="tripCardBody"><h3>${esc(t.name||"Untitled trip")}</h3><p>${esc(dateText)}${t.destination?` · ${esc(t.destination)}`:""}</p>
         <div class="tripCardStats"><span class="tripStat">✈ ${c.flights}</span><span class="tripStat">▣ ${c.stays}</span><span class="tripStat">⌖ ${c.plans}</span></div></div>
     </div>`;
@@ -1183,6 +1242,7 @@ function finishItem(){
   flow={mode:"home",step:0,draft:{},editingId:null};
   renderAll();
   if(isMobile())closeMobilePlanner();
+  document.getElementById("editOverlay")?.classList.remove("open");
 }
 function removeItem(id){
   if(!confirm("Delete this plan?"))return;
@@ -1190,7 +1250,21 @@ function removeItem(id){
 }
 function editItem(id){
   const item=state.items.find(x=>x.id===id);if(!item)return;
-  closeModal();startType(item.type,item);
+  closeModal();
+  const sidebar=document.getElementById("sidebar");
+  const collapsed=!isMobile()&&sidebar?.classList.contains("collapsed");
+  startType(item.type,item);
+  if(collapsed){
+    setTimeout(()=>renderEditSheet(),0);
+  }
+}
+function renderEditSheet(){
+  const body=document.getElementById("editSheetBody"),planner=document.getElementById("planner");if(!body||!planner)return;
+  body.innerHTML=`<div class="planner">${planner.innerHTML}</div>`;
+  document.getElementById("editOverlay")?.classList.add("open");
+}
+function closeEditSheet(){
+  document.getElementById("editOverlay")?.classList.remove("open");
 }
 function openItem(id){
   const i=state.items.find(x=>x.id===id);if(!i)return;
@@ -1206,7 +1280,7 @@ function openItem(id){
       <div class="detail"><small>Type</small><b>${esc(TYPES[i.type]?.label||i.type)}</b></div>
     </div>
     ${i.meta?`<div class="detail"><small>Details</small>${esc(i.meta)}</div>`:""}
-    ${i.location?`<div class="shareRow"><button class="btn secondary" onclick="openMaps('${encodeURIComponent(i.location)}')">⌖ Open in Maps</button><button class="btn secondary" onclick="shareItem('${i.id}')">↗ Share</button></div>`:""}
+    ${i.location?`<div class="shareRow"><button class="btn secondary" onclick="openMaps('${encodeURIComponent(i.location)}')">⌖ Open in Google Maps</button><button class="btn secondary" onclick="shareItem('${i.id}')">↗ Share</button></div>`:""}
     ${i.attachment?`<div class="detailAttachment"><img src="${i.attachment.data}" alt="Booking attachment" onclick="viewAttachment('${i.id}')"></div>`:""}
     <div class="actions"><button class="btn secondary" onclick="editItem('${i.id}')">✏️ Edit</button><button class="btn danger" onclick="removeItem('${i.id}')">🗑 Delete</button></div>`;
   document.getElementById("modal").classList.add("open");
@@ -1221,7 +1295,7 @@ function viewAttachment(id){
 
 function openMaps(encoded){
   const q=decodeURIComponent(encoded||"");if(!q)return;
-  const apple=`https://maps.apple.com/?q=${encodeURIComponent(q)}`;
+  const apple=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
   window.open(apple,"_blank");
 }
 async function shareItem(id){
@@ -1286,7 +1360,7 @@ function renderMap(){
   document.getElementById("dateContext").textContent=t?.destination||"Trip map";
   const places=state.items.filter(i=>i.location && i.type!=="flight");
   let h=`<div class="wonderPanel"><h4>⌖ Your trip places</h4><p>Tap any location to open it in Apple Maps. A fully plotted in-app map can be added later with a geocoding/maps provider.</p></div>`;
-  h+=places.length?places.map(i=>`<div class="placeCard"><h4>${TYPES[i.type]?.icon||"•"} ${esc(i.title)}</h4><p>${esc(i.location)} · ${esc(i.date||"")}</p><button class="btn secondary" onclick="openMaps('${encodeURIComponent(i.location)}')">Open in Maps ↗</button></div>`).join(""):`<div class="empty" style="padding:50px 10px">Add locations to your hotels, restaurants and activities to build your places list.</div>`;
+  h+=places.length?places.map(i=>`<div class="placeCard"><h4>${TYPES[i.type]?.icon||"•"} ${esc(i.title)}</h4><p>${esc(i.location)} · ${esc(i.date||"")}</p><button class="btn secondary" onclick="openMaps('${encodeURIComponent(i.location)}')">Open in Google Maps ↗</button></div>`).join(""):`<div class="empty" style="padding:50px 10px">Add locations to your hotels, restaurants and activities to build your places list.</div>`;
   cal.innerHTML=h;
 }
 function openImportBooking(){
@@ -1713,7 +1787,7 @@ async function downloadCloudState(){
   return await r.json();
 }
 function cloudPayload(){
-  return {app:"Wonder Plan",version:"11.4",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
+  return {app:"Wonder Plan",version:"11.5.2",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
 }
 async function createCloudFile(){
   const boundary="wp_"+Math.random().toString(36).slice(2);
@@ -1789,7 +1863,7 @@ async function manualCloudSync(){
   }catch(e){console.error(e);toastSync("Sync failed — reconnect Google Drive if needed")}
 }
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:"11.4",savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:"11.5.2",savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -1846,5 +1920,11 @@ if ("serviceWorker" in navigator) {
 @media(max-width:600px){
   .segment{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:4px!important;width:100%!important}
   .segment button{display:block!important;width:auto!important;min-width:0!important;padding:9px 3px!important;font-size:11px!important;white-space:nowrap!important}
+}
+</style>
+
+<style>
+@media(max-width:600px){
+  #m-money span{font-size:20px;line-height:1}
 }
 </style>
