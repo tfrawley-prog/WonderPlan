@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Wonder Plan</title>
+<title>WonderPlan</title>
 
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#0B2545">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Wonder Plan">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="WonderPlan">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 
 <style>
 :root{
@@ -1061,6 +1063,283 @@ textarea{min-height:90px;resize:vertical}
   .plannerExitBtn{display:none!important}
 }
 
+
+/* V11.8 — mobile date navigation, compact month and stable section pages */
+.sectionView{width:100%;min-width:0}
+.calendarScroller.sectionPage{
+  overflow-x:hidden!important;
+  scroll-behavior:auto!important;
+}
+.mobileDateNavigator{display:none}
+
+@media(max-width:600px){
+  /* Itinerary date navigator */
+  .mobileDateNavigator{
+    display:block;
+    margin:2px 0 12px;
+    padding:10px;
+    border:1px solid #e5e9f0;
+    background:#fff;
+    border-radius:16px;
+  }
+  .mobileDateNavTop{
+    display:grid;
+    grid-template-columns:38px minmax(0,1fr) 38px;
+    gap:7px;
+    align-items:center;
+  }
+  .mobileDateArrow{
+    width:38px;height:38px;border-radius:11px;border:1px solid #e2e7ee;
+    background:#fff;color:#172033;font-size:21px;font-weight:800;
+  }
+  .mobileDatePickWrap{
+    position:relative;height:42px;border:1px solid #dfe5ee;border-radius:12px;
+    background:#f8fafc;overflow:hidden;
+  }
+  .mobileDatePickLabel{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    gap:7px;font-size:12px;font-weight:900;color:#172033;pointer-events:none;
+  }
+  .mobileDatePicker{
+    position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;
+  }
+  .mobileDateStrip{
+    display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin-top:8px;
+  }
+  .mobileDateChip{
+    border:0;border-radius:11px;background:#f6f8fb;padding:7px 2px;
+    color:#667085;min-width:0;
+  }
+  .mobileDateChip b{display:block;font-size:13px;line-height:1;color:#172033}
+  .mobileDateChip span{display:block;font-size:8px;font-weight:800;text-transform:uppercase;margin-top:4px}
+  .mobileDateChip small{display:block;font-size:8px;margin-top:2px}
+  .mobileDateChip.active{background:#eaf3ff;color:#176bc6;box-shadow:inset 0 0 0 1px #d5e7fb}
+  .mobileDateChip.active b{color:#176bc6}
+
+  /* Mobile itinerary */
+  .timeline.mobileDayTimeline{padding-bottom:90px}
+  .mobileTimelineTitle{
+    margin:2px 0 8px;font-size:12px;color:#667085;font-weight:750;
+  }
+  .mobileTimelineEmpty{
+    min-height:190px;border:1px dashed #dfe5ee;border-radius:16px;
+    display:grid;place-items:center;text-align:center;padding:25px;color:#98a2b3;
+    background:#fbfcfe;font-size:12px;
+  }
+  .mobileTimelineEmpty button{
+    margin-top:10px;border:0;border-radius:10px;background:#111827;color:#fff;
+    padding:9px 13px;font-weight:850
+  }
+  .timeline.mobileDayTimeline .wonderPanel{display:none}
+  .timeline.mobileDayTimeline .timelineDay{margin-top:0}
+  .timeline.mobileDayTimeline .timelineDayHead{
+    font-size:15px;padding:3px 1px 10px;margin:0;
+  }
+
+  /* True phone-sized month grid — no horizontal zoom/scroll needed */
+  .calendarScroller.mobileMonthScroller{overflow-x:hidden!important}
+  #calendar.mobileMonthGrid{
+    display:grid!important;
+    grid-template-columns:repeat(7,minmax(0,1fr))!important;
+    gap:4px!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+  .mobileMonthWeekday{
+    text-align:center;font-size:8px;font-weight:900;color:#98a2b3;
+    text-transform:uppercase;padding:3px 0 2px;
+  }
+  .mobileMonthCell{
+    position:relative;min-width:0;height:66px;padding:6px 4px;
+    border:1px solid #e8ebf0;border-radius:10px;background:#fff;overflow:hidden;
+  }
+  .mobileMonthCell.faded{opacity:.36}
+  .mobileMonthCell.selected{border-color:#8ab7ec;box-shadow:inset 0 0 0 1px #8ab7ec}
+  .mobileMonthTop{display:flex;align-items:center;justify-content:space-between;gap:2px}
+  .mobileMonthNum{font-size:11px;font-weight:900;color:#172033}
+  .mobileMonthPlus{
+    width:20px;height:20px;border:0;border-radius:7px;background:#f2f7fd;color:#4e82bb;
+    display:grid;place-items:center;font-size:13px;line-height:1;padding:0
+  }
+  .mobileMonthDots{display:flex;gap:2px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .mobileMonthDot{width:5px;height:5px;border-radius:999px;background:#667085}
+  .mobileMonthDot.flight{background:#84a8d8}
+  .mobileMonthDot.hotel{background:#85c9a5}
+  .mobileMonthDot.activity{background:#d5a0b0}
+  .mobileMonthDot.restaurant{background:#b5a791}
+  .mobileMonthDot.transport{background:#8fb6c9}
+  .mobileMonthCount{font-size:8px;color:#98a2b3;font-weight:800;margin-top:4px}
+  .mobileMonthHint{
+    grid-column:1/-1;font-size:9px;color:#98a2b3;text-align:center;padding:4px 0 0
+  }
+
+  /* Keep date/title information explicit on phones */
+  .titleWrap p{display:none!important}
+  .calendarNav .dateContext{
+    min-width:126px!important;font-size:11px!important;
+  }
+}
+
+/* Tablet/web section pages always start at the left edge and occupy the surface correctly */
+@media(min-width:601px){
+  #calendar.timeline,
+  #calendar.mapList,
+  #calendar.moneyView{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  .calendarScroller.sectionPage{
+    overflow-x:hidden!important;
+  }
+}
+
+
+/* V11.9 — WonderPlan approved brand identity */
+:root{
+  --brand-midnight:#0B2545;
+  --brand-ocean:#2563EB;
+  --brand-explorer:#10B981;
+  --brand-sky:#AFE6D9;
+  --brand-sand:#F4D6A0;
+  --brand-sunset:#FF7A59;
+  --brand-cloud:#F3F4F6;
+
+  --bg:#F3F4F6;
+  --panel:#FFFFFF;
+  --panel2:#F8FAFC;
+  --ink:#0B2545;
+  --muted:#667085;
+  --line:#E5E7EB;
+  --accent:#0B2545;
+  --accentSoft:#EEF4FA;
+  --green:#10B981;
+  --shadow:0 10px 30px rgba(11,37,69,.07);
+
+  --flight:#EDF4FF;--flightInk:#2563EB;
+  --hotel:#ECFDF5;--hotelInk:#0A8A63;
+  --activity:#FFF7E7;--activityInk:#936525;
+  --restaurant:#FFF1ED;--restaurantInk:#D8573F;
+  --transport:#EAF9F5;--transportInk:#128C79;
+  --other:#F3F4F6;--otherInk:#475467;
+}
+html,body{background:var(--brand-cloud);color:var(--brand-midnight)}
+.sidebar,.main{border-color:#E3E8EF}
+.brand{
+  display:flex!important;align-items:center;gap:2px;
+  font-size:23px!important;font-weight:850!important;letter-spacing:-.045em!important;color:var(--brand-midnight)
+}
+.brandMarkSmall{width:28px;height:28px;object-fit:contain;margin-right:6px;flex:0 0 auto}
+.brandWonder{color:var(--brand-midnight)}
+.brandPlan{color:var(--brand-ocean)}
+.version{background:#EDF4FF!important;color:#4F6B8A!important}
+.kicker{color:var(--brand-explorer)!important;letter-spacing:.14em!important}
+.btn.primary{
+  background:linear-gradient(135deg,var(--brand-midnight),#123A68)!important;
+  color:#fff!important;
+}
+.btn.primary:hover{filter:brightness(1.04)}
+input:focus,select:focus,textarea:focus{
+  border-color:#7EA9F5!important;
+  box-shadow:0 0 0 3px rgba(37,99,235,.10)!important
+}
+.segment button.active,.viewSegment button.active{
+  background:#E9F2FF!important;color:var(--brand-ocean)!important;box-shadow:none!important
+}
+.productTab.active,.filterChip.active{
+  background:var(--brand-midnight)!important;border-color:var(--brand-midnight)!important;color:#fff!important
+}
+.dayCell.selected{box-shadow:inset 0 0 0 2px var(--brand-ocean)!important}
+.quickAddBtn,.mobileMonthPlus{
+  background:#F1F6FF!important;color:var(--brand-ocean)!important;border-color:#DCE8FB!important
+}
+.tripPill .tripDot,.tripPill span:first-child{color:var(--brand-explorer)}
+.costPill{background:#F4F8FD!important;color:var(--brand-midnight)!important}
+.moneyCard.primary{
+  background:linear-gradient(135deg,var(--brand-midnight),#103A67 72%,#18528C)!important
+}
+.status{color:var(--brand-explorer)!important}
+.selectedAirport{background:#ECFDF5!important;color:#087A55!important}
+
+/* Brand-led home */
+.tripHome{
+  background:
+    radial-gradient(circle at 85% 5%,rgba(175,230,217,.27),transparent 27%),
+    linear-gradient(180deg,#FBFDFF 0%,var(--brand-cloud) 100%)!important
+}
+.tripHomeBrandWrap{gap:13px!important}
+.tripHomeLogo.brandMarkImage{
+  width:54px!important;height:54px!important;object-fit:contain!important;
+  padding:0!important;border-radius:0!important;background:none!important;
+  box-shadow:none!important;transform:none!important
+}
+.tripHomeBrand{
+  font-size:31px!important;font-weight:880!important;letter-spacing:-.045em!important;
+  line-height:1!important
+}
+.brandTagline{
+  margin-top:6px;font-size:8px;font-weight:800;letter-spacing:.34em;
+  color:#7A8799;white-space:nowrap
+}
+.homeSettings{color:var(--brand-midnight)!important}
+.tripHero{
+  background:linear-gradient(135deg,var(--brand-midnight),var(--brand-ocean))!important;
+  border-radius:22px!important
+}
+.tripHero.hasPhoto::before{
+  background:linear-gradient(90deg,rgba(11,37,69,.76),rgba(11,37,69,.22) 64%,rgba(11,37,69,.03))!important
+}
+.tripHeroEyebrow{color:var(--brand-sky)!important}
+.tripHeroBtn{color:var(--brand-midnight)!important}
+.tripHomeCard{border:1px solid #E5E9EF!important}
+.tripCardBody h3{color:var(--brand-midnight)!important}
+.tripStat{background:#F4F7FA!important;color:#4F6279!important}
+.homeNewTrip{background:var(--brand-midnight)!important}
+.brandExplore{
+  background:
+    linear-gradient(110deg,rgba(175,230,217,.25),rgba(237,244,255,.92))!important;
+  border-color:#DDE9EF!important
+}
+.brandExplore .homeExploreIcon{color:var(--brand-explorer)!important}
+.brandExplore b{color:var(--brand-midnight)!important}
+.brandExploreWords{
+  margin-left:auto;font-size:8px;letter-spacing:.2em;line-height:1.8;color:#6F849A;
+  max-width:260px;text-align:right
+}
+
+/* Buttons and chips align to the approved quiet/navy visual system */
+.iconBtn,.roundControl,.dateContext,.backHomeBtn,.tripPill,.productTab{
+  color:var(--brand-midnight)
+}
+.iconBtn:hover,.roundControl:hover{background:#F7FAFD!important}
+.typeCard:hover{border-color:#BDD0E5!important;background:#FBFDFF!important}
+.typeCard:focus-visible,.quickAddBtn:focus-visible,.productTab:focus-visible{
+  outline:2px solid var(--brand-ocean);outline-offset:2px
+}
+
+/* Mobile brand bar */
+@media(max-width:600px){
+  .tripHomeLogo.brandMarkImage{width:46px!important;height:46px!important}
+  .tripHomeBrand{font-size:25px!important}
+  .brandTagline{font-size:6px!important;letter-spacing:.28em!important}
+  .mobileNav{
+    border-top-color:#DDE5EE!important;
+    background:rgba(255,255,255,.96)!important
+  }
+  .mobileNavBtn{color:#64748B!important}
+  .mobileNavBtn.active{color:var(--brand-midnight)!important}
+  .mobileNavBtn.add{
+    background:var(--brand-midnight)!important;color:#fff!important;
+    box-shadow:0 8px 20px rgba(11,37,69,.15)!important
+  }
+}
+
+/* Branded scrollbars on desktop, still subtle */
+@media(min-width:601px){
+  .calendarScroller::-webkit-scrollbar{height:8px;width:8px}
+  .calendarScroller::-webkit-scrollbar-thumb{background:#CAD5E1;border-radius:99px}
+}
+
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -1069,8 +1348,11 @@ textarea{min-height:90px;resize:vertical}
   <aside class="sidebar" id="sidebar">
     <div class="mobileSheetTop"><div class="mobileSheetHandle"></div><button class="mobileSheetClose" onclick="closeMobilePlanner()" aria-label="Close">✕</button></div>
     <div class="brandrow">
-      <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v11.7.1</div>
+      <div class="brand hideWhenCollapsed">
+      <img class="brandMarkSmall" src="icons/brand-mark.png" alt="">
+      <span class="brandWonder">Wonder</span><span class="brandPlan">Plan</span>
+    </div>
+      <div class="version hideWhenCollapsed">v11.9</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -1128,8 +1410,11 @@ textarea{min-height:90px;resize:vertical}
   <div class="tripHomeInner">
     <div class="tripHomeTop">
       <div class="tripHomeBrandWrap">
-        <div class="tripHomeLogo">⌁</div>
-        <div><div class="tripHomeBrand">Wonder Plan</div><div class="tripHomeSub">Your trips, all in one place.</div></div>
+        <img class="tripHomeLogo brandMarkImage" src="icons/brand-mark.png" alt="WonderPlan">
+        <div>
+          <div class="tripHomeBrand"><span class="brandWonder">Wonder</span><span class="brandPlan">Plan</span></div>
+          <div class="brandTagline">PLAN MORE WONDER</div>
+        </div>
       </div>
       <button class="homeSettings" onclick="openSettings()" title="Settings">⚙</button>
     </div>
@@ -1139,10 +1424,10 @@ textarea{min-height:90px;resize:vertical}
       <button class="btn primary homeNewTrip" onclick="editTrip()">＋ New trip</button>
     </div>
     <div class="tripHomeGrid" id="tripHomeGrid"></div>
-    <div class="homeExplore">
-      <div class="homeExploreIcon">🧭</div>
-      <div><b>Explore the world, your way.</b><span>Plan, organise and keep every booking in one place.</span></div>
-      <div class="homeExploreArt">⌁</div>
+    <div class="homeExplore brandExplore">
+      <div class="homeExploreIcon">◈</div>
+      <div><b>Places. People. Plans.</b><span>Plan more wonder — keep every part of your journey together.</span></div>
+      <div class="brandExploreWords">PLAN · EXPLORE · EXPERIENCE · BELONG</div>
     </div>
   </div>
 </div>
@@ -1151,8 +1436,8 @@ textarea{min-height:90px;resize:vertical}
 <div class="editSheet"><div class="editSheetTop"><h3>Edit plan</h3><button class="editSheetClose" onclick="closeEditSheet()">✕</button></div><div id="editSheetBody"></div></div></div>
 <div class="mobileShade" id="mobileShade" onclick="closeMobilePlanner()"></div>
 <nav class="mobileNav" id="mobileNav" aria-label="Wonder Plan navigation">
-  <button class="mobileNavBtn" id="m-trips" onclick="showTripHome()"><span class="mIcon">✦</span><span>Trips</span></button>
-  <button class="mobileNavBtn active" id="m-calendar" onclick="mobileTimeline()"><span class="mIcon">☷</span><span>Itinerary</span></button>
+  <button class="mobileNavBtn" id="m-trips" onclick="showTripHome()"><span class="mIcon">⌖</span><span>Trips</span></button>
+  <button class="mobileNavBtn active" id="m-calendar" onclick="mobileTimeline()"><span class="mIcon">≈</span><span>Itinerary</span></button>
   <button class="mobileNavBtn add" id="m-add" onclick="mobileAdd()"><span class="mIcon">＋</span><span>Add</span></button>
   <button class="mobileNavBtn" id="m-money" onclick="mobileMoney()"><span class="mIcon">$</span><span>Money</span></button>
   <button class="mobileNavBtn" id="m-settings" onclick="mobileSettings()"><span class="mIcon">⚙</span><span>Settings</span></button>
@@ -1723,34 +2008,92 @@ function showSection(section){
   const seg=document.querySelector(".viewSegment");
   const nav=document.querySelector(".calendarNav");
   const filters=document.getElementById("filterBar");
+  const scroller=document.querySelector(".calendarScroller");
+  const cal=document.getElementById("calendar");
   const calendarMode=section==="calendar";
+
   seg?.classList.toggle("sectionHidden",!calendarMode);
   nav?.classList.toggle("sectionHidden",!calendarMode);
   if(filters)filters.style.display=calendarMode?"flex":"none";
+
+  // Reset stale scroll/layout from the previous calendar mode.
+  if(scroller){
+    scroller.scrollLeft=0;
+    scroller.scrollTop=0;
+    scroller.classList.toggle("sectionPage",!calendarMode);
+    if(section!=="calendar")scroller.classList.remove("mobileMonthScroller");
+  }
+  if(cal){
+    cal.style.gridTemplateColumns="";
+    cal.style.width="";
+    cal.style.minWidth="";
+  }
+
   if(section==="timeline")renderTimeline();
   else if(section==="map")renderMap();
   else if(section==="money")renderMoney();
   else renderCalendar();
+
+  requestAnimationFrame(()=>{
+    if(scroller){scroller.scrollLeft=0;scroller.scrollTop=0}
+  });
 }
 function renderTimeline(){
   updateTripUI();
-  const cal=document.getElementById("calendar");cal.className="timeline";cal.style.gridTemplateColumns="";
-  const t=activeTrip();document.getElementById("calendarTitle").textContent=t?.name||"Your itinerary";
+  const cal=document.getElementById("calendar");
+  const scroller=document.querySelector(".calendarScroller");
+  cal.style.gridTemplateColumns="";
+  scroller?.classList.add("sectionPage");
+  scroller?.classList.remove("mobileMonthScroller");
+  const t=activeTrip();
+
+  if(isMobile()){
+    cal.className="timeline mobileDayTimeline sectionView";
+    document.getElementById("calendarTitle").textContent="Itinerary";
+    document.getElementById("dateContext").textContent=focusDate.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+    const ds=iso(focusDate),items=timelineItemsForDate(ds);
+    const dayLabel=focusDate.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    let h=mobileDateNavigatorHTML("timeline");
+    h+=`<div class="mobileTimelineTitle">${esc(t?.name||"My Trip")} · ${esc(dayLabel)}</div>`;
+    if(!items.length){
+      h+=`<div class="mobileTimelineEmpty"><div><b>Nothing planned for this day</b><br><span>Choose another date above or add something here.</span><br><button onclick="calendarAdd('${ds}')">＋ Add plan</button></div></div>`;
+    }else{
+      h+=`<section class="timelineDay"><div class="timelineDayHead">${esc(dayLabel)}</div>`;
+      items.forEach(i=>{
+        const stage=occurrenceStage(i,ds);
+        let time=i.time||"Any time";
+        if(i.type==="flight"&&stage==="Arrives")time=i.arrivalTime||"Arrival";
+        h+=`<div class="timelineItem">
+          <div class="timelineTime">${esc(time)}</div><div class="timelineDot"></div>
+          <div class="timelineCard" onclick="openItem('${i.id}')">
+            <b>${TYPES[i.type]?.icon||"•"} ${esc(i.title)} ${stage?`· ${stage}`:""}</b>
+            <small>${esc(i.location||i.meta||TYPES[i.type]?.label||"Plan")}</small>
+          </div>
+        </div>`;
+      });
+      h+=`</section>`;
+    }
+    cal.innerHTML=h;
+    return;
+  }
+
+  cal.className="timeline sectionView";
+  document.getElementById("calendarTitle").textContent=t?.name||"Your itinerary";
   document.getElementById("dateContext").textContent=t?.destination||"Timeline";
+
   const grouped={};
   [...state.items].sort(sortItems).forEach(i=>{
-    const dates=[i.date];
-    if(i.type==="flight"&&i.arrivalDate&&i.arrivalDate!==i.date)dates.push(i.arrivalDate);
-    dates.forEach(ds=>{(grouped[ds]??=[]).push(i)})
+    timelineOccurrenceDates(i).forEach(ds=>{(grouped[ds]??=[]).push(i)});
   });
+
   const insights=wonderInsights();
   let h=`<div class="wonderPanel"><h4>✦ Wonder Checks</h4><p>${insights.length?"A few things worth checking before you travel.":"Your itinerary looks clear so far. Wonder Plan will flag tight timing and missing essentials as you add plans."}</p>${insights.map(x=>`<div class="insight">⚑ ${esc(x)}</div>`).join("")}</div>`;
   const dates=Object.keys(grouped).sort();
   if(!dates.length)h+=`<div class="empty" style="padding:50px 10px">No plans yet. Tap + to start building this trip.</div>`;
   dates.forEach(ds=>{
     const d=new Date(ds+"T12:00:00");
-    h+=`<section class="timelineDay"><div class="timelineDayHead">${d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})}</div>`;
-    grouped[ds].sort(sortItems).forEach(i=>{
+    h+=`<section class="timelineDay"><div class="timelineDayHead">${d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</div>`;
+    timelineItemsForDate(ds).forEach(i=>{
       const stage=occurrenceStage(i,ds);
       let time=i.time||"—";if(i.type==="flight"&&stage==="Arrives")time=i.arrivalTime||"—";
       h+=`<div class="timelineItem"><div class="timelineTime">${esc(time)}</div><div class="timelineDot"></div><div class="timelineCard" onclick="openItem('${i.id}')"><b>${TYPES[i.type]?.icon||"•"} ${esc(i.title)} ${stage?`· ${stage}`:""}</b><small>${esc(i.location||i.meta||TYPES[i.type]?.label||"Plan")}</small></div></div>`;
@@ -1761,7 +2104,7 @@ function renderTimeline(){
 }
 function renderMap(){
   updateTripUI();
-  const cal=document.getElementById("calendar");cal.className="mapList";cal.style.gridTemplateColumns="";
+  const cal=document.getElementById("calendar");cal.className="mapList sectionView";cal.style.gridTemplateColumns="";
   const t=activeTrip();document.getElementById("calendarTitle").textContent="Places";
   document.getElementById("dateContext").textContent=t?.destination||"Trip map";
   const places=state.items.filter(i=>i.location && i.type!=="flight");
@@ -1848,9 +2191,68 @@ function closeModal(){
   if(isMobile())setMobileNavActive(appSection==="map"?"m-map":appSection==="timeline"?"m-calendar":"m-calendar");
 }
 
+
+function setExactDate(ds,target=appSection){
+  if(!ds)return;
+  focusDate=new Date(ds+"T12:00:00");
+  if(target==="timeline"){appSection="timeline";showSection("timeline")}
+  else {appSection="calendar";showSection("calendar")}
+}
+function shiftTimelineDay(dir){
+  focusDate=addDays(focusDate,dir);
+  renderTimeline();
+}
+function mobileDateNavigatorHTML(target="timeline"){
+  const full=focusDate.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"long",year:"numeric"});
+  let chips="";
+  for(let n=-2;n<=2;n++){
+    const d=addDays(focusDate,n),ds=iso(d),active=n===0;
+    chips+=`<button class="mobileDateChip ${active?"active":""}" onclick="setExactDate('${ds}','${target}')">
+      <span>${d.toLocaleDateString(undefined,{weekday:"short"})}</span>
+      <b>${d.getDate()}</b>
+      <small>${d.toLocaleDateString(undefined,{month:"short"})}</small>
+    </button>`;
+  }
+  return `<div class="mobileDateNavigator">
+    <div class="mobileDateNavTop">
+      <button class="mobileDateArrow" onclick="${target==="timeline"?"shiftTimelineDay(-1)":"focusDate=addDays(focusDate,-1);renderCalendar()"}">‹</button>
+      <div class="mobileDatePickWrap">
+        <div class="mobileDatePickLabel">📅 ${esc(full)} ▾</div>
+        <input class="mobileDatePicker" type="date" value="${iso(focusDate)}" onchange="setExactDate(this.value,'${target}')" aria-label="Choose exact date">
+      </div>
+      <button class="mobileDateArrow" onclick="${target==="timeline"?"shiftTimelineDay(1)":"focusDate=addDays(focusDate,1);renderCalendar()"}">›</button>
+    </div>
+    <div class="mobileDateStrip">${chips}</div>
+  </div>`;
+}
+function timelineOccurrenceDates(i){
+  if(!i?.date)return [];
+  const start=new Date(i.date+"T12:00:00");
+  const end=new Date(itemEndDate(i)+"T12:00:00");
+  if(isNaN(start)||isNaN(end))return [i.date];
+  const out=[];
+  for(let d=new Date(start);d<=end;d=addDays(d,1)){
+    const ds=iso(d);
+    if(isItemOnDate(i,ds))out.push(ds);
+  }
+  return out.length?out:[i.date];
+}
+function timelineItemsForDate(ds){
+  return state.items.filter(i=>isItemOnDate(i,ds)).sort((a,b)=>{
+    const ta=(a.type==="flight"&&occurrenceStage(a,ds)==="Arrives"?(a.arrivalTime||"99:99"):(a.time||"99:99"));
+    const tb=(b.type==="flight"&&occurrenceStage(b,ds)==="Arrives"?(b.arrivalTime||"99:99"):(b.time||"99:99"));
+    return ta.localeCompare(tb)||sortItems(a,b);
+  });
+}
+
 function setView(v){appSection="calendar";view=v;expandedMonthDate=null;showSection("calendar")}
-function goToday(){focusDate=new Date();if(appSection==="calendar")renderCalendar();else if(appSection==="timeline")renderTimeline()}
+function goToday(){
+  focusDate=new Date();
+  if(appSection==="calendar")renderCalendar();
+  else if(appSection==="timeline")renderTimeline();
+}
 function movePeriod(dir){
+  if(appSection==="timeline"){focusDate=addDays(focusDate,dir);renderTimeline();return}
   if(view==="day")focusDate=addDays(focusDate,dir);
   if(view==="week")focusDate=addDays(focusDate,dir*7);
   if(view==="month")focusDate=new Date(focusDate.getFullYear(),focusDate.getMonth()+dir,1,12);
@@ -1939,10 +2341,13 @@ function calendarCellTap(e,ds){
 function renderCalendar(){
   updateTripUI();
   renderFilters();
-  document.getElementById("dateContext").textContent=dateContextLabel(focusDate);
+  document.getElementById("dateContext").textContent=isMobile()
+    ? focusDate.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})
+    : dateContextLabel(focusDate);
   ["day","week","month","year"].forEach(v=>document.getElementById("v-"+v).classList.toggle("active",v===view));
   const cal=document.getElementById("calendar"),focusIso=iso(focusDate);
   if(view==="day"){
+    document.querySelector(".calendarScroller")?.classList.remove("mobileMonthScroller");
     cal.className="calendar";cal.style.gridTemplateColumns="1fr";
     const ds=focusIso,items=itemsForDate(ds);
     document.getElementById("calendarTitle").textContent=focusDate.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
@@ -1950,6 +2355,7 @@ function renderCalendar(){
     return;
   }
   if(view==="week"){
+    document.querySelector(".calendarScroller")?.classList.remove("mobileMonthScroller");
     const start=startOfWeek(focusDate);
     cal.className="calendar";cal.style.gridTemplateColumns="repeat(7,minmax(135px,1fr))";
     document.getElementById("calendarTitle").textContent=`Week of ${start.toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"})}`;
@@ -1958,8 +2364,31 @@ function renderCalendar(){
   }
   if(view==="month"){
     const y=focusDate.getFullYear(),m=focusDate.getMonth(),first=new Date(y,m,1,12),start=startOfWeek(first);
-    cal.className="calendar";cal.style.gridTemplateColumns="repeat(7,minmax(120px,1fr))";
     document.getElementById("calendarTitle").textContent=first.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+
+    if(isMobile()){
+      const scroller=document.querySelector(".calendarScroller");
+      scroller?.classList.add("mobileMonthScroller");
+      cal.className="mobileMonthGrid";
+      cal.style.gridTemplateColumns="";
+      let h=mobileDateNavigatorHTML("calendar");
+      h+=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(x=>`<div class="mobileMonthWeekday">${x.charAt(0)}</div>`).join("");
+      for(let n=0;n<42;n++){
+        const d=addDays(start,n),ds=iso(d),items=itemsForDate(ds);
+        const dots=items.slice(0,4).map(i=>`<span class="mobileMonthDot ${i.type}"></span>`).join("");
+        h+=`<div class="mobileMonthCell ${d.getMonth()!==m?"faded":""} ${ds===focusIso?"selected":""}" onclick="setExactDate('${ds}','calendar');view='day';renderCalendar()">
+          <div class="mobileMonthTop"><span class="mobileMonthNum">${d.getDate()}</span><button class="mobileMonthPlus" onclick="event.stopPropagation();calendarAdd('${ds}')" title="Add plan">＋</button></div>
+          <div class="mobileMonthDots">${dots}</div>
+          ${items.length?`<div class="mobileMonthCount">${items.length} plan${items.length===1?"":"s"}</div>`:""}
+        </div>`;
+      }
+      h+=`<div class="mobileMonthHint">Tap a date to open its day itinerary · tap + to add a plan</div>`;
+      cal.innerHTML=h;
+      return;
+    }
+
+    document.querySelector(".calendarScroller")?.classList.remove("mobileMonthScroller");
+    cal.className="calendar";cal.style.gridTemplateColumns="repeat(7,minmax(120px,1fr))";
     let h="";
     for(let n=0;n<42;n++){
       const d=addDays(start,n),ds=iso(d),items=itemsForDate(ds),expanded=expandedMonthDate===ds;
@@ -1971,6 +2400,7 @@ function renderCalendar(){
     }
     cal.innerHTML=h;return;
   }
+  document.querySelector(".calendarScroller")?.classList.remove("mobileMonthScroller");
   document.getElementById("calendarTitle").textContent=String(focusDate.getFullYear());
   cal.className="yearGrid";cal.style.gridTemplateColumns="";
   let h="";
@@ -2080,7 +2510,7 @@ function renderMoney(){
   const cal=document.getElementById("calendar"),t=activeTrip();
   document.getElementById("calendarTitle").textContent="Trip money";
   document.getElementById("dateContext").textContent=t?.name||"Money";
-  cal.className="";
+  cal.className="moneyView sectionView";
   const priced=state.items.filter(i=>Number(i.price)>0);
   const converted=priced.map(i=>({i,v:convertedPrice(i)}));
   const known=converted.filter(x=>x.v!==null);
@@ -2225,7 +2655,7 @@ async function downloadCloudState(){
   return await r.json();
 }
 function cloudPayload(){
-  return {app:"Wonder Plan",version:"11.7.1",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
+  return {app:"Wonder Plan",version:"11.9",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
 }
 async function createCloudFile(){
   const boundary="wp_"+Math.random().toString(36).slice(2);
@@ -2301,7 +2731,7 @@ async function manualCloudSync(){
   }catch(e){console.error(e);toastSync("Sync failed — reconnect Google Drive if needed")}
 }
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:"11.7.1",savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:"11.9",savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);

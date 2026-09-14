@@ -1,12 +1,12 @@
 {
-  "name": "Wonder Plan",
-  "short_name": "Wonder Plan",
+  "name": "WonderPlan",
+  "short_name": "WonderPlan",
   "description": "A modern itinerary planner for flights, hotels, activities, restaurants and transport.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#F3F4F6",
+  "theme_color": "#0B2545",
   "orientation": "any",
   "icons": [
     {
