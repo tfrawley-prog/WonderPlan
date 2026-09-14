@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wonder Plan</title>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wonder Plan">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<style>
+:root{
+  --bg:#f4f6f8;
+  --panel:#ffffff;
+  --panel2:#f9fafb;
+  --ink:#101828;
+  --muted:#667085;
+  --line:#e4e7ec;
+  --accent:#111827;
+  --accentSoft:#eef2f7;
+  --green:#0f766e;
+  --danger:#b42318;
+  --shadow:0 8px 28px rgba(16,24,40,.07);
+  --r:18px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:grid;grid-template-columns:360px 1fr;gap:14px;padding:14px}
+.sidebar,.main{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.sidebar{padding:18px;display:flex;flex-direction:column;min-height:calc(100vh - 28px)}
+.sidebar.collapsed{width:72px;padding:12px;overflow:hidden}
+.sidebar.collapsed .hideWhenCollapsed{display:none}
+.sidebar.collapsed .collapseText{display:none}
+.brandrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+.brand{font-size:24px;font-weight:800;letter-spacing:-.04em}
+.version{font-size:11px;padding:6px 8px;border-radius:999px;background:var(--accentSoft);color:var(--muted);font-weight:700}
+.iconBtn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:10px 12px;font-weight:700;display:inline-flex;align-items:center;gap:8px}
+.iconBtn:hover{background:var(--panel2)}
+.sidebarToggle{width:100%;justify-content:center;margin-bottom:18px}
+.kicker{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);font-weight:800;margin-bottom:8px}
+h1{font-size:28px;line-height:1.1;letter-spacing:-.04em;margin:0 0 8px}
+.sub{margin:0 0 18px;color:var(--muted);line-height:1.5}
+.typeGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.typeCard{border:1px solid var(--line);background:#fff;border-radius:16px;padding:16px;text-align:left;min-height:108px;color:var(--ink)}
+.typeCard:hover{border-color:#cfd4dc;background:#fbfcfd}
+.typeIcon{font-size:24px;margin-bottom:12px}
+.typeTitle{font-weight:800;font-size:15px}
+.typeDesc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.35}
+.formBlock{margin-top:4px}
+label{display:block;font-size:12px;font-weight:800;margin:13px 0 6px;color:#344054}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:#fff;color:var(--ink);outline:none}
+input:focus,select:focus,textarea:focus{border-color:#98a2b3;box-shadow:0 0 0 3px #f2f4f7}
+textarea{min-height:90px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:flex;gap:8px;margin-top:18px}
+.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:800}
+.btn.primary{background:var(--accent);color:#fff;flex:1}
+.btn.secondary{background:#f2f4f7;color:var(--ink)}
+.btn.danger{background:var(--danger);color:#fff}
+.suggestions{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;font-size:12px;color:var(--ink)}
+.chip:hover{background:#f8fafc}
+.sidebarFooter{margin-top:auto;padding-top:18px}
+.saveRow{display:flex;gap:8px;flex-wrap:wrap}
+.saveRow .iconBtn{flex:1;justify-content:center}
+.status{font-size:11px;color:var(--green);font-weight:700;margin-top:8px}
+.main{padding:18px;min-width:0;display:flex;flex-direction:column}
+.topbar{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;margin-bottom:14px}
+.titleWrap h2{margin:0;font-size:26px;letter-spacing:-.04em}
+.titleWrap p{margin:4px 0 0;color:var(--muted)}
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.segment{display:flex;gap:4px;background:#f2f4f7;padding:4px;border-radius:12px}
+.segment button{border:0;background:transparent;color:#475467;border-radius:9px;padding:8px 10px;font-weight:800}
+.segment button.active{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(16,24,40,.08)}
+.navrow{display:flex;gap:6px}
+.navrow button{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:8px 10px;font-weight:800}
+.calendarScroller{overflow:auto;max-height:calc(100vh - 140px);padding-bottom:4px}
+.calendar{display:grid;gap:8px;min-width:850px}
+.dayCell{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;min-height:140px}
+.dayCell.faded{opacity:.42}
+.dayCell.expanded{min-height:300px}
+.dayHeader{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f2f5;padding-bottom:8px;margin-bottom:8px}
+.dayName{font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase}
+.dayNum{font-size:18px;font-weight:800}
+.event{border:1px solid #eceff3;background:#f8fafc;border-radius:10px;padding:8px;margin-bottom:6px;cursor:pointer}
+.event:hover{border-color:#cfd4dc}
+.event.compact{padding:7px}
+.event.compact .eventMeta{display:none}
+.event.compact .eventTitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eventTime{font-size:10px;color:var(--muted);font-weight:800}
+.eventTitle{font-size:12px;font-weight:800;margin-top:2px}
+.eventMeta{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.35}
+.empty{font-size:11px;color:#98a2b3;text-align:center;padding:16px 0}
+.yearGrid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:10px;min-width:760px}
+.yearMonth{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
+.yearMonth h3{margin:0 0 8px;font-size:15px}
+.modal{position:fixed;inset:0;background:rgba(16,24,40,.38);display:none;place-items:center;padding:18px;z-index:50}
+.modal.open{display:grid}
+.modalCard{width:min(520px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:20px;padding:18px;box-shadow:0 24px 70px rgba(16,24,40,.22)}
+.modalTop{display:flex;justify-content:space-between;gap:12px}
+.modalTop h3{margin:0;font-size:22px}
+.modalClose{border:0;background:#f2f4f7;border-radius:10px;width:36px;height:36px}
+.detailGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.detail{background:#f8fafc;border-radius:12px;padding:11px}
+.detail small{display:block;color:var(--muted);margin-bottom:4px}
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{min-height:auto}
+  .sidebar.collapsed{width:auto}
+  .main{min-height:70vh}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brandrow">
+      <div class="brand hideWhenCollapsed">Wonder Plan</div>
+      <div class="version hideWhenCollapsed">v6</div>
+    </div>
+
+    <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
+      <span>☰</span><span class="collapseText">Hide / Show planner</span>
+    </button>
+
+    <div id="planner" class="hideWhenCollapsed"></div>
+
+    <div class="sidebarFooter hideWhenCollapsed">
+      <div class="saveRow">
+        <button class="iconBtn" onclick="exportTrip()">💾 Save</button>
+        <button class="iconBtn" onclick="document.getElementById('fileInput').click()">📂 Load</button>
+        <input id="fileInput" type="file" accept=".json,application/json" style="display:none" onchange="importTrip(event)">
+      </div>
+      <div class="status" id="status">✓ Autosave ready</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="titleWrap">
+        <h2 id="calendarTitle">Your itinerary</h2>
+        <p>Tap a plan to view, edit or delete it.</p>
+      </div>
+      <div class="controls">
+        <div class="segment">
+          <button id="v-day" onclick="setView('day')">☀ Day</button>
+          <button id="v-week" onclick="setView('week')">🗓 Week</button>
+          <button id="v-month" onclick="setView('month')">📅 Month</button>
+          <button id="v-year" onclick="setView('year')">🧭 Year</button>
+        </div>
+        <div class="navrow">
+          <button onclick="movePeriod(-1)">◀</button>
+          <button onclick="goToday()">Today</button>
+          <button onclick="movePeriod(1)">▶</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="calendarScroller">
+      <div id="calendar"></div>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modalCard" id="modalCard"></div>
+</div>
+
+<script>
+const TYPES={
+  flight:{label:"Flight",icon:"✈️",desc:"Airports, airline and times"},
+  hotel:{label:"Hotel",icon:"🏨",desc:"Accommodation and stay dates"},
+  activity:{label:"Activity",icon:"🎟️",desc:"Sightseeing, tours and experiences"},
+  restaurant:{label:"Restaurant",icon:"🍽️",desc:"Meals and reservations"},
+  transport:{label:"Transport",icon:"🚆",desc:"Train, ferry, bus or car"},
+  other:{label:"Other",icon:"＋",desc:"Anything else"}
+};
+const AIRPORTS={
+  tokyo:[["HND","Haneda Airport"],["NRT","Narita International Airport"]],
+  osaka:[["KIX","Kansai International Airport"],["ITM","Osaka International Airport"]],
+  sapporo:[["CTS","New Chitose Airport"]],
+  fukuoka:[["FUK","Fukuoka Airport"]],
+  bangkok:[["BKK","Suvarnabhumi Airport"],["DMK","Don Mueang Airport"]],
+  brisbane:[["BNE","Brisbane Airport"]],
+  "gold coast":[["OOL","Gold Coast Airport"]],
+  sydney:[["SYD","Sydney Airport"]],
+  melbourne:[["MEL","Melbourne Airport"]],
+  seoul:[["ICN","Incheon International Airport"],["GMP","Gimpo International Airport"]],
+  singapore:[["SIN","Singapore Changi Airport"]],
+  bali:[["DPS","Ngurah Rai International Airport"]],
+  denpasar:[["DPS","Ngurah Rai International Airport"]]
+};
+
+let state=loadState();
+let flow={mode:"home",step:0,draft:{},editingId:null};
+let view="week";
+let focusDate=state.items.length?new Date(state.items[0].date+"T12:00:00"):new Date();
+let expandedMonthDate=null;
+
+function loadState(){
+  try{
+    const raw=localStorage.getItem("wonderPlanV6");
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {items:[]};
+}
+function persist(msg="✓ Saved locally"){
+  try{localStorage.setItem("wonderPlanV6",JSON.stringify(state));setStatus(msg)}
+  catch(e){setStatus("Local save unavailable")}
+}
+function setStatus(t){const el=document.getElementById("status");if(el)el.textContent=t}
+function uid(){return "wp_"+Date.now()+"_"+Math.random().toString(36).slice(2)}
+function esc(s=""){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function val(id){return document.getElementById(id)?.value.trim()||""}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+function iso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function startOfWeek(d){const x=new Date(d);const n=(x.getDay()+6)%7;x.setDate(x.getDate()-n);x.setHours(12,0,0,0);return x}
+function toggleSidebar(){document.getElementById("sidebar").classList.toggle("collapsed")}
+
+function renderHome(){
+  return `<div class="kicker">Build your itinerary</div>
+  <h1>What are you adding?</h1>
+  <p class="sub">Choose a type first. Wonder Plan will only ask what it needs for that item.</p>
+  <div class="typeGrid">
+    ${Object.entries(TYPES).map(([k,v])=>`
+      <button class="typeCard" onclick="startType('${k}')">
+        <div class="typeIcon">${v.icon}</div>
+        <div class="typeTitle">${v.label}</div>
+        <div class="typeDesc">${v.desc}</div>
+      </button>`).join("")}
+  </div>`;
+}
+function startType(type,item=null){
+  flow.mode=type;flow.step=0;flow.editingId=item?.id||null;flow.draft=item?JSON.parse(JSON.stringify(item)):{type};
+  renderPlanner();
+}
+function capture(){
+  document.querySelectorAll("[data-field]").forEach(el=>flow.draft[el.dataset.field]=el.value.trim());
+}
+function controls(last=false){
+  return `<div class="actions">
+    <button class="btn secondary" onclick="backStep()">Back</button>
+    <button class="btn primary" onclick="${last?"finishItem()":"nextStep()"}">${last?(flow.editingId?"Save changes":"Add to itinerary"):"Continue"} →</button>
+  </div>`;
+}
+function nextStep(){capture();flow.step++;renderPlanner()}
+function backStep(){capture();if(flow.step===0){flow={mode:"home",step:0,draft:{},editingId:null}}else flow.step--;renderPlanner()}
+function airportSuggestions(city,field){
+  const list=AIRPORTS[String(city||"").toLowerCase().trim()]||[];
+  if(!list.length)return `<div class="sub" style="font-size:12px;margin-top:8px">Type a city such as Tokyo, Osaka, Brisbane or Bangkok for airport suggestions.</div>`;
+  return `<div class="suggestions">${list.map(a=>`<button class="chip" onclick="pickAirport('${field}','${a[0]} — ${a[1]}')">${a[0]} · ${a[1]}</button>`).join("")}</div>`;
+}
+function pickAirport(field,value){flow.draft[field]=value;renderPlanner()}
+function renderFlight(){
+  const d=flow.draft;
+  if(flow.step===0)return `<div class="kicker">Flight · 1 of 5</div><h1>Where are you flying to?</h1><p class="sub">Start with the destination city.</p>
+    <label>Destination city</label><input data-field="arriveCity" value="${esc(d.arriveCity)}" placeholder="e.g. Tokyo">${airportSuggestions(d.arriveCity,"arriveAirport")}${controls()}`;
+  if(flow.step===1)return `<div class="kicker">Flight · 2 of 5</div><h1>Which airport?</h1>
+    <label>Arrival airport</label><input data-field="arriveAirport" value="${esc(d.arriveAirport)}" placeholder="Choose or type airport">${airportSuggestions(d.arriveCity,"arriveAirport")}${controls()}`;
+  if(flow.step===2)return `<div class="kicker">Flight · 3 of 5</div><h1>Where are you flying from?</h1>
+    <label>Departure city</label><input data-field="departCity" value="${esc(d.departCity)}" placeholder="e.g. Brisbane">
+    <label>Departure airport</label><input data-field="departAirport" value="${esc(d.departAirport)}" placeholder="e.g. BNE — Brisbane Airport">${airportSuggestions(d.departCity,"departAirport")}${controls()}`;
+  if(flow.step===3)return `<div class="kicker">Flight · 4 of 5</div><h1>When is the flight?</h1>
+    <div class="row"><div><label>Date</label><input type="date" data-field="date" value="${esc(d.date)}"></div><div><label>Departure</label><input type="time" data-field="time" value="${esc(d.time)}"></div></div>
+    <label>Arrival time</label><input type="time" data-field="arrivalTime" value="${esc(d.arrivalTime)}">${controls()}`;
+  return `<div class="kicker">Flight · 5 of 5</div><h1>Flight details</h1>
+    <div class="row"><div><label>Airline</label><input data-field="airline" value="${esc(d.airline)}" placeholder="Qantas"></div><div><label>Flight number</label><input data-field="flightNo" value="${esc(d.flightNo)}" placeholder="QF61"></div></div>
+    <label>Notes</label><textarea data-field="notes" placeholder="Terminal, booking reference, baggage…">${esc(d.notes)}</textarea>${controls(true)}`;
+}
+function genericTitle(type){
+  return {hotel:"Where are you staying?",activity:"What are you doing?",restaurant:"Where are you eating?",transport:"What transport are you taking?",other:"What are you adding?"}[type];
+}
+function renderGeneric(){
+  const t=flow.mode,d=flow.draft;
+  if(flow.step===0)return `<div class="kicker">${TYPES[t].label} · 1 of 3</div><h1>${genericTitle(t)}</h1>
+    <label>${TYPES[t].label}</label><input data-field="title" value="${esc(d.title)}" placeholder="${t==="hotel"?"e.g. Hotel Gracery Shinjuku":t==="restaurant"?"e.g. Sushi dinner":t==="activity"?"e.g. TeamLab Borderless":t==="transport"?"e.g. Shinkansen to Kyoto":"e.g. Pick up SIM card"}">${controls()}`;
+  if(flow.step===1)return `<div class="kicker">${TYPES[t].label} · 2 of 3</div><h1>When is it?</h1>
+    <div class="row"><div><label>Date</label><input type="date" data-field="date" value="${esc(d.date)}"></div><div><label>Time</label><input type="time" data-field="time" value="${esc(d.time)}"></div></div>
+    ${t==="hotel"?`<label>Check-out date</label><input type="date" data-field="endDate" value="${esc(d.endDate)}">`:""}${controls()}`;
+  return `<div class="kicker">${TYPES[t].label} · 3 of 3</div><h1>Details</h1>
+    <label>Location / address</label><input data-field="location" value="${esc(d.location)}" placeholder="Optional">
+    <label>Notes</label><textarea data-field="notes" placeholder="Booking reference, ideas, details…">${esc(d.notes)}</textarea>${controls(true)}`;
+}
+function renderPlanner(){
+  document.getElementById("planner").innerHTML=flow.mode==="home"?renderHome():flow.mode==="flight"?renderFlight():renderGeneric();
+}
+function finishItem(){
+  capture();
+  const d=flow.draft;
+  if(!d.date){alert("Please add a date.");return}
+  let item={...d,id:flow.editingId||uid()};
+  if(d.type==="flight"){
+    item.title=`Flight to ${d.arriveCity||d.arriveAirport||"destination"}`;
+    item.location=`${d.departAirport||d.departCity||""} → ${d.arriveAirport||d.arriveCity||""}`;
+    item.meta=[d.airline,d.flightNo,d.arrivalTime?`Arrive ${d.arrivalTime}`:""].filter(Boolean).join(" · ");
+  }else{
+    item.meta=d.notes||"";
+  }
+  if(flow.editingId){
+    const idx=state.items.findIndex(x=>x.id===flow.editingId);
+    if(idx>=0)state.items[idx]=item;
+  }else state.items.push(item);
+  focusDate=new Date(item.date+"T12:00:00");
+  persist();
+  flow={mode:"home",step:0,draft:{},editingId:null};
+  renderAll();
+}
+function removeItem(id){
+  if(!confirm("Delete this plan?"))return;
+  state.items=state.items.filter(x=>x.id!==id);persist();closeModal();renderAll();
+}
+function editItem(id){
+  const item=state.items.find(x=>x.id===id);if(!item)return;
+  closeModal();startType(item.type,item);
+}
+function openItem(id){
+  const i=state.items.find(x=>x.id===id);if(!i)return;
+  document.getElementById("modalCard").innerHTML=`
+    <div class="modalTop"><div><div class="kicker">${TYPES[i.type]?.label||"Plan"}</div><h3>${esc(i.title)}</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
+    <div class="detailGrid">
+      <div class="detail"><small>Date</small><b>${esc(i.date||"—")}</b></div>
+      <div class="detail"><small>Time</small><b>${esc(i.time||"—")}</b></div>
+      <div class="detail"><small>Location</small><b>${esc(i.location||"—")}</b></div>
+      <div class="detail"><small>Type</small><b>${esc(TYPES[i.type]?.label||i.type)}</b></div>
+    </div>
+    ${i.meta?`<div class="detail"><small>Details</small>${esc(i.meta)}</div>`:""}
+    ${i.notes?`<div class="detail" style="margin-top:10px"><small>Notes</small>${esc(i.notes)}</div>`:""}
+    <div class="actions"><button class="btn secondary" onclick="editItem('${i.id}')">✏️ Edit</button><button class="btn danger" onclick="removeItem('${i.id}')">🗑 Delete</button></div>`;
+  document.getElementById("modal").classList.add("open");
+}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+
+function setView(v){view=v;expandedMonthDate=null;renderCalendar()}
+function goToday(){focusDate=new Date();renderCalendar()}
+function movePeriod(dir){
+  if(view==="day")focusDate=addDays(focusDate,dir);
+  if(view==="week")focusDate=addDays(focusDate,dir*7);
+  if(view==="month")focusDate=new Date(focusDate.getFullYear(),focusDate.getMonth()+dir,1,12);
+  if(view==="year")focusDate=new Date(focusDate.getFullYear()+dir,focusDate.getMonth(),1,12);
+  renderCalendar();
+}
+function eventHTML(i,compact=false){
+  return `<div class="event ${compact?"compact":""}" onclick="event.stopPropagation();openItem('${i.id}')">
+    <div class="eventTime">${TYPES[i.type]?.icon||"•"} ${esc(i.time||TYPES[i.type]?.label||"Plan")}</div>
+    <div class="eventTitle">${esc(i.title)}</div>
+    ${i.location?`<div class="eventMeta">${esc(i.location)}</div>`:""}
+    ${i.meta?`<div class="eventMeta">${esc(i.meta)}</div>`:""}
+  </div>`;
+}
+function renderCalendar(){
+  ["day","week","month","year"].forEach(v=>document.getElementById("v-"+v).classList.toggle("active",v===view));
+  const cal=document.getElementById("calendar");
+  if(view==="day"){
+    cal.className="calendar";cal.style.gridTemplateColumns="1fr";
+    const ds=iso(focusDate),items=state.items.filter(i=>i.date===ds).sort(sortItems);
+    document.getElementById("calendarTitle").textContent=focusDate.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    cal.innerHTML=dayCellHTML(focusDate,items,false);
+    return;
+  }
+  if(view==="week"){
+    const start=startOfWeek(focusDate);
+    cal.className="calendar";cal.style.gridTemplateColumns="repeat(7,minmax(130px,1fr))";
+    document.getElementById("calendarTitle").textContent=`Week of ${start.toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"})}`;
+    let h="";for(let n=0;n<7;n++){const d=addDays(start,n),ds=iso(d),items=state.items.filter(i=>i.date===ds).sort(sortItems);h+=dayCellHTML(d,items,false)}
+    cal.innerHTML=h;return;
+  }
+  if(view==="month"){
+    const y=focusDate.getFullYear(),m=focusDate.getMonth(),first=new Date(y,m,1,12),start=startOfWeek(first);
+    cal.className="calendar";cal.style.gridTemplateColumns="repeat(7,minmax(120px,1fr))";
+    document.getElementById("calendarTitle").textContent=first.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+    let h="";
+    for(let n=0;n<42;n++){
+      const d=addDays(start,n),ds=iso(d),items=state.items.filter(i=>i.date===ds).sort(sortItems),expanded=expandedMonthDate===ds;
+      h+=`<div class="dayCell ${d.getMonth()!==m?"faded":""} ${expanded?"expanded":""}" onclick="toggleMonthDay('${ds}')">
+        <div class="dayHeader"><div class="dayName">${d.toLocaleDateString(undefined,{weekday:"short"})}</div><div class="dayNum">${d.getDate()}</div></div>
+        ${items.length?(expanded?items.map(i=>eventHTML(i,false)).join(""):items.slice(0,3).map(i=>eventHTML(i,true)).join("")):`<div class="empty">Open</div>`}
+        ${!expanded&&items.length>3?`<div class="eventMeta">+${items.length-3} more</div>`:""}
+      </div>`;
+    }
+    cal.innerHTML=h;return;
+  }
+  document.getElementById("calendarTitle").textContent=String(focusDate.getFullYear());
+  cal.className="yearGrid";cal.style.gridTemplateColumns="";
+  let h="";
+  for(let m=0;m<12;m++){
+    const monthItems=state.items.filter(i=>{const d=new Date(i.date+"T12:00:00");return d.getFullYear()===focusDate.getFullYear()&&d.getMonth()===m});
+    h+=`<div class="yearMonth"><h3>${new Date(focusDate.getFullYear(),m,1).toLocaleDateString(undefined,{month:"long"})}</h3>
+      ${monthItems.length?monthItems.sort(sortItems).slice(0,6).map(i=>eventHTML(i,true)).join(""):`<div class="empty">No plans</div>`}
+    </div>`;
+  }
+  cal.innerHTML=h;
+}
+function sortItems(a,b){return (a.date+(a.time||"99:99")).localeCompare(b.date+(b.time||"99:99"))}
+function dayCellHTML(d,items){return `<div class="dayCell expanded"><div class="dayHeader"><div class="dayName">${d.toLocaleDateString(undefined,{weekday:"long"})}</div><div class="dayNum">${d.getDate()}</div></div>${items.length?items.map(i=>eventHTML(i,false)).join(""):`<div class="empty">No plans yet</div>`}</div>`}
+function toggleMonthDay(ds){expandedMonthDate=expandedMonthDate===ds?null:ds;renderCalendar()}
+
+function exportTrip(){
+  const payload={app:"Wonder Plan",version:6,savedAt:new Date().toISOString(),data:state};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");
+  a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  setStatus("💾 Trip file saved");
+}
+function importTrip(e){
+  const file=e.target.files?.[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const parsed=JSON.parse(r.result),incoming=parsed.data||parsed;
+      if(!incoming||!Array.isArray(incoming.items))throw new Error("Invalid Wonder Plan file");
+      state=incoming;persist("✓ Trip loaded");
+      if(state.items.length)focusDate=new Date(state.items[0].date+"T12:00:00");
+      renderAll();
+    }catch(err){alert("Could not load this trip: "+err.message)}
+    e.target.value="";
+  };
+  r.readAsText(file);
+}
+function renderAll(){renderPlanner();renderCalendar()}
+renderAll();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+  });
+}
+</script>
+
+</body>
+</html>
