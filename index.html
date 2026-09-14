@@ -704,6 +704,78 @@ textarea{min-height:90px;resize:vertical}
  .editOverlay{align-items:flex-end;padding:0}.editSheet{width:100%;max-height:88vh;border-radius:24px 24px 0 0;padding:18px}
 }
 
+
+/* V11.6 — tablet balance, home alignment and quick-add */
+.tripCardMenu{margin-left:auto!important;display:grid!important;place-items:center!important}
+.tripHomeTop .homeSettings{display:grid!important;place-items:center!important}
+.tripHomeSectionHead .homeNewTrip{
+  width:auto!important;max-width:max-content!important;min-width:124px!important;
+  flex:0 0 auto!important;margin-left:auto!important
+}
+
+/* Always make room for title + view controls on tablet */
+@media(min-width:601px) and (max-width:1180px){
+  .sidebar:not(.collapsed){width:248px!important;min-width:248px!important}
+  .sidebar:not(.collapsed) .brand{font-size:20px!important}
+  .sidebar:not(.collapsed) h1{font-size:24px!important;line-height:1.05!important}
+  .sidebar:not(.collapsed) .sub{font-size:11px!important;line-height:1.4!important}
+  .sidebar:not(.collapsed) .typeGrid{grid-template-columns:1fr 1fr!important;gap:7px!important}
+  .sidebar:not(.collapsed) .typeCard{min-height:92px!important;padding:10px!important}
+  .sidebar:not(.collapsed) .typeIcon{font-size:19px!important}
+  .sidebar:not(.collapsed) .typeTitle{font-size:12px!important}
+  .sidebar:not(.collapsed) .typeDesc{font-size:9px!important;line-height:1.25!important}
+  .sidebar:not(.collapsed) .importMainCard{grid-column:1/-1!important;padding:11px!important}
+  .topbar{
+    grid-template-columns:minmax(200px,1fr) auto!important;
+    column-gap:12px!important;
+    row-gap:6px!important
+  }
+  .topbar .titleWrap{min-width:0!important;position:relative!important;z-index:1!important}
+  .topbar .controls{position:relative!important;z-index:2!important;max-width:560px!important}
+  .segment{min-width:315px!important;grid-template-columns:repeat(4,minmax(70px,1fr))!important}
+  .segment button{font-size:10px!important;padding:8px 5px!important}
+  .navrow{gap:5px!important}
+  .roundControl{width:38px!important;height:38px!important;padding:0!important}
+  .dateContext{min-width:105px!important;padding:9px 10px!important;font-size:11px!important}
+  .topbar h2{font-size:25px!important;line-height:1.05!important;white-space:normal!important;max-width:290px!important}
+  .topbar .titleWrap>p{font-size:11px!important;max-width:260px!important;margin-top:6px!important}
+}
+
+.quickAddBtn{
+  width:26px;height:26px;border:0;border-radius:9px;background:#eef4ff;color:#1769d2;
+  font-weight:900;font-size:16px;display:grid;place-items:center;cursor:pointer
+}
+.dayHeader{gap:8px}
+.dayHeader .quickAddBtn{margin-left:auto}
+.dayCell.quickAddTarget{cursor:pointer}
+.dayCell.quickAddTarget:hover{background:#fbfdff}
+.quickAddModalGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.quickAddChoice{
+  border:1px solid #e1e6ef;background:#fff;border-radius:14px;padding:14px;text-align:left;
+  font-weight:850;color:#172033
+}
+.quickAddChoice span{display:block;font-size:22px;margin-bottom:5px}
+.quickAddTimeRow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){
+  .quickAddModalGrid{grid-template-columns:1fr 1fr}
+}
+
+
+/* V11.6.1 — exit active add/edit flow */
+.planner{position:relative}
+.plannerExitBtn{
+  position:absolute;right:0;top:0;z-index:12;
+  display:flex;align-items:center;gap:6px;
+  border:1px solid #e2e7ef;background:#fff;color:#667085;
+  border-radius:10px;padding:7px 10px;font-size:11px;font-weight:850;
+  cursor:pointer;box-shadow:0 2px 8px rgba(16,24,40,.04)
+}
+.plannerExitBtn:hover{background:#f6f8fb;color:#172033}
+.editSheet .plannerExitBtn{right:2px;top:2px}
+@media(max-width:600px){
+  .plannerExitBtn{position:sticky;float:right;top:8px;margin:0 0 8px 8px}
+}
+
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -713,7 +785,7 @@ textarea{min-height:90px;resize:vertical}
     <div class="mobileSheetTop"><div class="mobileSheetHandle"></div><button class="mobileSheetClose" onclick="closeMobilePlanner()" aria-label="Close">✕</button></div>
     <div class="brandrow">
       <div class="brand hideWhenCollapsed">Wonder Plan</div>
-      <div class="version hideWhenCollapsed">v11.5.2</div>
+      <div class="version hideWhenCollapsed">v11.6.1</div>
     </div>
 
     <button class="iconBtn sidebarToggle" onclick="toggleSidebar()" title="Hide or show planner">
@@ -795,7 +867,7 @@ textarea{min-height:90px;resize:vertical}
   <button class="mobileNavBtn" id="m-trips" onclick="showTripHome()"><span class="mIcon">✦</span><span>Trips</span></button>
   <button class="mobileNavBtn active" id="m-calendar" onclick="mobileTimeline()"><span class="mIcon">☷</span><span>Itinerary</span></button>
   <button class="mobileNavBtn add" id="m-add" onclick="mobileAdd()"><span class="mIcon">＋</span><span>Add</span></button>
-  <button class="mobileNavBtn" id="m-map" onclick="mobileMap()"><span class="mIcon">⌖</span><span>Places</span></button>
+  <button class="mobileNavBtn" id="m-money" onclick="mobileMoney()"><span class="mIcon">$</span><span>Money</span></button>
   <button class="mobileNavBtn" id="m-settings" onclick="mobileSettings()"><span class="mIcon">⚙</span><span>Settings</span></button>
 </nav>
 
@@ -909,11 +981,24 @@ const DESTINATION_PHOTOS={
  newzealand:{url:"https://images.unsplash.com/photo-1469521669194-babb45599def?auto=format&fit=crop&w=1600&q=80",credit:"Unsplash",link:"https://unsplash.com/"}
 };
 function destinationPhoto(t){
- if(t?.coverImage)return {url:t.coverImage,credit:"",link:""};
- const s=((t?.destination||"")+" "+(t?.name||"")).toLowerCase().replace(/\s+/g,"");
- const aliases=[["japan","japan"],["tokyo","japan"],["kyoto","japan"],["osaka","japan"],["myoko","japan"],["thailand","thailand"],["bangkok","thailand"],["phuket","thailand"],["bali","indonesia"],["indonesia","indonesia"],["vietnam","vietnam"],["italy","italy"],["france","france"],["australia","australia"],["newzealand","newzealand"]];
- for(const [needle,key] of aliases)if(s.includes(needle))return DESTINATION_PHOTOS[key];
- return null;
+  if(t?.coverImage)return {url:t.coverImage,credit:"",link:""};
+  const itemText=(t?.items||[]).map(i=>`${i.title||""} ${i.location||""} ${i.currency||""}`).join(" ");
+  const s=((t?.destination||"")+" "+(t?.name||"")+" "+itemText).toLowerCase().replace(/\s+/g,"");
+  const aliases=[
+    ["japan","japan"],["tokyo","japan"],["kyoto","japan"],["osaka","japan"],["myoko","japan"],["nagareyama","japan"],["jpy","japan"],
+    ["thailand","thailand"],["bangkok","thailand"],["phuket","thailand"],["chiangmai","thailand"],["thb","thailand"],
+    ["bali","indonesia"],["indonesia","indonesia"],["idr","indonesia"],
+    ["vietnam","vietnam"],["hanoi","vietnam"],["danang","vietnam"],["vnd","vietnam"],
+    ["italy","italy"],["rome","italy"],["france","france"],["paris","france"],
+    ["australia","australia"],["brisbane","australia"],["sydney","australia"],["aud","australia"],
+    ["newzealand","newzealand"],["queenstown","newzealand"],["nzd","newzealand"]
+  ];
+  for(const [needle,key] of aliases)if(s.includes(needle))return DESTINATION_PHOTOS[key];
+  return {
+    url:"https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80",
+    credit:"Unsplash",
+    link:"https://unsplash.com/"
+  };
 }
 function photoStyle(p){return p?.url?`background-image:url('${p.url.replace(/'/g,"%27")}')`:""}
 
@@ -997,6 +1082,7 @@ function editTrip(id=""){
     <div class="modalTop"><div><div class="kicker">${t?"Edit trip":"New trip"}</div><h3>${t?"Trip details":"Where are you going?"}</h3></div><button class="modalClose" onclick="openTrips()">✕</button></div>
     <label>Trip name</label><input id="tripName" value="${esc(t?.name||"")}" placeholder="Japan Winter 2027">
     <label>Destination</label><input id="tripDestination" value="${esc(t?.destination||"")}" placeholder="Japan">
+    <label>Cover photo URL <span style="font-weight:500;color:#98a2b3">(optional)</span></label><input id="tripCoverImage" value="${esc(t?.coverImage||"")}" placeholder="Leave blank for automatic location photo">
     <div class="row"><div><label>Start</label><input id="tripStart" type="date" value="${esc(t?.startDate||"")}"></div><div><label>End</label><input id="tripEnd" type="date" value="${esc(t?.endDate||"")}"></div></div>
     <label>Travellers</label><input id="tripTravellers" value="${esc(t?.travellers||"")}" placeholder="Tom, Jake…">
     <label>Trip icon</label><input id="tripEmoji" value="${esc(t?.emoji||"✈️")}" placeholder="✈️">
@@ -1005,7 +1091,7 @@ function editTrip(id=""){
 }
 function saveTrip(id=""){
   const name=val("tripName")||"Untitled Trip";
-  const obj={name,destination:val("tripDestination"),startDate:val("tripStart"),endDate:val("tripEnd"),travellers:val("tripTravellers"),emoji:val("tripEmoji")||"✈️"};
+  const obj={name,destination:val("tripDestination"),coverImage:val("tripCoverImage"),startDate:val("tripStart"),endDate:val("tripEnd"),travellers:val("tripTravellers"),emoji:val("tripEmoji")||"✈️"};
   if(id){
     const t=state.trips.find(x=>x.id===id);Object.assign(t,obj);
   }else{
@@ -1062,7 +1148,8 @@ function mobileAdd(){
   renderPlanner();openMobilePlanner();
 }
 function mobileTimeline(){closeMobilePlanner();closeModal();showSection("timeline");setMobileNavActive("m-calendar")}
-function mobileMap(){closeMobilePlanner();closeModal();showSection("map");setMobileNavActive("m-map")}
+function mobileMap(){closeMobilePlanner();closeModal();showSection("map");setMobileNavActive("m-calendar")}
+function mobileMoney(){closeMobilePlanner();closeModal();showSection("money");setMobileNavActive("m-money")}
 function mobileCalendar(){closeMobilePlanner();closeModal();showSection("calendar");setMobileNavActive("m-calendar")}
 function mobileToday(){closeMobilePlanner();closeModal();goToday();showSection("timeline");setMobileNavActive("m-calendar")}
 function mobileSettings(){closeMobilePlanner();openSettings();setMobileNavActive("m-settings")}
@@ -1218,9 +1305,35 @@ function handleAttachment(input){
   reader.readAsDataURL(file);
 }
 function removeAttachment(){flow.draft.attachment=null;renderPlanner()}
-function renderPlanner(){
+
+function addPlannerExitButton(){
+  const planner=document.getElementById("planner");
+  if(!planner || !flow?.mode)return;
+  if(planner.querySelector(".plannerExitBtn"))return;
+  const btn=document.createElement("button");
+  btn.className="plannerExitBtn";
+  btn.type="button";
+  btn.innerHTML="✕ <span>Exit</span>";
+  btn.title="Exit without finishing";
+  btn.onclick=cancelPlannerFlow;
+  planner.prepend(btn);
+}
+function cancelPlannerFlow(){
+  closeEditSheet();
+  flow={mode:null,step:0,editingId:null,draft:{}};
+  renderPlanner();
+  if(isMobile())closeMobilePlanner();
+}
+
+function renderPlannerCore(){
   document.getElementById("planner").innerHTML=flow.mode==="home"?renderHome():flow.mode==="flight"?renderFlight():renderGeneric();
 }
+
+function renderPlanner(){
+  renderPlannerCore();
+  addPlannerExitButton();
+}
+
 function finishItem(){
   capture();
   const d=flow.draft;
@@ -1242,7 +1355,7 @@ function finishItem(){
   flow={mode:"home",step:0,draft:{},editingId:null};
   renderAll();
   if(isMobile())closeMobilePlanner();
-  document.getElementById("editOverlay")?.classList.remove("open");
+  closeEditSheet();
 }
 function removeItem(id){
   if(!confirm("Delete this plan?"))return;
@@ -1254,17 +1367,23 @@ function editItem(id){
   const sidebar=document.getElementById("sidebar");
   const collapsed=!isMobile()&&sidebar?.classList.contains("collapsed");
   startType(item.type,item);
-  if(collapsed){
-    setTimeout(()=>renderEditSheet(),0);
-  }
+  if(collapsed)setTimeout(()=>openPlannerSheet("Edit plan"),0);
 }
-function renderEditSheet(){
+function openPlannerSheet(title="Edit plan"){
   const body=document.getElementById("editSheetBody"),planner=document.getElementById("planner");if(!body||!planner)return;
-  body.innerHTML=`<div class="planner">${planner.innerHTML}</div>`;
+  const h=document.querySelector(".editSheetTop h3");if(h)h.textContent=title;
+  body.innerHTML="";
+  body.appendChild(planner);
+  planner.classList.remove("hideWhenCollapsed");
   document.getElementById("editOverlay")?.classList.add("open");
 }
 function closeEditSheet(){
-  document.getElementById("editOverlay")?.classList.remove("open");
+  const overlay=document.getElementById("editOverlay"),planner=document.getElementById("planner"),sidebar=document.getElementById("sidebar");
+  overlay?.classList.remove("open");
+  if(planner&&sidebar&&!sidebar.contains(planner)){
+    planner.classList.add("hideWhenCollapsed");
+    sidebar.appendChild(planner);
+  }
 }
 function openItem(id){
   const i=state.items.find(x=>x.id===id);if(!i)return;
@@ -1280,7 +1399,7 @@ function openItem(id){
       <div class="detail"><small>Type</small><b>${esc(TYPES[i.type]?.label||i.type)}</b></div>
     </div>
     ${i.meta?`<div class="detail"><small>Details</small>${esc(i.meta)}</div>`:""}
-    ${i.location?`<div class="shareRow"><button class="btn secondary" onclick="openMaps('${encodeURIComponent(i.location)}')">⌖ Open in Google Maps</button><button class="btn secondary" onclick="shareItem('${i.id}')">↗ Share</button></div>`:""}
+    ${i.location?`<div class="shareRow"><button class="btn secondary" onclick="openMaps('${esc(i.location).replace(/'/g,"&#39;")}')">⌖ Open in Google Maps</button><button class="btn secondary" onclick="shareItem('${i.id}')">↗ Share</button></div>`:""}
     ${i.attachment?`<div class="detailAttachment"><img src="${i.attachment.data}" alt="Booking attachment" onclick="viewAttachment('${i.id}')"></div>`:""}
     <div class="actions"><button class="btn secondary" onclick="editItem('${i.id}')">✏️ Edit</button><button class="btn danger" onclick="removeItem('${i.id}')">🗑 Delete</button></div>`;
   document.getElementById("modal").classList.add("open");
@@ -1359,8 +1478,8 @@ function renderMap(){
   const t=activeTrip();document.getElementById("calendarTitle").textContent="Places";
   document.getElementById("dateContext").textContent=t?.destination||"Trip map";
   const places=state.items.filter(i=>i.location && i.type!=="flight");
-  let h=`<div class="wonderPanel"><h4>⌖ Your trip places</h4><p>Tap any location to open it in Apple Maps. A fully plotted in-app map can be added later with a geocoding/maps provider.</p></div>`;
-  h+=places.length?places.map(i=>`<div class="placeCard"><h4>${TYPES[i.type]?.icon||"•"} ${esc(i.title)}</h4><p>${esc(i.location)} · ${esc(i.date||"")}</p><button class="btn secondary" onclick="openMaps('${encodeURIComponent(i.location)}')">Open in Google Maps ↗</button></div>`).join(""):`<div class="empty" style="padding:50px 10px">Add locations to your hotels, restaurants and activities to build your places list.</div>`;
+  let h=`<div class="wonderPanel"><h4>⌖ Your trip places</h4><p>Tap any location to open it in Google Maps. A fully plotted in-app map can be added later with a geocoding/maps provider.</p></div>`;
+  h+=places.length?places.map(i=>`<div class="placeCard"><h4>${TYPES[i.type]?.icon||"•"} ${esc(i.title)}</h4><p>${esc(i.location)} · ${esc(i.date||"")}</p><button class="btn secondary" onclick="openMaps('${esc(i.location).replace(/'/g,"&#39;")}')">Open in Google Maps ↗</button></div>`).join(""):`<div class="empty" style="padding:50px 10px">Add locations to your hotels, restaurants and activities to build your places list.</div>`;
   cal.innerHTML=h;
 }
 function openImportBooking(){
@@ -1505,6 +1624,31 @@ function renderFilters(){
 }
 function toggleType(t){typeFilters[t]=!typeFilters[t];renderCalendar()}
 function showAllTypes(){const allOn=Object.values(typeFilters).every(Boolean);Object.keys(typeFilters).forEach(k=>typeFilters[k]=!allOn);renderCalendar()}
+
+function calendarAdd(ds,time=""){
+  const d=new Date(ds+"T12:00:00");
+  document.getElementById("modalCard").className="modalCard";
+  document.getElementById("modalCard").innerHTML=`
+    <div class="modalTop"><div><div class="kicker">Quick add</div><h3>${d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})}</h3></div><button class="modalClose" onclick="closeModal()">✕</button></div>
+    <p class="sub">Choose what you want to add. The date${time?" and time":""} will already be filled in.</p>
+    <div class="quickAddTimeRow"><div><label>Date</label><input id="quickAddDate" type="date" value="${esc(ds)}"></div><div><label>Time</label><input id="quickAddTime" type="time" value="${esc(time)}"></div></div>
+    <div class="quickAddModalGrid">${Object.entries(TYPES).map(([k,v])=>`<button class="quickAddChoice" onclick="startCalendarType('${k}')"><span>${v.icon}</span>${v.label}</button>`).join("")}</div>`;
+  document.getElementById("modal").classList.add("open");
+}
+function startCalendarType(type){
+  const ds=document.getElementById("quickAddDate")?.value||iso(focusDate);
+  const time=document.getElementById("quickAddTime")?.value||"";
+  closeModal();
+  flow={mode:type,step:0,editingId:null,draft:{type,date:ds,time}};
+  renderPlanner();
+  if(isMobile())openMobilePlanner();
+  else if(document.getElementById("sidebar")?.classList.contains("collapsed"))openPlannerSheet("Add plan");
+}
+function calendarCellTap(e,ds){
+  if(e.target.closest(".event")||e.target.closest(".quickAddBtn"))return;
+  calendarAdd(ds);
+}
+
 function renderCalendar(){
   updateTripUI();
   renderFilters();
@@ -1533,7 +1677,7 @@ function renderCalendar(){
     for(let n=0;n<42;n++){
       const d=addDays(start,n),ds=iso(d),items=itemsForDate(ds),expanded=expandedMonthDate===ds;
       h+=`<div class="dayCell ${d.getMonth()!==m?"faded":""} ${expanded?"expanded":""} ${ds===focusIso?"selected":""}" onclick="toggleMonthDay('${ds}')">
-        <div class="dayHeader"><div class="dayName">${d.toLocaleDateString(undefined,{weekday:"short"})}</div><div class="dayNum">${d.getDate()}</div></div>
+        <div class="dayHeader"><div class="dayName">${d.toLocaleDateString(undefined,{weekday:"short"})}</div><div class="dayNum">${d.getDate()}</div><button class="quickAddBtn" onclick="event.stopPropagation();calendarAdd('${ds}')" title="Add plan">＋</button></div>
         ${items.length?(expanded?items.map(i=>eventHTML(i,false,ds)).join(""):items.slice(0,4).map(i=>eventHTML(i,true,ds)).join("")):`<div class="empty">Open</div>`}
         ${!expanded&&items.length>4?`<div class="eventMeta">+${items.length-4} more</div>`:""}
       </div>`;
@@ -1562,7 +1706,7 @@ function renderCalendar(){
       <h3>${open?"▾":"▸"} ${new Date(focusDate.getFullYear(),m,1).toLocaleDateString(undefined,{month:"long"})} <span class="countBadge">${monthItems.length}</span></h3>
       ${!open?(monthItems.length?monthItems.slice(0,3).map(i=>eventHTML(i,true,i.date)).join(""):`<div class="empty">No plans</div>`):`
       <div class="yearLayer">${Object.entries(groups).map(([date,items])=>`<div class="yearDay">
-        <div class="yearDayHead" onclick="event.stopPropagation();toggleYearDay('${date}')"><span>${expandedYearDay===date?"▾":"▸"} ${new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})}</span><span>${items.length} item${items.length===1?"":"s"}</span></div>
+        <div class="yearDayHead" onclick="event.stopPropagation();toggleYearDay('${date}')"><span>${expandedYearDay===date?"▾":"▸"} ${new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})}</span><span style="display:flex;align-items:center;gap:7px">${items.length} item${items.length===1?"":"s"}<button class="quickAddBtn" onclick="event.stopPropagation();calendarAdd('${date}')" title="Add plan">＋</button></span></div>
         ${expandedYearDay===date?`<div class="yearItems">${items.map(i=>eventHTML(i,false,date)).join("")}</div>`:""}
       </div>`).join("")||`<div class="empty">No plans</div>`}</div>`}
     </div>`;
@@ -1572,7 +1716,14 @@ function renderCalendar(){
 function sortItems(a,b){return (a.date+(a.time||"99:99")).localeCompare(b.date+(b.time||"99:99"))}
 function dayCellHTML(d,items){
   const ds=iso(d),selected=ds===iso(focusDate);
-  return `<div class="dayCell expanded ${selected?"selected":""}" onclick="setFocusDate('${ds}')"><div class="dayHeader"><div class="dayName">${d.toLocaleDateString(undefined,{weekday:"long"})}</div><div class="dayNum">${d.getDate()}</div></div>${items.length?items.map(i=>eventHTML(i,false,ds)).join(""):`<div class="empty">No plans yet</div>`}</div>`
+  return `<div class="dayCell expanded quickAddTarget ${selected?"selected":""}" onclick="calendarCellTap(event,'${ds}')">
+    <div class="dayHeader">
+      <div class="dayName">${d.toLocaleDateString(undefined,{weekday:"long"})}</div>
+      <div class="dayNum">${d.getDate()}</div>
+      <button class="quickAddBtn" onclick="event.stopPropagation();calendarAdd('${ds}')" title="Add plan on this date">＋</button>
+    </div>
+    ${items.length?items.map(i=>eventHTML(i,false,ds)).join(""):`<div class="empty">Tap here to add a plan</div>`}
+  </div>`
 }
 function toggleMonthDay(ds){focusDate=new Date(ds+"T12:00:00");expandedMonthDate=expandedMonthDate===ds?null:ds;renderCalendar()}
 function toggleYearMonth(e,m){if(e.target.closest(".event"))return;expandedYearMonth=expandedYearMonth===m?null:m;expandedYearDay=null;renderCalendar()}
@@ -1787,7 +1938,7 @@ async function downloadCloudState(){
   return await r.json();
 }
 function cloudPayload(){
-  return {app:"Wonder Plan",version:"11.5.2",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
+  return {app:"Wonder Plan",version:"11.6.1",modifiedAt:state.modifiedAt||new Date().toISOString(),state};
 }
 async function createCloudFile(){
   const boundary="wp_"+Math.random().toString(36).slice(2);
@@ -1863,7 +2014,7 @@ async function manualCloudSync(){
   }catch(e){console.error(e);toastSync("Sync failed — reconnect Google Drive if needed")}
 }
 function exportTrip(){
-  const payload={app:"Wonder Plan",version:"11.5.2",savedAt:new Date().toISOString(),data:state};
+  const payload={app:"Wonder Plan",version:"11.6.1",savedAt:new Date().toISOString(),data:state};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
   a.href=url;a.download="wonder-plan-trip.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
