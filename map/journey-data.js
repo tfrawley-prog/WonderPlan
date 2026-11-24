@@ -108,6 +108,7 @@ window.WonderJourneyData = (() => {
     }
     for (const item of trip.items || []) {
       const location = trim(item.location);
+      const coordinateOf = point => point && coordinate(point.lat, point.lng);
       if (item.type === "flight" || item.type === "transport") {
         const [from, to] = location.split(/\s*(?:→|->|\s+to\s+)\s*/i, 2);
         const airport = item.type === "flight";
@@ -118,14 +119,14 @@ window.WonderJourneyData = (() => {
           const arrivalDate = item.arrivalDate || item.date;
           const sameDay = arrivalDate === item.date;
           const departureTime = item.departTime || item.time;
-          add(item, origin, item.date, departureTime || (sameDay && item.arrivalTime), {airport, leg, includeItem: false});
-          add(item, destination, arrivalDate, item.arrivalTime || (sameDay && departureTime), {airport, leg, arrival: true});
+          add(item, origin, item.date, departureTime || (sameDay && item.arrivalTime), {airport, leg, point: coordinateOf(item.fromCoordinates), includeItem: false});
+          add(item, destination, arrivalDate, item.arrivalTime || (sameDay && departureTime), {airport, leg, point: coordinateOf(item.toCoordinates), arrival: true});
           continue;
         }
       }
       const point = coordinate(item.lat ?? item.latitude ?? item.coordinates?.lat,
         item.lng ?? item.longitude ?? item.coordinates?.lng ?? item.coordinates?.lon);
-      add(item, location || (point ? item.title : ""), item.date, item.time, {point, end: item.type === "hotel" ? item.endDate : ""});
+      add(item, location || item.title, item.date, item.time, {point, end: item.type === "hotel" ? item.endDate : ""});
     }
     if (!events.some(event => event.place) && trim(trip.destination)) {
       add(null, trip.destination, trip.startDate, "", {end: trip.endDate, allowCountry: true});

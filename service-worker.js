@@ -1,4 +1,4 @@
-const CACHE = "wonder-plan-v12-2";
+const CACHE = "wonder-plan-v13-1";
 const ASSETS = [
   "./",
   "./index.html",
@@ -7,6 +7,9 @@ const ASSETS = [
   "./map/vendor/leaflet.css",
   "./map/journey-map.css",
   "./map/journey-map.js",
+  "./booking/scan.js",
+  "./booking/editor.js",
+  "./booking/editor.css",
   "./map/journey-data.js",
   "./map/boundaries.json",
   "./map/places.json",

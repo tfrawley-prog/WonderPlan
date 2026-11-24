@@ -52,3 +52,14 @@ test("unresolved plans can use a trip-level destination for framing", () => {
   assert.equal(pending[0].name, "Unknown hotel");
   assert.equal(lookup.resolve("Chicago, IL", "").name, "Chicago");
 });
+
+test("a geocoded transfer uses both confirmed addresses for its route", () => {
+  const {stops, routes} = journey.build({items: [{
+    type: "transport", title: "Airport shuttle", date: "2026-06-01",
+    location: "Terminal pickup → Hotel entrance",
+    fromCoordinates: {lat: 35.55, lng: 139.77},
+    toCoordinates: {lat: 35.69, lng: 139.71}
+  }]}, lookup);
+  assert.deepEqual(Array.from(stops, stop => stop.lat), [35.55, 35.69]);
+  assert.equal(routes[0].mode, "road");
+});

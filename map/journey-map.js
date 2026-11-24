@@ -64,7 +64,6 @@ window.WonderJourneyMap = (() => {
     const {trip, airports, escape, formatDate, costs, photo, openItem, openMaps} = options;
     root.innerHTML = `
       <div class="journeyToolbar">
-        <button class="journeyReturn" type="button">‹ Itinerary</button>
         <label class="journeyStyle">Map style
           <select aria-label="Map style"><option value="terrain">Terrain</option><option value="atlas">Atlas</option><option value="dark">Dark</option></select>
         </label>
@@ -119,7 +118,6 @@ window.WonderJourneyMap = (() => {
       map?.remove();
     };
     select.value = style;
-    root.querySelector(".journeyReturn").onclick = options.back;
 
     loadAssets().then(([data, boundaries]) => {
       if (!alive || !root.isConnected) return;
@@ -329,10 +327,14 @@ window.WonderJourneyMap = (() => {
       if (pending.length) {
         pendingList.innerHTML = `<details><summary>${pending.length} ${pending.length === 1 ? "location" : "locations"} without map coordinates</summary>
           <p>Add a city and country to the plan, or enter coordinates like -27.47, 153.03.</p>
-          <ul>${pending.map(({name, date}, index) => `<li>
+          <ul>${pending.map(({name, date, item}, index) => `<li>
             <span>${escape(name)}${date ? `<small data-stop-date ${visible.dates ? "" : "hidden"}>${escape(formatDate(date))}</small>` : ""}</span>
+            ${item?.id ? `<button type="button" data-edit-place="${index}">Add map address</button>` : ""}
             <button type="button" data-search="${index}">Search maps ↗</button>
           </li>`).join("")}</ul></details>`;
+        pendingList.querySelectorAll("[data-edit-place]").forEach(button => {
+          button.onclick = () => options.editItem(pending[Number(button.dataset.editPlace)].item.id, true);
+        });
         pendingList.querySelectorAll("[data-search]").forEach(button => {
           button.onclick = () => openMaps(pending[Number(button.dataset.search)].name);
         });

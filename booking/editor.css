@@ -1,0 +1,25 @@
+.bookingReview { border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px 12px; margin: 12px 0; min-width: 0; }
+.bookingReview legend { padding-inline: 5px; font-weight: 750; color: var(--wp-midnight); }
+.bookingReview input { margin-top: 4px; }
+.bookingLookup { margin: 8px 0; }
+.bookingPlaceResults { color: var(--muted); font-size: 13px; }
+.bookingPlaceResults:not(:empty) { margin-top: 8px; }
+.bookingPlaceResults a { display: inline-block; margin: 8px 0 4px; }
+.bookingPlaceResults small { display: block; }
+.bookingPlaceResults button {
+  display: block; width: 100%; text-align: left; background: var(--panel2); color: var(--wp-midnight);
+  min-height: 44px; padding: 8px; border: 1px solid var(--line); border-radius: 9px; margin-block: 5px;
+}
+@media(max-width:600px){
+  :root { --wp-tab-footer: max(18px, env(safe-area-inset-bottom)); }
+  .mobileNav {
+    grid-template-columns: repeat(6,minmax(0,1fr)) !important;
+    height: calc(64px + var(--wp-tab-footer)) !important;
+    padding: 5px 6px var(--wp-tab-footer) !important;
+  }
+  .main { bottom: calc(64px + var(--wp-tab-footer)); }
+  .calendarScroller { flex: 1; min-height: 0; height: auto; }
+  .mobileNavBtn.active:not(.add) { background: #eef5ff; color: var(--wp-ocean); }
+  .mobileNavBtn.add { margin-inline: 0 !important; }
+  .syncToast { bottom: calc(74px + var(--wp-tab-footer)); }
+}
