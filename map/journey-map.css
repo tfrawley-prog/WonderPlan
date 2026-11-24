@@ -92,9 +92,20 @@
 }
 @media (max-width: 600px) {
   .journeyToolbar .journeyReturn, .journeyMobileEntry { display: inline-flex; align-items: center; }
-  .journeyMobileEntry { margin: 0 0 8px; }
+  .journeyMobileEntry { min-height: 40px; margin-left: auto; }
+  .main:has(.journeyView) .journeyMobileEntry { display: none; }
   .journeyLayout { display: block; }
   .journeySurface { height: clamp(250px, 48svh, 470px); }
   .journeyDetails { max-height: none; border-left: 0; border-top: 1px solid var(--line); }
   .journeyLayers div { min-width: min(190px, 80vw); }
 }
+
+
+.appUpdate {
+  position: fixed; z-index: 10000; top: max(12px, env(safe-area-inset-top)); left: 50%;
+  transform: translateX(-50%); display: flex; gap: 10px; align-items: center;
+  padding: 6px 8px 6px 12px; border-radius: 12px; color: white;
+  background: var(--wp-midnight); box-shadow: var(--shadow); white-space: nowrap; font-size: 13px;
+}
+.appUpdate[hidden] { display: none; }
+.appUpdate button { background: white; color: var(--wp-midnight); border: 0; border-radius: 8px; min-height: 38px; padding: 0 10px; }
