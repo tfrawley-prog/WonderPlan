@@ -194,6 +194,80 @@ async function findBookingPlace(button) {
   }
 }
 
+const verifiedBookingPlaces = [{
+  name: "Hotel Lumi Gili Trawangan",
+  address: "Jalan Sunset Point, Gili Trawangan, Lombok, Indonesia",
+  kind: "hotel", lat: -8.3506698, lng: 116.0287738,
+  source: "Hotel website", sourceUrl: "https://hotel-lumi.com/contact-us"
+}];
+
+const placeWords = value => (value || "").normalize("NFD").replace(/\p{M}/gu, "")
+  .toLowerCase().match(/[\p{L}\p{N}]+/gu)?.filter(word => word.length >= 2) || [];
+
+function matchesBookingName(name, query) {
+  const generic = new Set(["hotel", "resort", "the", "and", "activity", "tour"]);
+  const words = placeWords(query).filter(word => !generic.has(word));
+  const candidate = placeWords(name);
+  return words.length > 0 && candidate.some(token => token.startsWith(words[0]));
+}
+
+async function searchWikidataVenues(title, city, signal) {
+  const base = "https://www.wikidata.org/w/api.php";
+  async function query(parameters) {
+    const url = new URL(base);
+    url.search = new URLSearchParams({origin: "*", format: "json", ...parameters});
+    const response = await fetch(url, {signal, cache: "no-store"});
+    if (!response.ok) throw new Error("Wikidata lookup unavailable");
+    return response.json();
+  }
+  const {search = []} = await query({action:"wbsearchentities", search:title, language:"en", limit:"5"});
+  const areaWords = placeWords(city).filter(word => word.length >= 3);
+  const candidates = search.filter(entry => matchesBookingName(entry.label, title) &&
+    (!areaWords.length || areaWords.some(word => placeWords(entry.description).includes(word))));
+  if (!candidates.length) return [];
+  const {entities = {}} = await query({action:"wbgetentities", ids:candidates.map(item => item.id).join("|"), props:"claims"});
+  return candidates.flatMap(item => {
+    const coordinates = entities[item.id]?.claims?.P625?.find(claim => claim.rank !== "deprecated")?.mainsnak?.datavalue?.value;
+    if (!coordinates || coordinates.globe !== "http://www.wikidata.org/entity/Q2" ||
+        !Number.isFinite(coordinates.latitude) || !Number.isFinite(coordinates.longitude)) return [];
+    return [{name:item.label, address:[item.label,item.description].filter(Boolean).join(" · "),
+      lat:coordinates.latitude, lng:coordinates.longitude, source:"Wikidata",
+      sourceUrl:`https://www.wikidata.org/wiki/${encodeURIComponent(item.id)}`}];
+  });
+}
+
+function mapsFallback(query, draft, name, status, list) {
+  const link = document.createElement("a");
+  link.textContent = "Search Google Maps ↗";
+  link.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  const details = document.createElement("details");
+  const summary = document.createElement("summary");
+  summary.textContent = "Use a map link or coordinates";
+  const input = document.createElement("input");
+  input.placeholder = "Full map URL or latitude, longitude";
+  input.setAttribute("aria-label", "Map URL or coordinates");
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "Use this pin";
+  button.onclick = () => {
+    const value = input.value.trim();
+    const pair = value.match(/^(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)$/);
+    const point = WonderBooking.pin(pair ? `https://www.google.com/maps?q=${pair[1]},${pair[2]}` : value);
+    if (point.lat === undefined) {
+      status.textContent = "Paste a full map URL containing a pin, or paste latitude and longitude.";
+      return;
+    }
+    Object.assign(draft, {location:`${name.value.trim()} @ ${point.lat}, ${point.lng}`, ...point});
+    status.textContent = "Map pin added.";
+    list.replaceChildren();
+    name.focus();
+  };
+  details.append(summary,input,button);
+  list.append(link,details);
+}
+
 async function searchBookingPlaces(text, controller = new AbortController()) {
   const url = new URL("https://photon.komoot.io/api/");
   url.search = new URLSearchParams({q: text, limit: "8", lang: "en"});
@@ -208,7 +282,7 @@ async function searchBookingPlaces(text, controller = new AbortController()) {
       if (!p || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat)>90 || Math.abs(lng)>180) return [];
       const address = [...new Set([p.name, [p.housenumber, p.street].filter(Boolean).join(" "),
         p.city || p.town || p.village || p.district, p.state, p.country].filter(Boolean))].join(", ");
-      return address ? [{lat, lng, address, name:p.name, key:p.osm_key, kind:p.osm_value}] : [];
+      return address ? [{lat, lng, address, name:p.name, key:p.osm_key, kind:p.osm_value, source:"Photon / OpenStreetMap"}] : [];
     });
   } finally { clearTimeout(timeout); }
 }
@@ -262,17 +336,39 @@ function bindPlaceSuggestions(planner) {
     timer = setTimeout(async () => {
       const controller = request = new AbortController();
       try {
-        const places = await searchBookingPlaces(query, controller);
-        if (!form.isConnected || controller.signal.aborted) return;
+        const verified = draft.type === "hotel" ? verifiedBookingPlaces.filter(place => {
+          const nameWords = placeWords(place.name);
+          const requested = placeWords(title).filter(word => word !== "hotel");
+          const address = placeWords(place.address);
+          return requested.length && requested.every(word => nameWords.some(token => token.startsWith(word))) &&
+            (!city || placeWords(city).some(word => nameWords.includes(word) || address.includes(word)));
+        }) : [];
+        const places = await searchBookingPlaces(query, controller).catch(() => []);
+        if (request !== controller) return;
+        if (!form.isConnected) return;
         const seen = new Set();
-        const matches = places.filter(place => {
-          if (!place.name || seen.has(place.address)) return false;
+        const photon = places.filter(place => {
+          if (!place.name || seen.has(place.address) || !matchesBookingName(place.name, title)) return false;
           const lodging = ["hotel", "hostel", "guest_house", "motel", "apartment", "chalet", "resort", "camp_site", "caravan_site"].includes(place.kind);
           if (draft.type === "hotel" && !lodging) return false;
           if (draft.type === "activity" && ["place", "boundary", "highway"].includes(place.key)) return false;
           seen.add(place.address);
           return true;
-        }).slice(0, 5);
+        });
+        let extra = [];
+        if (!photon.length && draft.type === "activity") {
+          const wikidata = new AbortController();
+          const timeout = setTimeout(() => wikidata.abort(), 3500);
+          const abort = () => wikidata.abort();
+          controller.signal.addEventListener("abort", abort, {once:true});
+          try { extra = await searchWikidataVenues(title, city, wikidata.signal); }
+          catch {} finally {
+            clearTimeout(timeout);
+            controller.signal.removeEventListener("abort", abort);
+          }
+        }
+        if (request !== controller || !form.isConnected) return;
+        const matches = [...verified, ...photon, ...extra].slice(0, 5);
         status.textContent = matches.length ? "Choose a match to add its address." : "No matches. Try a fuller name or city, or continue to enter the address manually.";
         for (const place of matches) {
           const button = document.createElement("button");
@@ -287,12 +383,16 @@ function bindPlaceSuggestions(planner) {
             name.focus();
           };
           list.append(button);
-        }
-        if (matches.length) {
-          const credit = document.createElement("small");
-          credit.textContent = "Photon / OpenStreetMap";
+          const credit = document.createElement(place.sourceUrl ? "a" : "small");
+          credit.textContent = place.source;
+          if (place.sourceUrl) {
+            credit.href = place.sourceUrl;
+            credit.target = "_blank";
+            credit.rel = "noopener noreferrer";
+          }
           list.append(credit);
         }
+        mapsFallback(query, draft, name, status, list);
       } catch {
         if (form.isConnected && request === controller) {
           status.textContent = "Search unavailable. You can continue and enter the address manually.";

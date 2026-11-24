@@ -93,5 +93,5 @@ window.WonderBooking = (() => {
       location: from && to ? `${from} → ${to}` : field(text, "address|location|property address|hotel address|venue|meeting point") || from || to,
       ...pin(sourceUrl)}];
   }
-  return {scan};
+  return {scan, pin};
 })();

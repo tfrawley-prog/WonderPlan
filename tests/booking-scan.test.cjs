@@ -3,7 +3,7 @@ const {readFileSync} = require("node:fs");
 const {join} = require("node:path");
 const {test} = require("node:test");
 const vm = require("node:vm");
-const context = {window: {}};
+const context = {window: {}, URL};
 vm.runInNewContext(readFileSync(join(__dirname, "../booking/scan.js"), "utf8"), context);
 const scan = (text, type) => JSON.parse(JSON.stringify(context.window.WonderBooking.scan(text, [
   {iata: "BNE", name: "Brisbane Airport"}, {iata: "SIN", name: "Changi Airport"},
@@ -42,4 +42,12 @@ test("extracts transfer endpoints and leaves unknown flight times empty", () => 
   assert.equal(transfer.location, "Haneda Airport → Shinjuku");
   const [flight] = scan("QF61\nDeparture: BNE 22 Dec 2026\nArrival: HND", "flight");
   assert.equal(flight.arrivalTime, "");
+});
+
+test("imports the exact map marker instead of the map viewport centre", () => {
+  const pin = context.window.WonderBooking.pin;
+  const point = pin("https://www.google.com/maps/place/Hotel+Lumi/@0,0,16z/data=!3d-8.3506698!4d116.0287738");
+  assert.equal(point.lat, -8.3506698);
+  assert.equal(point.lng, 116.0287738);
+  assert.equal(pin("https://www.google.com/maps/@0,0,16z").lat, undefined);
 });
