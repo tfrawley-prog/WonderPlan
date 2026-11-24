@@ -105,3 +105,18 @@
 }
 .appUpdate[hidden] { display: none; }
 .appUpdate button { background: white; color: var(--wp-midnight); border: 0; border-radius: 8px; min-height: 38px; padding: 0 10px; }
+
+
+.journeyMapPanel { position: relative; min-width: 0; }
+.journeyMapNotice {
+  position: absolute; z-index: 1; inset: auto 10px 24px 10px;
+  padding: 6px 8px; border-radius: 8px; font-size: 12px; background: #fff; color: var(--wp-midnight);
+  pointer-events: none;
+}
+.journeySurface[data-style="dark"] .journeyStreetPane { filter: brightness(.68) saturate(.65); }
+.journeyPinName { max-width: 132px; overflow: hidden; text-overflow: ellipsis; }
+.journeyAddressActions { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-block: 5px 9px; }
+.journeyAddressActions button {
+  min-height: 44px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--panel2); color: var(--wp-midnight); font-size: 12px; font-weight: 750;
+}

@@ -1,7 +1,7 @@
 window.WonderJourneyMap = (() => {
   const switches = {
     names: "Destination names",
-    labels: "Geographical labels",
+    labels: "Overview labels",
     routes: "Routes",
     dates: "Travel dates",
     accommodation: "Accommodation",
@@ -76,7 +76,10 @@ window.WonderJourneyMap = (() => {
         </details>
       </div>
       <div class="journeyLayout">
-        <div class="journeySurface" aria-label="Trip map" role="region"></div>
+        <div class="journeyMapPanel">
+          <div class="journeySurface" aria-label="Trip map" role="region"></div>
+          <div class="journeyMapNotice" role="status" hidden></div>
+        </div>
         <aside class="journeyDetails" aria-label="Journey stops">
           <p class="journeyStatus" role="status">Loading trip map…</p>
           <div class="journeyCard" hidden></div>
@@ -88,6 +91,7 @@ window.WonderJourneyMap = (() => {
 
     const surface = root.querySelector(".journeySurface");
     const status = root.querySelector(".journeyStatus");
+    const mapNotice = root.querySelector(".journeyMapNotice");
     const card = root.querySelector(".journeyCard");
     const list = root.querySelector(".journeyStops");
     const pendingList = root.querySelector(".journeyPending");
@@ -99,6 +103,7 @@ window.WonderJourneyMap = (() => {
     let alive = true;
     let map;
     let observer;
+    let removeNetworkListeners = () => {};
     let timer;
     let selected;
     let activeMarker;
@@ -115,6 +120,7 @@ window.WonderJourneyMap = (() => {
       alive = false;
       stopPlayback();
       observer?.disconnect();
+      removeNetworkListeners();
       map?.remove();
     };
     select.value = style;
@@ -127,13 +133,13 @@ window.WonderJourneyMap = (() => {
       const point = stop => [stop.lat, stop.mapLng];
       const resize = new ResizeObserver(() => map.invalidateSize({pan: false}));
       map = L.map(surface, {
-        crs: L.CRS.EPSG4326, zoomSnap: .25, minZoom: 0, maxZoom: 12,
+        zoomSnap: .25, zoomAnimation: false, minZoom: 0, maxZoom: 19,
         maxBounds: [[-90, -360], [90, 720]], scrollWheelZoom: false,
         attributionControl: false, touchZoom: true
       }).setView([18, 0], 0);
       observer = resize;
       observer.observe(surface);
-      L.control.attribution({prefix: false}).addAttribution(
+      const attribution = L.control.attribution({prefix: false}).addAttribution(
         '<a href="https://www.naturalearthdata.com/">Natural Earth</a> · <a href="https://ourairports.com/data/">OurAirports</a>'
       ).addTo(map);
       map.createPane("journeyLabels");
@@ -144,8 +150,8 @@ window.WonderJourneyMap = (() => {
       map.createPane("journeyRoutes");
       map.getPane("journeyRoutes").style.zIndex = 405;
       const lines = L.layerGroup().addTo(map);
-      const relief = L.layerGroup(worlds.map(offset => L.imageOverlay("./map/terrain.webp",
-        [[-90, -180 + offset], [90, 180 + offset]], {interactive: false})));
+      const relief = L.layerGroup(worlds.map(offset => L.imageOverlay("./map/terrain-mercator.webp",
+        [[-85.05112878, -180 + offset], [85.05112878, 180 + offset]], {interactive: false})));
       const outlines = worlds.map(offset => L.geoJSON(boundaries, {
         coordsToLatLng: ([lng, lat]) => L.latLng(lat, lng + offset),
         interactive: false
@@ -167,10 +173,57 @@ window.WonderJourneyMap = (() => {
         });
       }
 
+      const streetZoom = 11;
+      const streetPane = map.createPane("journeyStreets");
+      streetPane.style.zIndex = 402;
+      streetPane.classList.add("journeyStreetPane");
+      const streetCredit = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+      const streets = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        pane: "journeyStreets", minZoom: streetZoom, maxZoom: 19, keepBuffer: 1,
+        referrerPolicy: "strict-origin-when-cross-origin"
+      });
+      let streetTilesLoaded = false;
+      function showMapNotice(message) {
+        mapNotice.textContent = message;
+        mapNotice.hidden = !message;
+      }
+      function updateStreetDetail() {
+        const zoomedIn = map.getZoom() >= streetZoom;
+        if (zoomedIn && navigator.onLine) {
+          if (!map.hasLayer(streets)) {
+            streetTilesLoaded = false;
+            streets.addTo(map);
+            attribution.addAttribution(streetCredit);
+          }
+        } else if (map.hasLayer(streets)) {
+          map.removeLayer(streets);
+          attribution.removeAttribution(streetCredit);
+          streetTilesLoaded = false;
+        }
+        showMapNotice(zoomedIn && !navigator.onLine ? "Street detail requires internet. Your trip pins are still available." : "");
+        drawLabels();
+      }
+      streets.on("loading", () => { streetTilesLoaded = false; });
+      streets.on("tileerror", () => {
+        if (!streetTilesLoaded && map.hasLayer(streets)) showMapNotice("Street detail is unavailable. Your trip pins are still available.");
+      });
+      streets.on("tileload", () => {
+        if (streetTilesLoaded) return;
+        streetTilesLoaded = true;
+        showMapNotice("");
+        drawLabels();
+      });
+      window.addEventListener("online", updateStreetDetail);
+      window.addEventListener("offline", updateStreetDetail);
+      removeNetworkListeners = () => {
+        window.removeEventListener("online", updateStreetDetail);
+        window.removeEventListener("offline", updateStreetDetail);
+      };
+
       const sortedLabels = [...lookup.labels].sort((a, b) => a.zoom - b.zoom);
       function drawLabels() {
         labels.clearLayers();
-        if (!visible.labels) return;
+        if (!visible.labels || (streetTilesLoaded && map.hasLayer(streets))) return;
         const zoom = map.getZoom();
         const bounds = map.getBounds().pad(-.04);
         const cells = new Set();
@@ -195,7 +248,7 @@ window.WonderJourneyMap = (() => {
           }
         }
       }
-      map.on("moveend", drawLabels);
+      map.on("moveend", updateStreetDetail);
       map.on("dragstart zoomstart", event => {
         if (event.originalEvent || event.type === "dragstart") stopPlayback();
       });
@@ -263,6 +316,11 @@ window.WonderJourneyMap = (() => {
             <h3 tabindex="-1"><span>${stop.number}</span> ${escape(stop.name)}</h3>
             <button type="button" data-close aria-label="Close destination">×</button>
           </div>
+          ${stop.address && stop.address !== stop.name ? `<p class="journeyAddress">${escape(stop.address)}</p>` : ""}
+          <div class="journeyAddressActions">
+            <button type="button" data-zoom-stop>${stop.precise ? "Zoom to address" : "Zoom in here"}</button>
+            <button type="button" data-open-map>Open in Maps ↗</button>
+          </div>
           ${image ? `<figure><img alt="${escape(image.alt || "Destination photo")}" src="${escape(image.url)}">
             ${image.credit ? `<figcaption>${escape(image.credit)}</figcaption>` : ""}</figure>` : ""}
           ${visible.photos ? `<p class="journeyPhotoUnavailable" ${image ? "hidden" : ""}>Photograph unavailable</p>` : ""}
@@ -270,6 +328,13 @@ window.WonderJourneyMap = (() => {
           ${visible.accommodation ? planGroup("Accommodation", hotels) : ""}
           ${visible.activities ? planGroup("Activities", activities) : ""}
           <div class="journeyPlanGroup"><h4>Estimated expenditure</h4><p>${escape(costs(stop.items) || "No costs added")}</p></div>`;
+        card.querySelector("[data-zoom-stop]").onclick = () => {
+          stopPlayback();
+          map.stop();
+          map.setView(point(stop), Math.max(map.getZoom(), stop.precise ? 17 : 13));
+          surface.scrollIntoView({block: "nearest"});
+        };
+        card.querySelector("[data-open-map]").onclick = () => openMaps(stop.precise ? `${stop.lat},${stop.lng}` : stop.name);
         const img = card.querySelector("img");
         if (img) {
           const unavailable = () => {
@@ -381,10 +446,11 @@ window.WonderJourneyMap = (() => {
       drawBase();
       drawRoutes();
       frame();
-      drawLabels();
+      updateStreetDetail();
     }).catch(error => {
       if (!alive) return;
       observer?.disconnect();
+      removeNetworkListeners();
       map?.remove();
       map = undefined;
       console.error("WonderPlan map:", error);
