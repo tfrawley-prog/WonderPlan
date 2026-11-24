@@ -51,10 +51,10 @@ window.WonderJourneyData = (() => {
     }
     function resolve(value, hint, {airport = false, point = null, allowCountry = false} = {}) {
       const text = trim(value);
-      if (point) return {name: text || "Pinned location", lat: point[0], lng: point[1]};
+      if (point) return {name: text.split(",")[0] || "Pinned location", address: text, precise: true, lat: point[0], lng: point[1]};
       const pair = text.match(/^(?:(.+?)\s*@\s*)?(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
       const namedPin = pair && coordinate(pair[2], pair[3]);
-      if (namedPin) return {name: pair[1] || text, lat: namedPin[0], lng: namedPin[1]};
+      if (namedPin) return {name: pair[1] || "Pinned location", address: pair[2] + ", " + pair[3], precise: true, lat: namedPin[0], lng: namedPin[1]};
       const code = airport && text.match(/^([A-Z]{3})(?:\s|$)/)?.[1];
       if (code && data.airports[code]) {
         const [name, country, lat, lng] = data.airports[code];
@@ -99,6 +99,7 @@ window.WonderJourneyData = (() => {
     const hint = lookup.countryFor(trip.destination);
     function add(item, name, date, time, options = {}) {
       const place = lookup.resolve(name, hint, options);
+      if (place?.precise && options.title) place.name = options.title;
       if (!trim(name) && !place) return;
       events.push({
         name: place?.name || trim(name), place, date: day(date), time: trim(time),
@@ -126,7 +127,7 @@ window.WonderJourneyData = (() => {
       }
       const point = coordinate(item.lat ?? item.latitude ?? item.coordinates?.lat,
         item.lng ?? item.longitude ?? item.coordinates?.lng ?? item.coordinates?.lon);
-      add(item, location || item.title, item.date, item.time, {point, end: item.type === "hotel" ? item.endDate : ""});
+      add(item, location || item.title, item.date, item.time, {point, title:trim(item.title), end: item.type === "hotel" ? item.endDate : ""});
     }
     if (!events.some(event => event.place) && trim(trip.destination)) {
       add(null, trip.destination, trip.startDate, "", {end: trip.endDate, allowCountry: true});

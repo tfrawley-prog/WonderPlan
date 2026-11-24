@@ -63,3 +63,13 @@ test("a geocoded transfer uses both confirmed addresses for its route", () => {
   assert.deepEqual(Array.from(stops, stop => stop.lat), [35.55, 35.69]);
   assert.equal(routes[0].mode, "road");
 });
+
+test("a precise stop keeps its address separate from the map label", () => {
+  const {stops} = journey.build({items: [{
+    type: "hotel", title: "Villa Siki Sanur", location: "Villa Siki Sanur, 2 Gang Penjor Agung, Denpasar",
+    date: "2026-12-05", lat: -8.69, lng: 115.26
+  }]}, lookup);
+  assert.equal(stops[0].name, "Villa Siki Sanur");
+  assert.equal(stops[0].address, "Villa Siki Sanur, 2 Gang Penjor Agung, Denpasar");
+  assert.equal(stops[0].precise, true);
+});
