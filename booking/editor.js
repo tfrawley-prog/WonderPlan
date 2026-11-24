@@ -144,24 +144,7 @@ async function findBookingPlace(button) {
   output.replaceChildren();
   button.disabled = true;
   try {
-    const search = async text => {
-      const url = new URL("https://photon.komoot.io/api/");
-      url.search = new URLSearchParams({q: text, limit: "4", lang: "en"});
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 6500);
-      try {
-        const response = await fetch(url, {signal: controller.signal, cache: "no-store"});
-        if (!response.ok) throw new Error("Place search unavailable");
-        const data = await response.json();
-        return (data.features || []).map(feature => {
-          const p = feature.properties;
-          const [lng, lat] = feature.geometry.coordinates;
-          const address = [...new Set([p.name, [p.housenumber, p.street].filter(Boolean).join(" "), p.city || p.town || p.district, p.state, p.country].filter(Boolean))].join(", ");
-          return {lat, lng, address};
-        }).filter(place => place.address && Number.isFinite(place.lat) && Number.isFinite(place.lng));
-      } finally { clearTimeout(timeout); }
-    };
-    const results = await Promise.all((parts.length === 2 ? parts.map(withArea) : [query]).map(search));
+    const results = await Promise.all((parts.length === 2 ? parts.map(withArea) : [query]).map(text => searchBookingPlaces(text)));
     if (!button.isConnected || field.value.trim() !== location) return;
     if (results.every(items => !items.length)) {
       output.textContent = "No matching addresses. Add a city or use a street address.";
@@ -209,4 +192,112 @@ async function findBookingPlace(button) {
       output.append(link);
     }
   }
+}
+
+async function searchBookingPlaces(text, controller = new AbortController()) {
+  const url = new URL("https://photon.komoot.io/api/");
+  url.search = new URLSearchParams({q: text, limit: "8", lang: "en"});
+  const timeout = setTimeout(() => controller.abort(), 6500);
+  try {
+    const response = await fetch(url, {signal: controller.signal, cache: "no-store"});
+    if (!response.ok) throw new Error("Place search unavailable");
+    const data = await response.json();
+    return (data.features || []).flatMap(feature => {
+      const p = feature.properties;
+      const [lng, lat] = feature.geometry?.coordinates || [];
+      if (!p || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat)>90 || Math.abs(lng)>180) return [];
+      const address = [...new Set([p.name, [p.housenumber, p.street].filter(Boolean).join(" "),
+        p.city || p.town || p.village || p.district, p.state, p.country].filter(Boolean))].join(", ");
+      return address ? [{lat, lng, address, name:p.name, key:p.osm_key, kind:p.osm_value}] : [];
+    });
+  } finally { clearTimeout(timeout); }
+}
+
+function placeSuggestionsHTML(type, draft) {
+  const city = draft.placeArea ?? activeTrip()?.destination ?? "";
+  return `<div class="livePlaceSearch">
+    <label for="planner-place-area">City or area</label>
+    <input id="planner-place-area" data-field="placeArea" value="${esc(city)}" placeholder="e.g. Shinjuku, Tokyo" autocomplete="off">
+    <label for="planner-place-name">${type === "hotel" ? "Hotel or property name" : "Activity or venue name"}</label>
+    <input id="planner-place-name" data-field="title" value="${esc(draft.title)}" autocomplete="off" placeholder="${type === "hotel" ? "e.g. Hotel Gracery" : "e.g. teamLab Borderless"}" aria-describedby="planner-place-status">
+    <p id="planner-place-status" role="status">${draft.location ? esc(draft.location) : "Type a name to find its address."}</p>
+    <div class="bookingPlaceResults"></div>
+  </div>`;
+}
+
+let disposePlaceSuggestions = () => {};
+function bindPlaceSuggestions(planner) {
+  disposePlaceSuggestions();
+  disposePlaceSuggestions = () => {};
+  const form = planner.querySelector(".livePlaceSearch");
+  if (!form) return;
+  const name = form.querySelector('[data-field="title"]');
+  const area = form.querySelector('[data-field="placeArea"]');
+  const status = form.querySelector('[role="status"]');
+  const list = form.querySelector(".bookingPlaceResults");
+  const draft = flow.draft;
+  let timer;
+  let request;
+  const cancel = () => {
+    clearTimeout(timer);
+    request?.abort();
+    request = undefined;
+  };
+  disposePlaceSuggestions = cancel;
+  form.oninput = () => {
+    cancel();
+    list.replaceChildren();
+    const title = name.value.trim();
+    if (title.length < 3) {
+      status.textContent = "Type at least three characters to search.";
+      return;
+    }
+    if (!navigator.onLine) {
+      status.textContent = "Search unavailable offline. You can continue and enter the address manually.";
+      return;
+    }
+    status.textContent = "Searching for places…";
+    const city = area.value.trim();
+    const query = city && !title.toLowerCase().includes(city.toLowerCase()) ? `${title}, ${city}` : title;
+    timer = setTimeout(async () => {
+      const controller = request = new AbortController();
+      try {
+        const places = await searchBookingPlaces(query, controller);
+        if (!form.isConnected || controller.signal.aborted) return;
+        const seen = new Set();
+        const matches = places.filter(place => {
+          if (!place.name || seen.has(place.address)) return false;
+          const lodging = ["hotel", "hostel", "guest_house", "motel", "apartment", "chalet", "resort", "camp_site", "caravan_site"].includes(place.kind);
+          if (draft.type === "hotel" && !lodging) return false;
+          if (draft.type === "activity" && ["place", "boundary", "highway"].includes(place.key)) return false;
+          seen.add(place.address);
+          return true;
+        }).slice(0, 5);
+        status.textContent = matches.length ? "Choose a match to add its address." : "No matches. Try a fuller name or city, or continue to enter the address manually.";
+        for (const place of matches) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = place.address;
+          button.onclick = () => {
+            cancel();
+            name.value = place.name;
+            Object.assign(draft, {location:place.address, lat:place.lat, lng:place.lng});
+            list.replaceChildren();
+            status.textContent = `Address added: ${place.address}`;
+            name.focus();
+          };
+          list.append(button);
+        }
+        if (matches.length) {
+          const credit = document.createElement("small");
+          credit.textContent = "Photon / OpenStreetMap";
+          list.append(credit);
+        }
+      } catch {
+        if (form.isConnected && request === controller) {
+          status.textContent = "Search unavailable. You can continue and enter the address manually.";
+        }
+      }
+    }, 650);
+  };
 }

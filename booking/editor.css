@@ -23,3 +23,6 @@
   .mobileNavBtn.add { margin-inline: 0 !important; }
   .syncToast { bottom: calc(74px + var(--wp-tab-footer)); }
 }
+
+.livePlaceSearch [role="status"] { color: var(--muted); font-size: 12px; margin: 8px 0; }
+.livePlaceSearch .bookingPlaceResults { margin-bottom: 10px; }
