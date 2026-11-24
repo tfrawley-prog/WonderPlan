@@ -2,13 +2,12 @@
 #calendar.journeyView { max-width: 1400px !important; margin-inline: auto; padding-bottom: 12px; }
 .journeyView [hidden] { display: none !important; }
 .journeyToolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
-.journeyToolbar button, .journeyToolbar summary, .journeyToolbar select, .journeyMobileEntry {
+.journeyToolbar button, .journeyToolbar summary, .journeyToolbar select {
   min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: #fff;
   padding: 8px 12px; color: var(--wp-midnight); font: inherit; font-size: 13px; font-weight: 750;
 }
 .journeyToolbar button:disabled { opacity: .5; cursor: default; }
-.journeyToolbar .journeyPlay, .journeyMobileEntry { background: var(--wp-midnight); color: white; }
-.journeyToolbar .journeyReturn, .journeyMobileEntry { display: none; }
+.journeyToolbar .journeyPlay { background: var(--wp-midnight); color: white; }
 .journeyStyle { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; }
 .journeyStyle select { width: auto; }
 .journeyLayers { position: relative; z-index: 2; }
@@ -85,15 +84,12 @@
 .journeyPending li + li { border-top: 1px solid var(--line); padding-top: 6px; }
 .journeyLegend { display: flex; flex-wrap: wrap; gap: 7px 14px; color: var(--muted); font-size: 11px; margin-top: 8px; }
 .journeyLegend span { display: inline-flex; align-items: center; gap: 5px; }
-.journeyView :focus-visible, .journeyMobileEntry:focus-visible { outline: 2px solid var(--wp-ocean); outline-offset: 2px; }
+.journeyView :focus-visible:focus-visible { outline: 2px solid var(--wp-ocean); outline-offset: 2px; }
 
 @media (max-width: 900px) {
   .journeyLayout { grid-template-columns: minmax(0, 1fr) minmax(190px, 30%); }
 }
 @media (max-width: 600px) {
-  .journeyToolbar .journeyReturn, .journeyMobileEntry { display: inline-flex; align-items: center; }
-  .journeyMobileEntry { min-height: 40px; margin-left: auto; }
-  .main:has(.journeyView) .journeyMobileEntry { display: none; }
   .journeyLayout { display: block; }
   .journeySurface { height: clamp(250px, 48svh, 470px); }
   .journeyDetails { max-height: none; border-left: 0; border-top: 1px solid var(--line); }
