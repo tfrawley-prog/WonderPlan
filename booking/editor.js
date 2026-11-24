@@ -79,7 +79,7 @@ function renderBookingReview(preferred) {
       const d = {...bookingReview[index]};
       card.querySelectorAll("[data-booking-field]").forEach(input => { d[input.dataset.bookingField] = input.value.trim(); });
       if (d.location !== bookingReview[index].location) {
-        delete d.lat; delete d.lng; delete d.fromCoordinates; delete d.toCoordinates;
+        delete d.lat; delete d.lng; delete d.fromCoordinates; delete d.toCoordinates; delete d.geoapifyCredits;
       }
       return d;
     });
@@ -144,7 +144,7 @@ async function findBookingPlace(button) {
   output.replaceChildren();
   button.disabled = true;
   try {
-    const results = await Promise.all((parts.length === 2 ? parts.map(withArea) : [query]).map(text => searchBookingPlaces(text)));
+    const results = await Promise.all((parts.length === 2 ? parts.map(withArea) : [query]).map(text => searchBookingProviders(text)));
     if (!button.isConnected || field.value.trim() !== location) return;
     if (results.every(items => !items.length)) {
       output.textContent = "No matching addresses. Add a city or use a street address.";
@@ -162,6 +162,7 @@ async function findBookingPlace(button) {
           group.replaceChildren(document.createTextNode(`✓ ${place.address}`));
           if (results.length === 2 && (!chosen[0] || !chosen[1])) return;
           draft.location = field.value = chosen.map(p => p.address).join(" → ");
+          rememberBookingPlaceSources(draft, chosen);
           if (results.length === 2) {
             draft.fromCoordinates = {lat: chosen[0].lat, lng: chosen[0].lng};
             draft.toCoordinates = {lat: chosen[1].lat, lng: chosen[1].lng};
@@ -171,14 +172,11 @@ async function findBookingPlace(button) {
           }
           output.textContent = "✓ Added map coordinates";
         };
-        group.append(choice);
+        group.append(choice, bookingPlaceCredit(place));
       }
       if (!items.length && results.length > 1) group.append(" — no matches. Add a city or street address.");
       output.append(group);
     });
-    const attribution = document.createElement("small");
-    attribution.textContent = "Location search by Photon / OpenStreetMap";
-    output.append(attribution);
   } catch {
     output.textContent = "Address search is unavailable. You can still enter an address and save.";
   } finally {
@@ -260,12 +258,99 @@ function mapsFallback(query, draft, name, status, list) {
       return;
     }
     Object.assign(draft, {location:`${name.value.trim()} @ ${point.lat}, ${point.lng}`, ...point});
+    rememberBookingPlaceSources(draft, []);
     status.textContent = "Map pin added.";
     list.replaceChildren();
     name.focus();
   };
   details.append(summary,input,button);
   list.append(link,details);
+}
+
+const geoapifyKeyStorage = "wonderPlanGeoapifyKey";
+
+function bookingSearchSettingsHTML() {
+  const configured = Boolean(localStorage.getItem(geoapifyKeyStorage));
+  return `<div class="settingsCard"><h4>Additional place search</h4>
+    <p>${configured ? "Geoapify is enabled on this device." : "Add a Geoapify browser API key to search another address and place index alongside Photon."}</p>
+    <p><a href="https://myprojects.geoapify.com/" target="_blank" rel="noopener noreferrer">Get a free Geoapify key ↗</a></p>
+    <label for="geoapifyKey">Geoapify browser API key</label>
+    <input id="geoapifyKey" type="password" autocomplete="off" autocapitalize="none" spellcheck="false">
+    <div class="actions"><button type="button" class="btn secondary" onclick="saveBookingSearchKey()">Save key</button>
+    ${configured ? '<button type="button" class="btn secondary" onclick="saveBookingSearchKey(true)">Remove key</button>' : ""}</div>
+    <p id="bookingSearchStatus" role="status">Restrict the key to tfrawley-prog.github.io in Geoapify. The key is saved on this device.</p>
+  </div>`;
+}
+
+function saveBookingSearchKey(remove = false) {
+  const input = document.getElementById("geoapifyKey");
+  const value = input.value.trim();
+  if (!remove && !/^[A-Za-z0-9_-]{16,128}$/.test(value)) {
+    document.getElementById("bookingSearchStatus").textContent = "Enter a valid Geoapify browser API key.";
+    return;
+  }
+  if (remove) localStorage.removeItem(geoapifyKeyStorage);
+  else localStorage.setItem(geoapifyKeyStorage, value);
+  openSettings();
+}
+
+function bookingPlaceCredit(place) {
+  const credit = document.createElement(place.sourceUrl ? "a" : "small");
+  credit.textContent = place.source;
+  if (place.sourceUrl) {
+    credit.href = place.sourceUrl;
+    credit.target = "_blank";
+    credit.rel = "noopener noreferrer";
+  }
+  return credit;
+}
+
+function rememberBookingPlaceSources(draft, places) {
+  const credits = [...new Set(places.filter(place => place.provider === "geoapify").map(place => place.source))];
+  if (credits.length) draft.geoapifyCredits = credits;
+  else delete draft.geoapifyCredits;
+}
+
+async function searchGeoapifyPlaces(text, apiKey, signal) {
+  const url = new URL("https://api.geoapify.com/v1/geocode/search");
+  url.search = new URLSearchParams({text, apiKey, lang:"en", limit:"5", format:"json"});
+  const response = await fetch(url, {signal, cache:"no-store"});
+  if (!response.ok) throw new Error("Geoapify search unavailable");
+  const {results = []} = await response.json();
+  return results.flatMap(place => {
+    const {lat, lon:lng, formatted:address} = place;
+    if (!address || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat)>90 || Math.abs(lng)>180) return [];
+    const category = place.category || "";
+    const lodging = category === "accommodation" || category.startsWith("accommodation.") || category.startsWith("tourism.hotel");
+    return [{
+      lat, lng, address, name:place.name || (lodging ? place.address_line1 : ""),
+      key:place.result_type, kind:lodging ? "hotel" : "",
+      provider:"geoapify", source:["Geoapify", place.datasource?.attribution].filter(Boolean).join(" · "),
+      sourceUrl:"https://www.geoapify.com/"
+    }];
+  });
+}
+
+async function searchBookingProviders(text, controller = new AbortController()) {
+  const apiKey = localStorage.getItem(geoapifyKeyStorage);
+  if (!apiKey) return searchBookingPlaces(text, controller);
+  // A provider failure must still leave the other provider's results available.
+  const timeout = setTimeout(() => controller.abort(), 6500);
+  const results = await Promise.allSettled([
+    searchBookingPlaces(text, controller),
+    searchGeoapifyPlaces(text, apiKey, controller.signal)
+  ]).finally(() => clearTimeout(timeout));
+  if (results.every(result => result.status === "rejected")) throw results[0].reason;
+  const [photon, geoapify] = results.map(result => result.status === "fulfilled" ? result.value : []);
+  const seen = new Set();
+  return Array.from({length:Math.max(photon.length, geoapify.length)}, (_, index) =>
+    [photon[index], geoapify[index]]).flat().filter(place => {
+      if (!place) return false;
+      const key = place.address.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 }
 
 async function searchBookingPlaces(text, controller = new AbortController()) {
@@ -343,15 +428,15 @@ function bindPlaceSuggestions(planner) {
           return requested.length && requested.every(word => nameWords.some(token => token.startsWith(word))) &&
             (!city || placeWords(city).some(word => nameWords.includes(word) || address.includes(word)));
         }) : [];
-        const places = await searchBookingPlaces(query, controller).catch(() => []);
+        const places = await searchBookingProviders(query, controller).catch(() => []);
         if (request !== controller) return;
         if (!form.isConnected) return;
         const seen = new Set();
         const photon = places.filter(place => {
           if (!place.name || seen.has(place.address) || !matchesBookingName(place.name, title)) return false;
           const lodging = ["hotel", "hostel", "guest_house", "motel", "apartment", "chalet", "resort", "camp_site", "caravan_site"].includes(place.kind);
-          if (draft.type === "hotel" && !lodging) return false;
-          if (draft.type === "activity" && ["place", "boundary", "highway"].includes(place.key)) return false;
+          if (draft.type === "hotel" && !lodging && !(place.provider === "geoapify" && place.key === "amenity")) return false;
+          if (draft.type === "activity" && ["place", "boundary", "highway", "street", "suburb", "district", "postcode", "city", "county", "state", "country"].includes(place.key)) return false;
           seen.add(place.address);
           return true;
         });
@@ -378,19 +463,13 @@ function bindPlaceSuggestions(planner) {
             cancel();
             name.value = place.name;
             Object.assign(draft, {location:place.address, lat:place.lat, lng:place.lng});
+            rememberBookingPlaceSources(draft, [place]);
             list.replaceChildren();
             status.textContent = `Address added: ${place.address}`;
             name.focus();
           };
           list.append(button);
-          const credit = document.createElement(place.sourceUrl ? "a" : "small");
-          credit.textContent = place.source;
-          if (place.sourceUrl) {
-            credit.href = place.sourceUrl;
-            credit.target = "_blank";
-            credit.rel = "noopener noreferrer";
-          }
-          list.append(credit);
+          list.append(bookingPlaceCredit(place));
         }
         mapsFallback(query, draft, name, status, list);
       } catch {

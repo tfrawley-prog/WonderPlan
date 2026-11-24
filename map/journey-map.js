@@ -302,6 +302,8 @@ window.WonderJourneyMap = (() => {
           return;
         }
         const stop = selected;
+        const credits = [...new Set(stop.items.flatMap(item =>
+          Array.isArray(item.geoapifyCredits) ? item.geoapifyCredits : []))];
         const hotels = stop.items.filter(i => i.type === "hotel");
         const activities = stop.items.filter(i => i.type === "activity" || i.type === "restaurant");
         const dateText = [stop.start, stop.end !== stop.start ? stop.end : ""].filter(Boolean).map(formatDate).join(" – ");
@@ -317,6 +319,7 @@ window.WonderJourneyMap = (() => {
             <button type="button" data-close aria-label="Close destination">×</button>
           </div>
           ${stop.address && stop.address !== stop.name ? `<p class="journeyAddress">${escape(stop.address)}</p>` : ""}
+          ${credits.length ? `<p><a href="https://www.geoapify.com/" target="_blank" rel="noopener noreferrer">${escape(credits.join(" · "))}</a></p>` : ""}
           <div class="journeyAddressActions">
             <button type="button" data-zoom-stop>${stop.precise ? "Zoom to address" : "Zoom in here"}</button>
             <button type="button" data-open-map>Open in Maps ↗</button>
