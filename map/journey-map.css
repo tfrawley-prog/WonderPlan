@@ -1,0 +1,100 @@
+.main:has(.journeyView) :is(.titleWrap p, .viewSegment) { display: none !important; }
+#calendar.journeyView { max-width: 1400px !important; margin-inline: auto; padding-bottom: 12px; }
+.journeyView [hidden] { display: none !important; }
+.journeyToolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.journeyToolbar button, .journeyToolbar summary, .journeyToolbar select, .journeyMobileEntry {
+  min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: #fff;
+  padding: 8px 12px; color: var(--wp-midnight); font: inherit; font-size: 13px; font-weight: 750;
+}
+.journeyToolbar button:disabled { opacity: .5; cursor: default; }
+.journeyToolbar .journeyPlay, .journeyMobileEntry { background: var(--wp-midnight); color: white; }
+.journeyToolbar .journeyReturn, .journeyMobileEntry { display: none; }
+.journeyStyle { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; }
+.journeyStyle select { width: auto; }
+.journeyLayers { position: relative; z-index: 2; }
+.journeyLayers summary { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.journeyLayers summary::after { content: "▾"; }
+.journeyLayers div {
+  position: absolute; inset: calc(100% + 5px) auto auto 0; min-width: 190px;
+  border: 1px solid var(--line); border-radius: 12px; background: white; padding: 5px 12px; box-shadow: var(--shadow);
+}
+.journeyLayers label { display: flex; align-items: center; gap: 8px; min-height: 40px; margin: 0; }
+.journeyLayers input { width: 17px; height: 17px; accent-color: var(--wp-midnight); }
+.journeyLayout {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 26%);
+  border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: white;
+}
+.journeySurface {
+  position: relative; z-index: 0; background: #dcebed; min-width: 0;
+  height: clamp(360px, 65vh, 740px); height: clamp(360px, 65svh, 740px);
+  font-family: inherit;
+}
+.journeySurface .leaflet-control-zoom a { width: 40px; height: 40px; line-height: 40px; }
+.journeySurface .leaflet-control-attribution { font-size: 10px; }
+.journeyGeo span, .journeyPinName {
+  position: absolute; width: max-content; white-space: nowrap; pointer-events: none;
+  font-size: 11px; font-weight: 700; color: #253c40; text-shadow: 0 0 4px white, 0 0 2px white, 0 0 2px white;
+}
+.journeyGeo span { transform: translate(-50%, -50%); }
+.journeyGeo.country span { font-size: 10px; text-transform: uppercase; letter-spacing: .055em; }
+.journeySurface[data-style="dark"] :is(.journeyGeo span, .journeyPinName) {
+  color: #f0f6f9; text-shadow: 0 1px 3px #101c29, 0 0 3px #101c29;
+}
+.journeyPin {
+  position: absolute; left: 0; top: 0; transform: translate(-50%, -50%);
+  min-width: 34px; height: 34px; padding: 0 7px; white-space: nowrap; pointer-events: auto;
+  border: 2px solid white; border-radius: 20px; background: var(--wp-midnight);
+  color: white; font-weight: 800; box-shadow: 0 2px 5px #0b254566;
+}
+.journeyPin::after { content: ""; position: absolute; inset: -6px; border-radius: inherit; }
+.journeyPin.active { background: var(--wp-ocean); box-shadow: 0 0 0 3px #2563eb70; }
+.journeyPinName { transform: translate(-50%, 20px); }
+.journeyDetails {
+  max-height: clamp(360px, 65vh, 740px); max-height: clamp(360px, 65svh, 740px);
+  padding: 14px; overflow: auto; border-left: 1px solid var(--line); min-width: 0;
+}
+.journeyStatus, .journeyDetails p { margin: 0 0 9px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+.journeyCard { border: 1px solid var(--line); border-radius: 14px; padding: 10px; margin: 0 0 12px; overflow-wrap: anywhere; }
+.journeyCardHeading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.journeyCard h3 { margin: 0; font-size: 16px; color: var(--wp-midnight); }
+.journeyCard h3 span { color: var(--wp-ocean); }
+.journeyCard [data-close] {
+  width: 44px; min-width: 44px; height: 44px; border: 0; border-radius: 10px;
+  background: var(--panel2); color: var(--wp-midnight); font-size: 21px;
+}
+.journeyCard figure { margin: 8px 0; }
+.journeyCard img { width: 100%; aspect-ratio: 2; object-fit: cover; border-radius: 9px; display: block; }
+.journeyCard figcaption { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.journeyPlanGroup h4 { margin: 8px 0 2px; font-size: 12px; color: var(--wp-midnight); }
+.journeyPlanGroup button, .journeyPending button {
+  background: none; border: 0; padding: 4px 0; display: block; min-height: 34px;
+  text-align: left; color: var(--wp-ocean); font-size: 12px; text-decoration: underline;
+}
+.journeyStops, .journeyPending ul { list-style: none; padding: 0; margin: 0; }
+.journeyStops li + li { margin-top: 4px; }
+.journeyStops button {
+  width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; min-height: 44px;
+  background: var(--panel2); border: 1px solid transparent; border-radius: 10px; padding: 6px 8px;
+  color: var(--wp-midnight); overflow-wrap: anywhere;
+}
+.journeyStops button[aria-pressed="true"] { border-color: var(--wp-ocean); background: #eef5ff; }
+.journeyStops b { color: var(--wp-ocean); flex-shrink: 0; }
+.journeyDetails small { display: block; color: var(--muted); }
+.journeyPending details { margin-top: 10px; font-size: 13px; }
+.journeyPending summary { cursor: pointer; padding: 9px 0; font-weight: 700; }
+.journeyPending li + li { border-top: 1px solid var(--line); padding-top: 6px; }
+.journeyLegend { display: flex; flex-wrap: wrap; gap: 7px 14px; color: var(--muted); font-size: 11px; margin-top: 8px; }
+.journeyLegend span { display: inline-flex; align-items: center; gap: 5px; }
+.journeyView :focus-visible, .journeyMobileEntry:focus-visible { outline: 2px solid var(--wp-ocean); outline-offset: 2px; }
+
+@media (max-width: 900px) {
+  .journeyLayout { grid-template-columns: minmax(0, 1fr) minmax(190px, 30%); }
+}
+@media (max-width: 600px) {
+  .journeyToolbar .journeyReturn, .journeyMobileEntry { display: inline-flex; align-items: center; }
+  .journeyMobileEntry { margin: 0 0 8px; }
+  .journeyLayout { display: block; }
+  .journeySurface { height: clamp(250px, 48svh, 470px); }
+  .journeyDetails { max-height: none; border-left: 0; border-top: 1px solid var(--line); }
+  .journeyLayers div { min-width: min(190px, 80vw); }
+}

@@ -1,8 +1,16 @@
-const CACHE = "wonder-plan-v11-10";
+const CACHE = "wonder-plan-v12-1";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./map/vendor/leaflet.js",
+  "./map/vendor/leaflet.css",
+  "./map/journey-map.css",
+  "./map/journey-map.js",
+  "./map/journey-data.js",
+  "./map/boundaries.json",
+  "./map/places.json",
+  "./map/terrain.webp",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
 ];
